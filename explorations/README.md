@@ -55,3 +55,10 @@ Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and a
 - What the average controls is the *typical* size, |W_χ|² ≈ Σ1/p ≈ log log P, a Gaussian picture of the kind in Selberg's central limit theorem. The largest member grows with the family: max_{χ≠1}|W_χ|² at P = 10⁶ is about 9, 14 and 22 for the three values of q. Averaging pins down most members, not each one.
 - The trivial member (ζ) is the outlier, oscillating up to |W|² ≈ 22 because of the pole at s = 1, the known impurity. Rotating the arms by χ ≠ 1 removes it.
 - An off-line zero at height γ with β = 1/2 + δ becomes visible only when P^δ exceeds about γ (§9), so none of these statistics can see one. Turning a family statement into a statement about one member requires an amplifier or a multiplicity-type mechanism.
+
+## Amplification: from the family to one member
+
+`amplifier.py` bounds a single member χ₀ of the family mod q = 10007 (P = 10⁵, s = 1/2 + 14.1347i) by weighting the family with the amplifier A_χ = |Σ_{ℓ≤L} χ̄₀(ℓ)χ(ℓ)|². Outputs: `amplifier.json` and `amplifier.png`.
+
+- The gain over the trivial bound equals the number of amplifier primes while L < q, and grows more slowly beyond q. At L = 10⁵ the amplified bound is within a factor of 1.1 of the true value for the largest member and for ζ, and within 1.9 for a median member.
+- **Caveat:** the amplified moment is computed here *exactly* from the known W_χ. A proof must estimate it from orthogonality alone, which is exact only while the products ℓ·p^k stay below q, roughly L·P < q. Every run here lies far outside that range. The experiment therefore shows what amplification could achieve if the off-diagonal terms behaved as they do numerically. The difficulty of the method lies in the gap between this numerical behaviour and what can be proved.

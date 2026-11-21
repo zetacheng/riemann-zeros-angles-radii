@@ -69,6 +69,6 @@ This research is a collaboration between the author and two AI systems:
 | **Claude** (Anthropic; Claude Opus 5.5 as configured in the working sessions) | Computations, scripts, drafting and revisions |
 | **ChatGPT** (OpenAI) | Independent review of successive versions; its reviews drove the corrections in versions 2 and 4 |
 
-The author's original contributions — the zeros-on-a-circle picture, running the operation backwards, the impurities, the helix–circle synthesis and others — are listed item by item, with the sections they led to, in the paper's **Author contributions** paragraph.
+The author's original contributions — the zeros-on-a-circle picture, running the operation backwards, the impurities, the helix–circle synthesis and others — are listed item by item, with the sections they led to, in the paper's **Author contributions** paragraph. A fuller running record of who proposed what, including directions that were dropped or corrected, is kept in [CONTRIBUTIONS_LOG.md](CONTRIBUTIONS_LOG.md).
 
 Neither AI system is listed as an author of the paper, in line with arXiv and journal policies. The author is responsible for the content. See [CONTRIBUTING.md](CONTRIBUTING.md) for how each contributor's work is recorded in this repository.

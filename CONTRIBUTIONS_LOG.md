@@ -1,0 +1,68 @@
+# Contributions log
+
+A running record of who proposed what in this research, so that the author's ideas, Claude's proposals and ChatGPT's reviews can be told apart later. The paper's **Author contributions** paragraph lists only the author's ideas that became sections. This log also records directions, decisions, questions and proposals that were dropped or corrected.
+
+**How it is kept.** Claude adds entries whenever a new direction, idea or decision comes up in discussion. Every entry names its source:
+- **Zeta**: the author (Zeta Hoi-Ho Cheng);
+- **Claude**: Anthropic, Claude Opus 5.5 as configured in the working sessions;
+- **ChatGPT**: OpenAI, as reviewer.
+
+The *Outcome* column records what happened to each entry, including corrections.
+
+> Entries up to 2026-11-21 were reconstructed on that date from the working sessions. Some of those records are summaries, so the wording is approximate and dates are given only to the day the discussion took place. Entries from 2026-11-21 onward are recorded as they happen.
+
+## 1. Geometric picture (discussion that led to versions 1–6)
+
+| # | Source | Idea, question or decision | Outcome |
+|---|---|---|---|
+| 1 | Zeta | Project the infinite real line onto a bounded segment and rotate it so that multiplication becomes a straight line, removing composites. | Became the Frobenius picture α = b^ρ (paper §2; Author contributions item 1). |
+| 2 | Zeta | Go back to the starting point, where the earlier work went wrong, and restart from there. | Direction for the whole paper. |
+| 3 | Zeta | The difficulty lies in analytic continuation: we look for a line, but the line is infinitely long. | Refined into the distinction between finite-scale and infinite-scale information and the Li circle (§2, §4; item 2). |
+| 4 | Zeta | Infinitely many zeros mean the line "turns a full circle". This calls for a new operation whose output is a circle (not necessarily a round one). | The Frobenius picture and the "missing operation" theme (item 1; later Part III). |
+| 5 | Claude | Formalise this as α = b^ρ: the angle is γ log b and the radius is b^β. Add the Li circle z = 1 − 1/ρ as a third picture. | §2. |
+| 6 | Zeta | Asked what the missing "Frobenius" in number fields is. | Claude explained Weil numbers, Honda–Tate and Katz–Sarnak. |
+| 7 | Zeta | Place the zeros on the circle and run the Frobenius operation backwards to see what domain comes out. | Became the reverse trace (§3; item 3). |
+| 8 | Claude | Define the reverse trace R(t) and predict its peak heights from the explicit formula. | §3, Table 1. |
+| 9 | Zeta | Conviction that the zeros must lie on the circumference. | Tested by the angle–radius experiment. Confirmed in one sense and refuted in another (§4; item 4, partly corrected). |
+| 10 | Claude | Experiment: jitter the heights versus move the zeros off the line (δ up to 0.49). | §4, Table 2. Anticipated by Sakhr–Bhaduri–van Zyl (2003), now credited. |
+| 11 | Zeta | The zeros form a "discrete circle with specific angles". Does a discrete-circle operator exist that would solve Hilbert–Pólya? | Claude: this is the Hilbert–Pólya problem itself, and it is open. The description is used in §5 and §12. |
+| 12 | Zeta | The circle carries "impurities" that hold the key to the obstruction. Positivity means no impurities remain once the known ones are removed. RH means the impurities are exactly two points. | §6, Table 4, Figure 4 (item 5). |
+| 13 | Zeta | Asked for a figure of the impurities. | Figure 4. |
+| 14 | Zeta | Do infinitely many zeros fill the circle? Compared this with the rationals in the reals, and proposed the filled circle as the complete zero set. | §7 (item 6). Partly corrected: the filled circle loses the arithmetic. |
+| 15 | Zeta | Synthesis: the helix carries the arithmetic but has no regular form; projecting it onto the circle gives a clear shape but erases the arithmetic. | Conclusion of the paper (item 7). |
+
+## 2. Paper, repository and positivity route (versions 1–6)
+
+| # | Source | Idea, question or decision | Outcome |
+|---|---|---|---|
+| 16 | Zeta | Write the observations up as a paper, check novelty and references, and open a public repository. | Versions 1–6 and this repository. |
+| 17 | Zeta | Every commit must say who wrote it; credit the Claude–ChatGPT collaboration; add an Author contributions section. | CONTRIBUTING.md, commit trailers, Author contributions paragraph. |
+| 18 | ChatGPT | Review of v1: the weights are not carried by the heights alone, the radius is not invisible at finite scale, the single-term dominance argument is only a heuristic, and the truncation error is unquantified. | Corrected in v2. |
+| 19 | ChatGPT | Review of v3: the Weil test class, the status of the Poisson spacings, the finite-height Landau bias, and the description of peak positions. | Corrected in v4. |
+| 20 | Claude | Distinguish two routes from primes to the circle: positivity (Weil, Connes) and amplitude (bounds on prime sums, as in Stepanov). | Framework for Part II. |
+| 21 | Zeta | Alpöge took one route; we take the other. | The positivity route was computed (§8; item 8). |
+| 22 | Claude | Compute a truncated Weil form from primes alone at high precision. | §8, Tables 7–8: positive, recovers five ordinates, no margin. |
+
+## 3. Amplitude route (versions 7–9)
+
+| # | Source | Idea, question or decision | Outcome |
+|---|---|---|---|
+| 23 | Zeta | The positivity route is probably a dead end, since many people, ourselves included, have walked it. | Decision to pursue the amplitude route. |
+| 24 | Zeta | Try the amplitude route with a projection method: build the helix and project it onto the circle. | Claude advised against it, because projections retain only statistics. Not pursued. |
+| 25 | Zeta | Try the theta modular transformation ourselves. | `explorations/theta_modular.py`. |
+| 26 | Claude | Jacobi theta lacks arithmetic, so move to cubic Gauss sums (Kubota). | `explorations/cubic_gauss_sums.py`. |
+| 27 | Zeta | Read the OpenAI quasi-RH preprint. Did it get stuck? How does it differ from Alpöge's method? | Comparison given in discussion. Claude's first account contained errors (entry 36). |
+| 28 | Zeta | Run Frobenius backwards and turn the circle n times. | v7 §9, Table 9, Figure 5 (item 9). Claude showed that turning is only the last step of the route. |
+| 29 | Claude | Off-circle example T² − 7T + 7: its counts are positive integers, yet its roots lie off the circle. | v7 §9. |
+| 30 | Zeta | Asked what step 1 corresponds to in our picture, and why we cannot do it. | Claude: an operation of which the primes are fixed points; none is known for ℤ. |
+| 31 | Zeta | Reformulation: start from the primes and create a new operation whose output is the circle (the zeros). | Basis of Part III (§12). |
+| 32 | Zeta | Proposed the spike graph (reverse trace) as a starting point. | Claude: the spikes are prime data, and this leads back to Weil positivity, which §8 had already computed. Not in the paper. |
+| 33 | Claude | Plan with three stages: A (Stepanov in the function field), B (the quasi-RH recursion), C (Alpöge, once readable). | Zeta chose to do A first, then B. |
+| 34 | Claude | Construct Stepanov's auxiliary polynomial explicitly over F_p and verify it point by point. | §10, Table 10. |
+| 35 | Claude | Reproduce the quasi-RH recursion from Liu (arXiv:2610.12234). | §11, Table 11. Finding: a fixed counting exponent of 2/3 sets the limit. |
+| 36 | Claude | **Correction of Claude's own errors:** the quasi-RH limit was described as accumulating losses with a fixed point near 0.8745. | Wrong. The limit is 0.874957…, set by a constant. Corrected in v8. |
+| 37 | Zeta | Since we no longer use α = b^ρ as a tool, the paper should be restructured, not extended. | Claude disagreed in part: α = b^ρ remains the descriptive language. |
+| 38 | Zeta | α = b^ρ is the answer; stages A, B and C should end in something equivalent to it. | Three-part structure of v8 (item 10). |
+| 39 | Claude | Within the Frobenius analogy, the object equivalent to α = b^ρ for ℤ should be a flow, not a single map. | §12. Qualified after ChatGPT's review (entry 40). |
+| 40 | ChatGPT | Review of v8 (issue #1): the spectral gap is not proved; R ≠ 0 is not guaranteed for large p; the norm factorisation N_n = (1−Aⁿ)(1−Bⁿ); mark the quasi-RH bound as announced; present the flow as an analogy, not a necessity. | Six of seven points adopted in v9. The point about a missing label did not apply. |
+| 41 | Zeta | Closed issue #1. Continue with stage C. Keep a record that separates the author's ideas from Claude's. | This log. |

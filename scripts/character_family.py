@@ -55,8 +55,8 @@ def run(q, Ps):
 
 Ps = [10, 30, 100, 300, 1000, 3000, 10_000, 30_000, 100_000, 300_000, 1_000_000]
 res = {q: run(q, Ps) for q in (101, 1009, 10007)}
-ROOT = os.path.dirname(os.path.abspath(__file__))
-json.dump({str(k): v for k, v in res.items()}, open(os.path.join(ROOT, 'character_family.json'), 'w'), indent=1)
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+json.dump({str(k): v for k, v in res.items()}, open(os.path.join(ROOT, 'validation', 'character_family.json'), 'w'), indent=1)
 
 plt.rcParams.update({'font.size': 9})
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.2))
@@ -78,4 +78,4 @@ a2.loglog(P, [r['diagonal'] for r in rows], '--', color='#888888', lw=0.9, label
 a2.axvline(1009, color='#1f4e79', lw=0.6, ls=':')
 a2.set_xlabel('primes $p\\leq P$'); a2.set_ylabel('$|W_\\chi(P)|^2$')
 a2.set_title('(b) $q=1009$: individual members'); a2.legend(frameon=False, fontsize=8)
-fig.tight_layout(); fig.savefig(os.path.join(ROOT, 'character_family.png'), dpi=130, bbox_inches='tight')
+fig.tight_layout(); fig.savefig(os.path.join(ROOT, 'paper', 'figures', 'fig8_family.pdf'), bbox_inches='tight')

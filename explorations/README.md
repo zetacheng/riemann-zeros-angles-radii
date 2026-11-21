@@ -31,7 +31,7 @@ Contrast with stage A: Stepanov's method has a parameter, the multiplicity M, th
 
 ## Stage C, first experiment: how close does the helix come to closing?
 
-`torus_closure.py` places each prime on its own circle: the line t ↦ (t log p / 2π mod 1) for p ≤ P on the torus (Bohr's lift). It finds the first time at which every coordinate lies within ε of an integer, which is an approximate common lattice. Output: `torus_closure.json`.
+`scripts/torus_closure.py` (now §13 of the paper) places each prime on its own circle: the line t ↦ (t log p / 2π mod 1) for p ≤ P on the torus (Bohr's lift). It finds the first time at which every coordinate lies within ε of an integer, which is an approximate common lattice. Output: `validation/torus_closure.json`.
 
 | primes (k) | 2 | 4 | 6 | 8 | 10 | 12 |
 |---|---|---|---|---|---|---|
@@ -41,7 +41,7 @@ Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and a
 
 ## One spiral arm per prime (the author's drawing)
 
-`prime_spirals.py` draws, at s = 1/2 + 14.1347i, the points p^{-ks} (k = 1, 2, …) for p ≤ 13, then adds the arms tip to tail over the primes up to 10⁵ (`prime_spirals.png`).
+`scripts/prime_spirals.py` (now §14, Figure 7) draws, at s = 1/2 + 14.1347i, the points p^{-ks} (k = 1, 2, …) for p ≤ 13, then adds the arms tip to tail over the primes up to 10⁵ (now `paper/figures/fig7_spirals.pdf`).
 
 - The arms are not separate curves. p^{-us} = e^{-(u log p)s}, so every arm lies on the same logarithmic spiral e^{-x s}, and prime p occupies the points x = k log p on it. The spiral is the helix of §2 with radius e^{-x/2}. Over F_q every point would sit at a multiple of log q, a common lattice on the spiral; over ℤ the spacings log p are incommensurable.
 - Each arm sums to the Euler factor −log(1 − p^{-s}), which converges. The sum over all arms converges at σ = 3/2, but on the critical line it winds outward without converging, which is why analytic continuation is needed.
@@ -49,7 +49,7 @@ Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and a
 
 ## Rotating the arms: the family of Dirichlet characters mod q
 
-`character_family.py` rotates each prime's arm by χ(p) for every Dirichlet character χ mod q (q = 101, 1009 and 10007, at s = 1/2 + 14.1347i). It computes W_χ(P), the logarithm of the partial Euler product over p ≤ P, for P up to 10⁶. Outputs: `character_family.json` and `character_family.png`.
+`scripts/character_family.py` (now §15) rotates each prime's arm by χ(p) for every Dirichlet character χ mod q (q = 101, 1009 and 10007, at s = 1/2 + 14.1347i). It computes W_χ(P), the logarithm of the partial Euler product over p ≤ P, for P up to 10⁶. Outputs: `validation/character_family.json` and `paper/figures/fig8_family.pdf`.
 
 - **Claude's prediction was wrong.** Claude expected the family mean square of |W_χ|² to leave the diagonal Σ1/p once P exceeds q, growing like the large-sieve worst case (1 + P/q). Instead it stays at the diagonal (ratio 0.94–1.09) up to P = 10⁴q. The twist p^{-it} already decorrelates the arms within each residue class, so the worst case of the large sieve is far from attained.
 - What the average controls is the *typical* size, |W_χ|² ≈ Σ1/p ≈ log log P, a Gaussian picture of the kind in Selberg's central limit theorem. The largest member grows with the family: max_{χ≠1}|W_χ|² at P = 10⁶ is about 9, 14 and 22 for the three values of q. Averaging pins down most members, not each one.
@@ -58,7 +58,7 @@ Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and a
 
 ## Amplification: from the family to one member
 
-`amplifier.py` bounds a single member χ₀ of the family mod q = 10007 (P = 10⁵, s = 1/2 + 14.1347i) by weighting the family with the amplifier A_χ = |Σ_{ℓ≤L} χ̄₀(ℓ)χ(ℓ)|². Outputs: `amplifier.json` and `amplifier.png`.
+`scripts/amplifier.py` (now §15) bounds a single member χ₀ of the family mod q = 10007 (P = 10⁵, s = 1/2 + 14.1347i) by weighting the family with the amplifier A_χ = |Σ_{ℓ≤L} χ̄₀(ℓ)χ(ℓ)|². Outputs: `validation/amplifier.json` and `paper/figures/fig9_amplifier.pdf`.
 
 - The gain over the trivial bound equals the number of amplifier primes while L < q, and grows more slowly beyond q. At L = 10⁵ the amplified bound is within a factor of 1.1 of the true value for the largest member and for ζ, and within 1.9 for a median member.
 - **Caveat:** the amplified moment is computed here *exactly* from the known W_χ. A proof must estimate it from orthogonality alone, which is exact only while the products ℓ·p^k stay below q, roughly L·P < q. Every run here lies far outside that range. The experiment therefore shows what amplification could achieve if the off-diagonal terms behaved as they do numerically. The difficulty of the method lies in the gap between this numerical behaviour and what can be proved.

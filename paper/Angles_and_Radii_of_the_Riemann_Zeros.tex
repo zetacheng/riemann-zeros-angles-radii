@@ -6,7 +6,7 @@
 
 \usepackage{enumitem}
 \usepackage{fancyhdr}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 9}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 10}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}\newtheorem{definition}[proposition]{Definition}
@@ -15,7 +15,7 @@
 
 \title{Angles and Radii of the Riemann Zeros:\\ the Circle as the Answer, and the Routes to It}
 \author{Zeta Hoi-Ho Cheng}
-\date{Version 9 --- 21 November 2026}
+\date{Version 10 --- 21 November 2026}
 
 \begin{document}
 \maketitle
@@ -27,17 +27,19 @@ Part~I uses the picture to separate the roles of the two coordinates. A smoothed
 
 Part~II computes the two known routes from primes to the circle. On the positivity route, a truncated Weil form built from primes alone is positive, recovers the first five ordinates of $\zeta$ to twelve digits from the primes up to $11$, and has computed smallest eigenvalues decaying rapidly to $0$, which suggests that the positivity has no margin. On the amplitude route, a uniform bound on prime sums confines the zeros to an annulus, and ``turning the circle'' $\alpha\mapsto\alpha^n$ collapses the annulus once the bound is known with a constant loss. Where Frobenius exists we carry out Stepanov's method explicitly for $y^2=x^3+x+1$ over $\mathbb F_{401}$: an auxiliary polynomial determined by a number of linear conditions that does not depend on the number of points vanishes to order $M$ at all $215$ of them, and the resulting bound falls from $603$ at $M=1$ to $224$ at $M=16$. Without Frobenius we reproduce the recursion behind the announced quasi-Riemann bound $0.874957\ldots$: a single step from the trivial bound already reaches $0.87506$, and the limit is fixed by a counting exponent $2/3$ rather than by accumulated losses.
 
-Part~III states what an operation equivalent to $\alpha=b^\rho$ would have to provide: input from the primes alone; a spectrum which, since $\Z$ has no common base, the Frobenius analogy suggests should come from a one-parameter flow rather than a single map; and a structure that forces this spectrum onto the circle. All theoretical statements are classical or taken from the cited works; the paper claims no new theorem and no progress toward the Riemann Hypothesis.
+Part~III states what an operation equivalent to $\alpha=b^\rho$ would have to provide: input from the primes alone; a spectrum which, since $\Z$ has no common base, the Frobenius analogy suggests should come from a one-parameter flow rather than a single map; and a structure that forces this spectrum onto the circle.
+
+Part~IV explores a route of our own along these lines. Giving each prime its own circle turns the helix into a line on an infinite torus, which closes in every coordinate but never in all at once: in experiments, the time for the first $k$ primes to close approximately grows by a factor of about $1/(2\varepsilon)$ per prime, so that by height $3\times10^{12}$ only about $17$ primes close together, against about $56{,}000$ that enter there. Drawing one spiral arm per prime shows that for $\zeta$ all arms lie on a single spiral, and that they separate only when twisted by characters. Rotating the arms by Dirichlet characters, the family mean square stays at its diagonal far beyond the range that orthogonality guarantees, and an amplifier isolates a single member to within a factor of $1.1$ when the family moments are computed exactly. A proof, however, can use orthogonality only in a restricted range, so the route converges on the structure of the quasi-Riemann method and on the gap at which it stops. All theoretical statements are classical or taken from the cited works; the paper claims no new theorem and no progress toward the Riemann Hypothesis.
 \end{abstract}
 
 \section{Introduction}
 The nontrivial zeros of the Riemann zeta function are often described as a spectrum: a discrete set of numbers that, according to the Hilbert--P\'olya philosophy, should be the eigenvalues of a natural self-adjoint or unitary operator. In the function-field case this description is a theorem. For a curve $C$ over $\mathbb F_q$ the zeros of $Z(C,T)$ are the reciprocals of the eigenvalues $\alpha_j$ of Frobenius on $H^1$, and Weil proved $|\alpha_j|=\sqrt q$: the zeros are finitely many points on a circle \cite{Weil1948}.
 
-This paper takes the function-field picture as the form of the answer for $\Z$. Mapping a zero to $\alpha=b^\rho$ places the zeros of $\zeta$ on a circle exactly when the Riemann Hypothesis holds. The question is how such a statement could be derived from the primes, and the paper is organised around it. Part~I (Sections~\ref{sec:pictures}--\ref{sec:filling}) asks what the answer encodes: which properties of the zeros are carried by the heights $\gamma$ and which by the real parts $\beta$. We show by explicit computation, and explain by the explicit formula, that the locations of the arithmetic features visible at finite scale (which integers are prime powers) are determined by the heights alone, while the real parts enter only through a smooth amplitude envelope. Part~II (Sections~\ref{sec:weilform}--\ref{sec:quasirh}) computes the two known routes from primes to the circle, positivity and amplitude, in the number field and, for comparison, in the function field, where Frobenius exists. Part~III (Section~\ref{sec:operation}) states what an operation that reproduces the answer would have to provide. Every ingredient is classical or taken from the cited works: the Riemann--von Mangoldt formula, the Weil explicit formula \cite{Weil1952}, Landau's formula \cite{Landau1912}, Li's criterion \cite{Li1997}, and the spacing statistics of Montgomery and Odlyzko \cite{Montgomery1973,Odlyzko1987}. The contribution is a unified geometric presentation and a set of reproducible experiments that make the separation between ``angle'' and ``radius'' quantitative.
+This paper takes the function-field picture as the form of the answer for $\Z$. Mapping a zero to $\alpha=b^\rho$ places the zeros of $\zeta$ on a circle exactly when the Riemann Hypothesis holds. The question is how such a statement could be derived from the primes, and the paper is organised around it. Part~I (Sections~\ref{sec:pictures}--\ref{sec:filling}) asks what the answer encodes: which properties of the zeros are carried by the heights $\gamma$ and which by the real parts $\beta$. We show by explicit computation, and explain by the explicit formula, that the locations of the arithmetic features visible at finite scale (which integers are prime powers) are determined by the heights alone, while the real parts enter only through a smooth amplitude envelope. Part~II (Sections~\ref{sec:weilform}--\ref{sec:quasirh}) computes the two known routes from primes to the circle, positivity and amplitude, in the number field and, for comparison, in the function field, where Frobenius exists. Part~III (Section~\ref{sec:operation}) states what an operation that reproduces the answer would have to provide, and Part~IV (Sections~\ref{sec:torus}--\ref{sec:stands}) explores a route of our own towards it. Every ingredient is classical or taken from the cited works: the Riemann--von Mangoldt formula, the Weil explicit formula \cite{Weil1952}, Landau's formula \cite{Landau1912}, Li's criterion \cite{Li1997}, and the spacing statistics of Montgomery and Odlyzko \cite{Montgomery1973,Odlyzko1987}. The contribution is a unified geometric presentation and a set of reproducible experiments that make the separation between ``angle'' and ``radius'' quantitative.
 
 \paragraph{Related work.} The reconstruction of prime-power lines from sums of $\cos(\gamma\log x)$ over zeros, with Gaussian smoothing, was carried out by Sakhr, Bhaduri and van Zyl \cite{SakhrBhaduriVanZyl2003}. They also moved zeros off the critical line and observed that the lines at prime powers persist with incorrect intensities, concluding that the locations depend only on the imaginary parts. Sections~\ref{sec:reverse} and~\ref{sec:angle-radius} reproduce this observation and extend it in four respects: the comparison with perturbations along the line and with a random null set, the quantitative agreement of peak heights with the explicit formula (Table~\ref{tab:heights}), the analytic form $\cosh(\delta t)$ of the off-line envelope together with the resulting finite-scale detectability of the radius, and the decomposition of the background (Table~\ref{tab:background}). The deviation of $\{\alpha\gamma\}$ from uniformity, governed by a Landau-type term that is nonzero exactly when $\alpha$ is a rational multiple of $\log p/2\pi$, was analysed by Ford and Zaharescu \cite{FordZaharescu2005} and extended in \cite{FordSoundararajanZaharescu,FordMengZaharescu}; the angle bias of Section~\ref{sec:stats} is a special case. We did not find in the literature the nearest-neighbour statistics of the wrapped angles (Table~\ref{tab:wrap}) or the reading of the poles of $\Lambda(s)$ as a maximally off-line pair in the $\alpha$-plane; both are elementary, and we make no priority claim for them.
 
-Section~\ref{sec:pictures} describes three ways of placing the zeros on a circle. Section~\ref{sec:reverse} defines the reverse trace and checks it against the explicit formula, Section~\ref{sec:angle-radius} contains the angle--radius experiment, Section~\ref{sec:stats} records statistical properties of the angles, Section~\ref{sec:impurities} identifies the known points off the circle and relates them to Weil positivity, and Section~\ref{sec:filling} studies how the projected angles fill the circle. Section~\ref{sec:weilform} computes the positivity route, Section~\ref{sec:amplitude} sets out the amplitude route, Section~\ref{sec:stepanov} carries out Stepanov's method where Frobenius exists, and Section~\ref{sec:quasirh} analyses the quasi-Riemann recursion where it does not. Section~\ref{sec:operation} discusses the missing operation, Section~\ref{sec:conclusion} concludes, and Section~\ref{sec:limits} lists limitations.
+Section~\ref{sec:pictures} describes three ways of placing the zeros on a circle. Section~\ref{sec:reverse} defines the reverse trace and checks it against the explicit formula, Section~\ref{sec:angle-radius} contains the angle--radius experiment, Section~\ref{sec:stats} records statistical properties of the angles, Section~\ref{sec:impurities} identifies the known points off the circle and relates them to Weil positivity, and Section~\ref{sec:filling} studies how the projected angles fill the circle. Section~\ref{sec:weilform} computes the positivity route, Section~\ref{sec:amplitude} sets out the amplitude route, Section~\ref{sec:stepanov} carries out Stepanov's method where Frobenius exists, and Section~\ref{sec:quasirh} analyses the quasi-Riemann recursion where it does not. Section~\ref{sec:operation} discusses the missing operation. Section~\ref{sec:torus} gives each prime its own circle, Section~\ref{sec:arms} draws one spiral arm per prime, Section~\ref{sec:families} rotates the arms by characters and applies an amplifier, and Section~\ref{sec:stands} assesses where the route stands. Section~\ref{sec:conclusion} concludes, and Section~\ref{sec:limits} lists limitations.
 
 \part{The answer: the zeros as points \texorpdfstring{$\alpha=b^\rho$}{alpha = b\textasciicircum rho}}
 
@@ -481,10 +483,112 @@ $7/8$ & $0.874957070$ & $0.874957019479$ & $0.874957019420$ & $0.874957019420\ld
 
 Table~\ref{tab:requirements} summarises the position. The picture of Part~I has the right shape but takes the answer as input. The flows of Connes and Meyer have the right input and the right spectrum but lack the forcing structure. The quasi-Riemann system, as announced, has the right input and a forcing mechanism of limited strength. Only Frobenius on a curve has all four, and in that case both routes reach the circle.
 
+\part{Towards a route of our own}
+
+\section{The circle pulled apart: one circle per prime}\label{sec:torus}
+Section~\ref{sec:stepanov} isolated three ingredients of Stepanov's method, and Section~\ref{sec:operation} located the missing piece in the first: the objects to be counted must be fixed points of one operation, all at once. In the picture of Part~I this is a statement about the spikes of the reverse trace. Over $\mathbb F_q$ they lie at multiples of $\log q$, a single lattice; over $\Z$ they lie at the lengths $\log p$, which are linearly independent over $\mathbb Q$. This is the same fact that prevents the helix of Section~\ref{sec:pictures} from closing into a circle.
+
+Pulling the circle apart in one further dimension only gives back the helix. Giving each prime its own circle instead gives the line
+\[
+t\longmapsto\Bigl(\frac{t\log p}{2\pi}\bmod1\Bigr)_{p\ \mathrm{prime}}
+\]
+on an infinite-dimensional torus, Bohr's lift of the zeta function: replacing $p^{-it}$ by independent points $z_p$ of the unit circle extends the Euler product to the whole torus. The motion is periodic in every coordinate separately, and by Kronecker's theorem the line is dense but never closes. For almost every point of the torus the random Euler product $\prod_p(1-z_pp^{-s})^{-1}$ converges in $\mathrm{Re}\,s>\tfrac12$, because $\sum_pp^{-2\sigma}<\infty$ there, and therefore has no zeros in that half-plane; the zeta function is the restriction to one line of measure zero. Bagchi proved that the Riemann Hypothesis is equivalent to a strong recurrence property of $\zeta$ along this line \cite{Bagchi1987}. In this picture the problem is to show that one particular dense line behaves like a typical point, uniformly in height.
+
+\paragraph{How close the helix comes to closing.} An approximate common lattice would supply Stepanov's first ingredient approximately. For the first $k$ primes and a tolerance $\varepsilon$ we searched for the first time $t$ at which every coordinate is within $\varepsilon$ of an integer. The search runs over the times $t=2\pi m/\log2$ at which the coordinate of $2$ vanishes, so the values found are upper bounds for the true first times. Table~\ref{tab:torus} shows the result. Each additional prime multiplies the waiting time by about $5.3$ for $\varepsilon=0.1$ and about $10.3$ for $\varepsilon=0.05$, close to the heuristic $1/(2\varepsilon)$ suggested by the volume of the target box; for $\varepsilon=0.05$ and $k=11$ no hit was found with $m\le2\times10^9$. Extrapolating, by height $3\times10^{12}$, the verified range \cite{PlattTrudgian2021}, only about $17$ primes close together at $\varepsilon=0.1$, whereas the approximate functional equation at that height involves the primes up to $\sqrt{T/2\pi}$, about $56{,}000$ of them. An approximate common lattice therefore covers only logarithmically many of the primes needed. Near-closure times of this kind are the classical mechanism for large values of $|\zeta(1+it)|$ \cite{Titchmarsh1986}; they produce extreme values, not information about the zeros.
+
+\begin{table}[ht]\centering\small
+\caption{First time $t$ at which $t\log p/2\pi$ lies within $\varepsilon$ of an integer for each of the first $k$ primes (search over $t=2\pi m/\log2$; upper bounds).}\label{tab:torus}
+\begin{tabular}{rrrr@{\qquad}rrr}
+\toprule
+ & & \multicolumn{2}{c}{$\varepsilon=0.1$} & & \multicolumn{2}{c}{$\varepsilon=0.05$}\\
+$k$ & largest prime & $m$ & $t$ & & $m$ & $t$\\
+\midrule
+2 & 3 & 5 & $45.3$ & & 12 & $109$\\
+4 & 7 & 171 & $1.55\times10^{3}$ & & 441 & $4.00\times10^{3}$\\
+6 & 13 & 3\,265 & $2.96\times10^{4}$ & & 87\,939 & $7.97\times10^{5}$\\
+8 & 19 & 37\,592 & $3.41\times10^{5}$ & & 8\,354\,462 & $7.57\times10^{7}$\\
+10 & 29 & 6\,052\,535 & $5.49\times10^{7}$ & & 1\,565\,047\,419 & $1.42\times10^{10}$\\
+12 & 37 & 113\,804\,283 & $1.03\times10^{9}$ & & -- & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{One arm per prime}\label{sec:arms}
+The author proposed a second picture: a spiral with one arm for each prime, all winding into a common centre. At $s=\sigma+it$ the arm of $p$ consists of the points $p^{-ks}$, $k=1,2,\dots$, of radius $p^{-k\sigma}$ and angle $-kt\log p$; each prime turns by its own angle $t\log p$, as each place of a curve over $\mathbb F_q$ has its own Frobenius. Computing the picture gives a surprise (Figure~\ref{fig:spirals}(a)). Since $p^{-us}=e^{-(u\log p)s}$, every arm lies on the same logarithmic spiral $x\mapsto e^{-xs}$, and the prime $p$ occupies the points $x=k\log p$ on it; the point $n^{-s}$ of every integer lies on it at $x=\log n$. The spiral is the helix of Section~\ref{sec:pictures} with radius $e^{-x\sigma}$, seen from above, and the incommensurability of the $\log p$ reappears as the spacing of each prime's points along it.
+
+Each arm sums to the Euler factor $-\log(1-p^{-s})$, which converges for $\sigma>0$. Figure~\ref{fig:spirals}(b) adds the arms tip to tail over the primes up to $10^5$. At $\sigma=3/2$ the sum converges quickly; on the critical line it winds outward without converging, driven by the pole of $\zeta$ at $s=1$. Every local factor is harmless and the difficulty lies entirely in adding infinitely many of them, which is where analytic continuation enters. The arms become genuinely separate curves only if the point of each prime is rotated by an additional angle, such as a character value $\chi(p)$ or a Satake parameter of an automorphic form. The drawing is therefore the picture of an $L$-function in a family, and $\zeta$ is the member in which no arm is rotated.
+
+\begin{figure}[ht]
+\centering\includegraphics[width=\textwidth]{figures/fig7_spirals.pdf}
+\caption{(a) The arms $p^{-ks}$, $k=1,\dots,9$, for $p\le13$ at $s=\tfrac12+14.1347i$: all lie on one spiral. (b) The arm sums $-\log(1-p^{-s})$ added tip to tail over the primes up to $10^5$, at $\sigma=\tfrac12$ and $\sigma=\tfrac32$ ($t=14.1347$).}\label{fig:spirals}
+\end{figure}
+
+\section{Rotating the arms: families and amplification}\label{sec:families}
+To let the arms rotate independently we used the family of Dirichlet characters modulo a prime $q$. For each $\chi$ put
+\[
+W_\chi(P)=\sum_{p\le P,\ p\ne q}-\log\bigl(1-\chi(p)p^{-s}\bigr),\qquad s=\tfrac12+14.1347i,
+\]
+the logarithm of a partial Euler product of $L(s,\chi)$, with the prime powers $p^k$, $k\le4$. The family mean of $|W_\chi(P)|^2$ equals the diagonal $D(P)=\sum_{p\le P}\sum_kp^{-k}/k^2$ exactly when no two of the prime powers involved are congruent modulo $q$, and for arbitrary coefficients the large sieve allows it to exceed the diagonal by a factor up to about $1+P/q$.
+
+\paragraph{The family.} Table~\ref{tab:family} and Figure~\ref{fig:family}(a) show the result for $q=101$, $1009$ and $10007$ and $P\le10^6$. Claude had predicted that the mean would leave the diagonal once $P$ exceeds $q$; it does not. The ratio of the mean to the diagonal stays between $0.94$ and $1.09$, up to $P=10^4q$ for $q=101$: the twist $p^{-it}$ already decorrelates the arms within each residue class, and the worst case of the large sieve is far from attained. What the family controls is the typical member, whose size $|W_\chi|^2\approx D(P)\approx\log\log P$ grows very slowly. The largest member grows with the family: at $P=10^6$ it is $9.3$, $14.0$ and $22.3$ for the three values of $q$. The trivial character, whose arms are not rotated, is an outlier of size about $21.5$ because of the pole at $s=1$, the known impurity of Section~\ref{sec:impurities}. An off-line zero at height $\gamma$ with real part $\tfrac12+\delta$ would become visible only when $P^\delta$ exceeds about $\gamma$ (Section~\ref{sec:amplitude}), so none of these statistics can detect one.
+
+\begin{table}[ht]\centering\small
+\caption{The family of characters modulo $q=1009$ at $s=\tfrac12+14.1347i$: diagonal, family mean, median and largest nontrivial member of $|W_\chi(P)|^2$, and the trivial character. Over all three moduli and all $P$ the ratio mean/diagonal lies in $[0.94,1.09]$.}\label{tab:family}
+\begin{tabular}{rrrrrrr}
+\toprule
+$P$ & diagonal & family mean & ratio & median & largest $\chi\ne1$ & $\chi=1$\\
+\midrule
+$10^2$ & 1.940 & 1.940 & 1.000 & 1.42 & 11.7 & 4.7\\
+$10^3$ & 2.335 & 2.339 & 1.002 & 1.59 & 11.6 & 7.9\\
+$10^4$ & 2.619 & 2.612 & 0.997 & 2.00 & 15.1 & 14.1\\
+$10^5$ & 2.842 & 2.832 & 0.997 & 2.16 & 15.1 & 21.6\\
+$10^6$ & 3.024 & 2.916 & 0.964 & 2.27 & 14.0 & 21.5\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Amplification.} To pass from the family to one member $\chi_0$ we weighted the family with the amplifier $A_\chi=\bigl|\sum_{\ell\le L}\overline{\chi_0}(\ell)\chi(\ell)\bigr|^2$, the sum over primes $\ell\le L$, and used
+\[
+|W_{\chi_0}|^2\le\frac{\sum_\chi A_\chi|W_\chi|^2}{A_{\chi_0}}.
+\]
+For $q=10007$ and $P=10^5$, Table~\ref{tab:amplifier} and Figure~\ref{fig:amplifier} show the bound for the largest member, a median member and $\zeta$. The gain over the trivial bound $|W_{\chi_0}|^2\le\sum_\chi|W_\chi|^2$ equals the number of amplifier primes while $L<q$ and grows more slowly beyond. At $L=10^5$ the bound is within a factor $1.09$ of the true value for the largest member and for $\zeta$, and within $1.91$ for the median member.
+
+These numbers come with a caveat that determines their meaning. The amplified moment $\sum_\chi A_\chi|W_\chi|^2$ was computed exactly from the known values $W_\chi$. A proof has to estimate it from orthogonality, which is exact only while the products $\ell p^k$ remain below $q$, roughly $LP<q$; every run here lies far outside that range, since already $P>q$. The experiment therefore shows what amplification would achieve if the off-diagonal terms behaved as they do numerically, not what can be proved.
+
+\begin{table}[ht]\centering\small
+\caption{Amplified bound for $|W_{\chi_0}|^2$, family modulo $q=10007$, $P=10^5$, against the true value ($20.42$ for the largest member, $2.12$ for a median member, $21.82$ for $\zeta$). The trivial bound is $28\,382$.}\label{tab:amplifier}
+\begin{tabular}{rrrrrrr}
+\toprule
+ & & \multicolumn{2}{c}{largest member} & \multicolumn{2}{c}{median member} & $\zeta$\\
+$L$ & amplifier primes & bound & bound/true & bound & bound/true & bound/true\\
+\midrule
+$10^2$ & 25 & 1\,254 & 61.4 & 1\,136 & 537 & 55.3\\
+$10^3$ & 168 & 187.0 & 9.15 & 167.6 & 79.2 & 8.63\\
+$10^4$ & 1\,229 & 40.6 & 1.99 & 22.4 & 10.6 & 1.95\\
+$10^5$ & 9\,591 & 22.3 & 1.09 & 4.04 & 1.91 & 1.09\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering\includegraphics[width=\textwidth]{figures/fig8_family.pdf}
+\caption{(a) Family mean of $|W_\chi(P)|^2$ divided by the diagonal, for $q=101$, $1009$, $10007$, with the large-sieve worst case $1+P/q$ for $q=1009$. (b) Individual members for $q=1009$.}\label{fig:family}
+\end{figure}
+
+\begin{figure}[ht]
+\centering\includegraphics[width=\textwidth]{figures/fig9_amplifier.pdf}
+\caption{(a) Amplified bound divided by the true value against the amplifier length $L$, $q=10007$, $P=10^5$; dotted and dashed lines mark $L=\sqrt q$ and $L=q$. (b) Gain over the trivial bound against the number of amplifier primes. The moments are computed exactly; see the text.}\label{fig:amplifier}
+\end{figure}
+
+\section{Where this route stands}\label{sec:stands}
+Starting from the author's pictures, a circle pulled apart into one circle per prime and one spiral arm per prime, this route arrived step by step at the structure of the quasi-Riemann method of Section~\ref{sec:quasirh}: a family in which the arms rotate independently, mean values over the family, an amplifier to isolate one member, and the large sieve. The route satisfies requirements (R1) and (R4) of Section~\ref{sec:operation}: it starts from the primes and uses the Euler product. The experiments add one observation: numerically, the cross terms between different members are far smaller than the bounds that orthogonality guarantees, both for the family mean square and for the amplified moment.
+
+The difficulty is the gap between that numerical behaviour and what can be proved. A proof can use orthogonality only in a restricted range, and the limit $0.874957$ of Section~\ref{sec:quasirh}, fixed by a counting exponent $2/3$ within its comparison system, is a cost of this gap. Going further requires proving cancellation in the off-diagonal terms, the domain of Kloosterman sums and spectral methods, which numerical experiments can observe but not establish. Alp\"oge's description mentions a barrier at $2/3$ overcome by averaging over Hecke characters and a relative trace formula; whether that is the same barrier cannot be assessed from the description. In its present form the route is of the right kind, but it leads to the place where the quasi-Riemann method stops, not to the circle.
+
 \section{Conclusion}\label{sec:conclusion}
 The experiments separate two objects that are often identified. \emph{The helix} (the critical line with its heights) carries the arithmetic: the explicit formula ties the zeros to the prime powers through an exact identity (Table~\ref{tab:heights}), Landau's formula imprints each prime on the angles (Table~\ref{tab:filling}), and the zeros repel like eigenvalues along it (Tables~\ref{tab:spacing} and~\ref{tab:wrap}). \emph{The circle} carries the shape: the projected angles become equidistributed for any base and lose the arithmetic, and what survives is the radius. The Riemann Hypothesis is the statement that the closure of the picture consists of the circle together with the known impurities of Section~\ref{sec:impurities}. This division is a geometric interpretation, not a separation theorem: the explicit formula depends on both coordinates of every zero.
 
-The circle is therefore the answer, and the problem is to reach it from the primes. Both known routes have been followed here as far as computation allows. The positivity route produces, from primes alone, a form that is positive and locates the zeros, but with no margin. The amplitude route reduces to a uniform bound with a constant loss; where Frobenius exists, Stepanov's multiplicity supplies it, and the computation of Section~\ref{sec:stepanov} shows the multiplicity doing so; where it does not, the announced quasi-Riemann method stops at a limit fixed by a constant counting exponent. In the function-field case Frobenius supplies the exact structure each route needs, a positive degree form for the first and the map $x\mapsto x^q$ for the second. For $\Z$ the missing object is an operation, most naturally a flow, that is built from the primes and carries such a structure. This note locates that gap; it does not fill it.
+The circle is therefore the answer, and the problem is to reach it from the primes. Both known routes have been followed here as far as computation allows. The positivity route produces, from primes alone, a form that is positive and locates the zeros, but with no margin. The amplitude route reduces to a uniform bound with a constant loss; where Frobenius exists, Stepanov's multiplicity supplies it, and the computation of Section~\ref{sec:stepanov} shows the multiplicity doing so; where it does not, the announced quasi-Riemann method stops at a limit fixed by a constant counting exponent. In the function-field case Frobenius supplies the exact structure each route needs, a positive degree form for the first and the map $x\mapsto x^q$ for the second. For $\Z$ the missing object is an operation, most naturally a flow, that is built from the primes and carries such a structure. The route explored in Part~IV, which gives each prime its own circle and lets the arms rotate in a family, reaches the same gap from a different direction: the cross terms cancel numerically far beyond what can be proved. This note locates that gap; it does not fill it.
 
 \section{Limitations and reproducibility}\label{sec:limits}
 \begin{enumerate}[label=(\roman*)]
@@ -495,6 +599,7 @@ The circle is therefore the answer, and the problem is to reach it from the prim
 \item The truncated Weil form of Section~\ref{sec:weilform} is computed with high-precision floating-point arithmetic and adaptive quadrature, checked by raising the precision; it is not interval-certified, and positivity of finite truncations is consistent with, not evidence for, the Riemann Hypothesis beyond the verified range.
 \item The off-circle example of Section~\ref{sec:amplitude} is a polynomial, not a curve; it shows that point counts alone are consistent with roots off the circle, not that any geometric object has them.
 \item The Stepanov computations of Section~\ref{sec:stepanov} are exact over $\mathbb F_p$ for $p\in\{101,211,307,401\}$; the figures quoted for larger $p$ come from the parameter count alone and are conditional on the auxiliary polynomial being nonzero.
+\item The experiments of Part~IV are exploratory. The family and amplifier computations use a single height $t=14.1347$ and compute the family moments exactly, far outside the ranges in which they could be estimated in a proof. The torus search is restricted to the times at which the coordinate of $2$ vanishes, and the figures for height $3\times10^{12}$ are extrapolations of the measured growth.
 \item Section~\ref{sec:quasirh} reproduces the recursion from the formulas stated in \cite{Liu2026} and checks their internal consistency; it does not verify the analytic estimates behind them, and parts of that paper (its final optimality section) were not examined in full. The two announcements discussed there had not been refereed at the time of writing, and nothing in this note depends on them.
 \end{enumerate}
 The scripts in the accompanying repository
@@ -517,6 +622,8 @@ regenerate every number, table and figure from the stored zeros (or recompute th
 
 \paragraph{Changes in version 9.} Revisions in response to an independent review by ChatGPT of version~8 (repository issue~1). Section~\ref{sec:weilform}: the absence of a spectral gap is stated as suggested by the computations, not established, with the reasons, and the recovery of the ordinates is described as a property of the near-null eigenvector in the chosen basis. Section~\ref{sec:amplitude}: the divisibility $N_m\mid N_n$ for the off-circle example is now proved for all $m\mid n$ by the norm factorisation $N_n=(1-A^n)(1-B^n)$ suggested by the review, replacing a check for $n\le10$. Section~\ref{sec:stepanov}: the four directly verified cases are separated from the parameter-count figures for larger $p$, which are conditional on the auxiliary polynomial being nonzero, and the general bound is attributed to Stepanov's theorem. Section~\ref{sec:quasirh} and Table~\ref{tab:requirements}: the quasi-Riemann bound is marked as announced throughout. Section~\ref{sec:operation}: the flow is presented as a requirement of the Frobenius analogy, not a necessity. The review's remark that a cross-reference label was missing did not apply (the label was defined and the build had no undefined references), but the duplicate label was removed for clarity. All points were adopted except that one.
 
+\paragraph{Changes in version 10.} Part~IV is added (Sections~\ref{sec:torus}--\ref{sec:stands}, Tables~\ref{tab:torus}--\ref{tab:amplifier}, Figures~\ref{fig:spirals}--\ref{fig:amplifier}). It develops two pictures proposed by the author, a circle pulled apart into one circle per prime and one spiral arm per prime, through four experiments: the near-closure of the helix on the prime torus, the spiral arms of $\zeta$, the family of Dirichlet characters, and an amplifier. One of Claude's predictions in Section~\ref{sec:families} turned out to be wrong, and this is recorded in the text. The abstract, introduction, conclusion, limitations and author contributions are updated. Part~IV was written by Claude at the author's request and had not been reviewed by ChatGPT at the time of writing.
+
 \paragraph{Author contributions.} The theoretical content of this note is classical, and much of the work consisted of translating the author's geometric intuitions into the language of existing results (the explicit formula, Li's criterion, Hlawka's theorem, Weil positivity) and testing them numerically. The questions and syntheses that determined its structure are the author's. In the order in which they arose in the discussion that led to this note:
 \begin{enumerate}[label=(\arabic*),itemsep=1pt]
 \item \emph{Zeros on a circle.} The author proposed projecting the unbounded critical line onto a bounded set and ``rotating'' it, and then proposed viewing the zeros as the points of a circle produced by a new operation. This became the Frobenius picture $\alpha=b^\rho$ of Section~\ref{sec:pictures}, Figure~\ref{fig:circle}, and the angle--radius vocabulary of the whole note.
@@ -529,13 +636,16 @@ regenerate every number, table and figure from the stored zeros (or recompute th
 \item \emph{The second route.} After the discussion distinguished a positivity route from an amplitude route (bounds on prime sums, as in Stepanov-type arguments), the author proposed pursuing the positivity route computationally. This led to Section~\ref{sec:weilform}.
 \item \emph{Turning the circle.} The author proposed running the Frobenius operation backwards repeatedly, turning the circle $n$ times, to see whether points off the circle reveal themselves. This led to Section~\ref{sec:amplitude}, which shows that they do, but only relative to an a priori bound that turning does not supply.
 \item \emph{The circle as the answer.} The author proposed treating $\alpha=b^\rho$ as the answer and the routes of Part~II as attempts to derive an equivalent object from the primes, and asked that the missing operation start from the primes and return the circle. This determined the three-part structure of version~8 and Section~\ref{sec:operation}.
+\item \emph{Pulling the circle apart.} The author proposed looking for a route of our own rather than waiting for published work, and observed that the discrete circle fills the circle only in the limit, so that pulling it apart in a further dimension gives the helix. Refined to one circle per prime, this became Section~\ref{sec:torus}.
+\item \emph{One arm per prime.} The author drew a spiral with one arm per prime winding into a common centre. Computing it showed that for $\zeta$ the arms coincide, and that they separate only when twisted by characters; this led to Sections~\ref{sec:arms} and~\ref{sec:families}.
 \end{enumerate}
-Several of these intuitions were partly corrected by the experiments they prompted, notably items~(2), (4), (6) and~(9); the corrections are part of the record.
+Several of these intuitions were partly corrected by the experiments they prompted, notably items~(2), (4), (6), (9), (11) and~(12); the corrections are part of the record.
 
-\paragraph{Acknowledgement and AI collaboration.} This note is the product of a collaboration between the author and two AI systems, used in complementary roles. Claude (Anthropic; Claude Opus~5.5 as configured in the working sessions) carried out the computations, wrote the scripts, drafted the text and produced the revisions. ChatGPT (OpenAI) acted as an independent reviewer of successive versions: its reviews identified the overstatements corrected in version~2 (the claims that the weights are carried by the heights alone and that the radius is invisible at finite scale, the single-term dominance heuristic, and the unquantified truncation error), and the four precision issues corrected in version~4 (the test-function class in Weil's criterion, the status of the Poisson spacings, the finite-height Landau bias, and the description of peak positions). Sections~\ref{sec:amplitude}--\ref{sec:operation}, added in versions~7 and~8 and written by Claude, were reviewed by ChatGPT for version~9; its review led to the qualifications listed under the changes in version~9. The author directed the research questions, the geometric picture of zeros on a circle, and the decisions on scope. Neither AI system is listed as an author, in line with the policies of arXiv and most journals. The author is responsible for the content.
+\paragraph{Acknowledgement and AI collaboration.} This note is the product of a collaboration between the author and two AI systems, used in complementary roles. Claude (Anthropic; Claude Opus~5.5 as configured in the working sessions) carried out the computations, wrote the scripts, drafted the text and produced the revisions. ChatGPT (OpenAI) acted as an independent reviewer of successive versions: its reviews identified the overstatements corrected in version~2 (the claims that the weights are carried by the heights alone and that the radius is invisible at finite scale, the single-term dominance heuristic, and the unquantified truncation error), and the four precision issues corrected in version~4 (the test-function class in Weil's criterion, the status of the Poisson spacings, the finite-height Landau bias, and the description of peak positions). Sections~\ref{sec:amplitude}--\ref{sec:operation}, added in versions~7 and~8 and written by Claude, were reviewed by ChatGPT for version~9; its review led to the qualifications listed under the changes in version~9. Part~IV, added in version~10 and written by Claude, had not been reviewed by ChatGPT at the time of writing. The author directed the research questions, the geometric picture of zeros on a circle, and the decisions on scope. Neither AI system is listed as an author, in line with the policies of arXiv and most journals. The author is responsible for the content.
 
 \begingroup\small
 \begin{thebibliography}{99}
+\bibitem{Bagchi1987} B. Bagchi, Recurrence in topological dynamics and the Riemann hypothesis, \emph{Acta Math. Hungar.} \textbf{50} (1987), 227--240.
 \bibitem{Bombieri1974} E. Bombieri, Counting points on curves over finite fields (d'apr\`es S. A. Stepanov), S\'eminaire Bourbaki 1972/73, Exp.~430, Lecture Notes in Math. \textbf{383}, Springer, 1974, 234--241.
 \bibitem{Bombieri2000} E. Bombieri, Remarks on Weil's quadratic functional in the theory of prime numbers, I, \emph{Rend. Mat. Acc. Lincei} (9) \textbf{11} (2000), 183--233.
 \bibitem{BombieriLagarias1999} E. Bombieri and J. C. Lagarias, Complements to Li's criterion for the Riemann hypothesis, \emph{J. Number Theory} \textbf{77} (1999), 274--287.
@@ -564,6 +674,7 @@ Several of these intuitions were partly corrected by the experiments they prompt
 \bibitem{SakhrBhaduriVanZyl2003} J. Sakhr, R. K. Bhaduri and B. P. van Zyl, Zeta function zeros, powers of primes, and quantum chaos, \emph{Phys. Rev. E} \textbf{68} (2003), 026206; arXiv:nlin/0212042.
 \bibitem{Stepanov1969} S. A. Stepanov, On the number of points of a hyperelliptic curve over a finite prime field, \emph{Izv. Akad. Nauk SSSR Ser. Mat.} \textbf{33} (1969), 1171--1181.
 \bibitem{Tate1966} J. Tate, Endomorphisms of abelian varieties over finite fields, \emph{Invent. Math.} \textbf{2} (1966), 134--144.
+\bibitem{Titchmarsh1986} E. C. Titchmarsh, \emph{The Theory of the Riemann Zeta-Function}, 2nd ed., revised by D. R. Heath-Brown, Oxford University Press, 1986.
 \bibitem{vonKoch1901} H. von Koch, Sur la distribution des nombres premiers, \emph{Acta Math.} \textbf{24} (1901), 159--182.
 \bibitem{Weil1948} A. Weil, \emph{Sur les courbes alg\'ebriques et les vari\'et\'es qui s'en d\'eduisent}, Hermann, Paris, 1948.
 \bibitem{Weil1952} A. Weil, Sur les ``formules explicites'' de la th\'eorie des nombres premiers, \emph{Comm. S\'em. Math. Univ. Lund} (1952), tome suppl\'ementaire, 252--265.

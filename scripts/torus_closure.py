@@ -42,4 +42,4 @@ for eps in (0.1, 0.05):
         res = first_hit(k, eps); out.append(res)
         print(json.dumps(res), flush=True)
         if res.get('m') is None: break
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'torus_closure.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'torus_closure.json'), 'w'), indent=1)

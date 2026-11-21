@@ -13,4 +13,8 @@ python3 -I frobenius_turns.py          # Table 9, Figure 5
 python3 -I stepanov_sweep.py           # Table 10 (about 6 minutes)
 python3 -I quasi_rh_recursion.py       # Table 11
 python3 -I fig6_routes.py              # Figure 6
+python3 -I torus_closure.py            # Table 13 (about 20 minutes)
+python3 -I prime_spirals.py            # Figure 7
+python3 -I character_family.py         # Table 14, Figure 8
+python3 -I amplifier.py                # Table 15, Figure 9
 cd ../paper && latexmk -pdf -interaction=nonstopmode -halt-on-error Angles_and_Radii_of_the_Riemann_Zeros.tex

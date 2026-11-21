@@ -57,8 +57,8 @@ for name, j0 in targets.items():
                          true=float(W2[j0]), trivial=trivial, gain=trivial / bound, bound_over_true=bound / float(W2[j0])))
         print(name, json.dumps({k: round(v, 3) if isinstance(v, float) else v for k, v in rows[-1].items()}), flush=True)
     out['results'][name] = dict(j0=j0, rows=rows)
-ROOT = os.path.dirname(os.path.abspath(__file__))
-json.dump(out, open(os.path.join(ROOT, 'amplifier.json'), 'w'), indent=1)
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+json.dump(out, open(os.path.join(ROOT, 'validation', 'amplifier.json'), 'w'), indent=1)
 
 plt.rcParams.update({'font.size': 9})
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.2))
@@ -73,4 +73,4 @@ a1.set_title(f'(a) how close the bound gets, $q={q}$'); a1.legend(frameon=False,
 nn = np.array([1, 1e4]); a2.loglog(nn, nn, '--', color='#888888', lw=0.8, label='gain $=$ number of amplifier primes')
 a2.set_xlabel('number of amplifier primes'); a2.set_ylabel('gain over the trivial bound')
 a2.set_title('(b) gain from amplification'); a2.legend(frameon=False, fontsize=8)
-fig.tight_layout(); fig.savefig(os.path.join(ROOT, 'amplifier.png'), dpi=130, bbox_inches='tight')
+fig.tight_layout(); fig.savefig(os.path.join(ROOT, 'paper', 'figures', 'fig9_amplifier.pdf'), bbox_inches='tight')

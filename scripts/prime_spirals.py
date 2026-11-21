@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 
 t = 14.134725141734693                     # first ordinate of zeta
-out = sys.argv[1] if len(sys.argv) > 1 else 'prime_spirals.png'
+out = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'paper', 'figures', 'fig7_spirals.pdf')
 plt.rcParams.update({'font.size': 9})
 fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.8))
 cols = ['#1f4e79', '#c0392b', '#2e7d32', '#8e44ad', '#d35400', '#555555']

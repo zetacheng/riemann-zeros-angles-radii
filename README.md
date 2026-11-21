@@ -51,6 +51,14 @@ This regenerates every number, table and figure and recompiles the paper. It tak
 - The off-line experiment manipulates the zero set formally. It does not describe any L-function.
 - The Weil-form computations use high-precision floating point checked by raising the precision. They are **not interval-certified**.
 
-## Acknowledgement
+## Collaboration
 
-The experiments, computations and drafting were carried out with the assistance of Claude (Anthropic). The author is responsible for the content.
+This research is a collaboration between the author and two AI systems:
+
+| Contributor | Role |
+|---|---|
+| **Zeta Hoi-Ho Cheng** (author) | Research questions, the geometric picture of zeros on a circle, scope decisions |
+| **Claude** (Anthropic; Claude Opus 5.5 as configured in the working sessions) | Computations, scripts, drafting and revisions |
+| **ChatGPT** (OpenAI) | Independent review of successive versions; its reviews drove the corrections in versions 2 and 4 |
+
+Neither AI system is listed as an author of the paper, in line with arXiv and journal policies. The author is responsible for the content. See [CONTRIBUTING.md](CONTRIBUTING.md) for how each contributor's work is recorded in this repository.

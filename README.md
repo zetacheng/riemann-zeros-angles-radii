@@ -1,6 +1,6 @@
 # Angles and Radii of the Riemann Zeros
 
-**A numerical study of the zeros of ζ as a discrete spectrum** · Zeta Hoi-Ho Cheng · Version 6, 20 November 2026
+**A numerical study of the zeros of ζ as a discrete spectrum** · Zeta Hoi-Ho Cheng · Version 7, 21 November 2026
 
 [Paper (PDF)](paper/Angles_and_Radii_of_the_Riemann_Zeros.pdf) · [LaTeX source](paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 
@@ -19,8 +19,9 @@ Write a nontrivial zero as ρ = β + iγ and map it to α = b^ρ. The height γ 
 | The smooth background equals the pole term plus the archimedean term to within 0.002. In the α-plane the poles s = 0, 1 form a pair reflected across the circle, the same form an off-line zero pair would have. | §6, Table 4, Figure 4 |
 | The projected angles fill the circle uniformly (Hlawka), but the prime bias and the eigenvalue repulsion are lost in the limit. | §7, Tables 5–6 |
 | A truncated Weil quadratic form computed from primes alone is positive in every case tested. Using only the primes up to 11, its ground state recovers the first five ordinates of ζ to twelve digits, and at fixed support its smallest eigenvalue tends to 0. | §8, Tables 7–8 |
+| Turning the circle n times (α ↦ αⁿ) on an elliptic curve over F₇, where Frobenius exists, keeps the normalised radius at 1. A pair of off-circle roots gives "point counts" that are positive integers with all the divisibility relations of a curve; turning reveals it only relative to an a priori bound O(q^{n/2}), which must come from geometry. For ζ the analogue is ψ(2ⁿ) − 2ⁿ. | §9, Table 9, Figure 5 |
 
-**Conclusion of the paper:** the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape asserted by the Riemann Hypothesis. A proof needs a bridge from one to the other. Weil positivity is such a bridge, and §8 shows numerically why it is delicate: it holds, but with no margin.
+**Conclusion of the paper:** the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape asserted by the Riemann Hypothesis. A proof needs a bridge from one to the other. Weil positivity is such a bridge, and §8 shows numerically why it is delicate: it holds, but with no margin. §9 shows the same structure on the amplitude route: turning the circle converts a uniform bound into a statement of shape, but the bound itself is the hard part.
 
 ## Related work
 
@@ -44,6 +45,7 @@ This regenerates every number, table and figure and recompiles the paper. It tak
 | `impurities_and_circle.py` | Tables 4–6, Figure 4 |
 | `weil_form_mp.py L N dps` | Truncated Weil form from primes alone (Tables 7–8) |
 | `weil_form_zero_side.py L N` | The same matrix built from the zeros, as an independent check |
+| `frobenius_turns.py` | Table 9, Figure 5, `validation/frobenius_turns.json` |
 
 ## Limitations
 

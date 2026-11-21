@@ -9,4 +9,5 @@ python3 -I weil_form_zero_side.py "math.log(13)" 8     # zero-side cross-check f
 python3 -I weil_form_mp.py "log(13)" 8 80              # Table 7, left column
 for n in 4 6 8 10 12 14; do python3 -I weil_form_mp.py "log(13)" $n 90; done   # Table 8
 python3 -I weil_form_mp.py "log(100)" 16 70            # e^L = 100 ground state
+python3 -I frobenius_turns.py          # Table 9, Figure 5
 cd ../paper && latexmk -pdf -interaction=nonstopmode -halt-on-error Angles_and_Radii_of_the_Riemann_Zeros.tex

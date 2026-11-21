@@ -104,7 +104,7 @@ def run(p, M, J, K, fcoef=(1, 1, 0, 1)):
     for _ in range(M - 1): ders.append(pder(ders[-1], p))
     ok = all(peval(d, x, p) == 0 for x in S for d in ders)
     roots_f = sum(1 for x in range(p) if peval(f, x, p) == 0)
-    return dict(p=p, M=M, J=J, K=K, equations=nrows, unknowns=ncols, rank=rank, solve_s=round(t_solve, 2),
+    return dict(p=p, M=M, J=J, K=K, equations=nrows, unknowns=ncols, rank=rank,
                 degR=degR, vanishes_to_order_M_on_S=ok, S=len(S), bound=degR / M,
                 trivial_bound_deg_g_minus_1=m * c, half_p=p / 2,
                 affine_points=2 * len(S) + roots_f, hasse_interval=[p + 1 - 2 * p ** 0.5, p + 1 + 2 * p ** 0.5])

@@ -1,0 +1,19 @@
+E: y^2=x^3+x+1 over F_7:  N_1=5, a_p=3, |alpha|=2.645751, sqrt(p)=2.645751
+ n   direct count   p^n+1-2Re(alpha^n)   |alpha^n|/p^(n/2)   angle of alpha^n (deg)
+ 1              5             5.000000            1.000000         55.5
+ 2             55            55.000000            1.000000        110.9
+ 3            380           380.000000            1.000000        166.4
+ 4           2475          2475.000000            1.000000       -138.2
+
+Fake roots of T^2-7T+7: 5.7913, 1.2087  (|alpha| vs sqrt(p)=2.6458)
+ n   N_n = p^n+1-A^n-B^n (integer, positive?)   deviation/p^(n/2)
+ 1                    1     True                2.65
+ 2                   15     True                5.00
+ 3                  148     True               10.58
+ 4                 1275     True               23.00
+ 5                10291     True               50.27
+ 6                79920     True              110.00
+ 7               605053     True              240.76
+ 8              4499475     True              527.00
+ 9             33025756     True             1153.55
+10            240037575     True             2525.00

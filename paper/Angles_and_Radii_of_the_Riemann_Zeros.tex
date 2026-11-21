@@ -583,17 +583,21 @@ $10^5$ & 9\,591 & 22.3 & 1.09 & 4.04 & 1.91 & 1.09\\
 \section{Impurities, extreme values and slow waves}\label{sec:impure}
 The experiments of Section~\ref{sec:families} raise a question proposed by the author. Are the known impurities of Section~\ref{sec:impurities} the only ones, or could a third appear somewhere, so slowly that its effect looks like gradual worsening and so rarely that it is invisible in the aggregate? We call an \emph{apparent impurity} any effect that, within a finite window, resembles the growth an off-line zero would produce, and a \emph{genuine impurity} an off-line zero. Statistics cannot exclude sparse genuine impurities, as Sections~\ref{sec:angle-radius} and~\ref{sec:amplitude} have shown, but the two possibilities leave different traces. Extreme values grow with the size of the family, like $\log N$, and occur in arbitrary members. An off-line zero of real part $\tfrac12+\delta$ in one particular member makes that member's prime sums grow like $x^\delta$ relative to $\sqrt x$, without limit.
 
-\paragraph{The worst member.} Table~\ref{tab:worst} compares the largest $|W_\chi(P)|^2$ over the families modulo eight primes from $31$ to $100003$ ($P=10^5$) with a random model, in which each $\chi(p)$ is replaced by an independent random point of the unit circle, and with the extreme-value prediction $D(\log N+0.577)$ for an exponential law with the family mean $D$. In this finite sample the ratio of the largest member to $\log N$ stays between $1.8$ and $2.5$. The largest member lies below the random-model maximum in seven of the eight cases and below the extreme-value prediction in all of them, and the upper tail is thinner than exponential: the fraction of members above $5D$ is at most $0.003$, against $e^{-5}\approx0.0067$. The growth of the worst member is consistent with what drawing more members produces under this heuristic, which treats the members as independent although they share their prime inputs. No impurity is needed to explain these data, but the comparison establishes no growth law and does not exclude a genuine impurity.
+\paragraph{The worst member.} Table~\ref{tab:worst} compares the largest $|W_\chi(P)|^2$ over the families modulo eight primes from $31$ to $100003$ ($P=10^5$) with a random model, in which each $\chi(p)$ is replaced by an independent random point of the unit circle, and with the extreme-value prediction $D(\log N+0.577)$ for an exponential law with the family mean $D$. In this finite sample the ratio of the largest member to $\log N$ stays between $1.76$ and $2.45$. The largest member lies below the random-model maximum in seven of the eight cases and below the extreme-value prediction in all of them, and the upper tail is thinner than exponential: the fraction of members above $5D$ is at most $0.003$, against $e^{-5}\approx0.0067$. The growth of the worst member is consistent with what drawing more members produces under this heuristic, which treats the members as independent although they share their prime inputs. No impurity is needed to explain these data, but the comparison establishes no growth law and does not exclude a genuine impurity.
 
 \begin{table}[ht]\centering\small
-\caption{Largest member $\max_{\chi\ne1}|W_\chi(P)|^2$ of the family modulo $q$ ($P=10^5$, $s=\tfrac12+14.1347i$) against a random model and the extreme-value prediction.}\label{tab:worst}
+\caption{Largest member $\max_{\chi\ne1}|W_\chi(P)|^2$ of the family modulo $q$ ($P=10^5$, $s=\tfrac12+14.1347i$) against a random model ($20000$ samples at most) and the extreme-value prediction, all eight moduli tested; a finite-sample comparison.}\label{tab:worst}
 \begin{tabular}{rrrrrr}
 \toprule
 $q$ & members $N$ & largest & random model & $D(\log N+0.577)$ & largest$/\log N$\\
 \midrule
+31 & 29 & 7.5 & 10.1 & 8.4 & 2.23\\
 101 & 99 & 10.3 & 9.5 & 13.8 & 2.25\\
+307 & 305 & 10.1 & 21.9 & 17.2 & 1.76\\
 1009 & 1\,007 & 15.1 & 16.4 & 21.1 & 2.18\\
+3001 & 2\,999 & 19.2 & 23.7 & 24.1 & 2.40\\
 10007 & 10\,005 & 20.4 & 29.9 & 27.7 & 2.22\\
+30011 & 30\,009 & 21.5 & 27.6 & 30.9 & 2.09\\
 100003 & 100\,001 & 28.2 & 31.3 & 34.4 & 2.45\\
 \bottomrule
 \end{tabular}

@@ -1,0 +1,67 @@
+{
+ "X": 20000,
+ "primes_pi": 2248,
+ "max_rel_err_abs2": 1.727584479278572e-15,
+ "cube_identity_max_err": {
+  "pi": 4.530619679015282e-15,
+  "conj(pi)": 1.9999817103560533,
+  "-pi": 2.000000000000003,
+  "-conj(pi)": 1.9996430707782056
+ },
+ "angle_hist12": [
+  249,
+  243,
+  198,
+  169,
+  153,
+  112,
+  112,
+  153,
+  169,
+  198,
+  243,
+  249
+ ],
+ "partial_sums": [
+  {
+   "X": 1250,
+   "count": 198,
+   "sum_real": 61.12,
+   "sum_imag": -0.0,
+   "sqrt_count": 14.07,
+   "X56_over_logX": 53.41
+  },
+  {
+   "X": 2500,
+   "count": 356,
+   "sum_real": 102.15,
+   "sum_imag": -0.0,
+   "sqrt_count": 18.87,
+   "X56_over_logX": 86.73
+  },
+  {
+   "X": 5000,
+   "count": 660,
+   "sum_real": 154.18,
+   "sum_imag": -0.0,
+   "sqrt_count": 25.69,
+   "X56_over_logX": 141.96
+  },
+  {
+   "X": 10000,
+   "count": 1222,
+   "sum_real": 245.83,
+   "sum_imag": -0.0,
+   "sqrt_count": 34.96,
+   "X56_over_logX": 233.91
+  },
+  {
+   "X": 20000,
+   "count": 2248,
+   "sum_real": 410.67,
+   "sum_imag": -0.0,
+   "sqrt_count": 47.41,
+   "X56_over_logX": 387.62
+  }
+ ]
+}

@@ -110,3 +110,13 @@ The counts agree at every height, and match the stored zeros. Off-line zeros com
 - **Forward in t**, the zeros repel and the spacing evens out. The smallest normalised gap rises from 0.138 to 0.295 at t = 0.05 and 0.486 at t = 0.2, and the spread of the normalised gaps falls from 0.38 to 0.29.
 
 This is why spacing arguments work at all heights only after deformation. For t > 0 the flow makes high zeros regular enough for an asymptotic argument (Polymath 15: Λ ≤ 0.22). For ζ itself (t = 0), arbitrarily close pairs keep occurring, the collisions approach t = 0, and Rodgers–Tao proved Λ ≥ 0: the Riemann Hypothesis, if true, holds with no margin.
+
+## The heat flow as a phase transition (author's proposal)
+
+`phase_transition.py` treats the heat-flow time t as a control parameter. For t ≥ Λ all zeros are real (one phase); for t < Λ some are complex. Rodgers–Tao proved Λ ≥ 0, so RH ⇔ Λ = 0. The number N of zeros used plays the role of system size. Outputs: `phase_transition.json` and `phase_transition.png`.
+
+- **Order parameter** m(t) = max Im z(t), which is zero in the ordered phase. It switches on with a square-root onset m ≈ √(2(t* − t)), a mean-field-like exponent of 1/2 for each colliding pair. The onset moves towards t = 0 as N grows: −0.31 for N = 100, −0.10 for N = 300, −0.013 for N = 1199.
+- **Apparent critical point** t_c(N), the backward collision closest to 0, rises steadily from −1.05 (N = 30) to −0.013 (N = 1199), always from below. A fit gives |t_c| ∝ N^{−1.25}, or N^{−0.90} after removing the (log)^{−2} factor of the mean spacing. A GUE heuristic predicts N^{−2/3} with that factor. With one sequence of 1200 zeros, an extreme-value statistic and strong low-height corrections, the exponent is not determined to better than this.
+- **Critical fluctuations.** The smallest normalised gap among N zeros falls like N^{−0.41} for ζ. For 40 GUE samples it falls like N^{−0.27}, against the theory value N^{−1/3} (Ben Arous–Bourgade). The ζ gaps are larger than GUE at these heights, consistent with the known finite-height corrections (an effective matrix size growing like log(γ/2π)).
+
+In this language, every finite computation sees an apparent critical point strictly below 0, approached from below like a power of N. RH asserts that it never crosses 0 as N → ∞; an off-line zero would be a crossing. Finite-size scaling describes the approach, but it cannot decide the limit.

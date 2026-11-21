@@ -75,3 +75,7 @@ Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and a
 | 100003 | 100001 | 28.2 | 31.3 | 34.4 | 2.45 |
 
 The largest member grows like ln N (the ratio stays near 2.2). In every case but one it lies below the maximum of a random model with independent random rotations, and it always lies below the exponential extreme-value prediction. The upper tail is in fact thinner than exponential: the fraction above 5D is at most 0.003, against e⁻⁵ ≈ 0.0067. The growth is therefore what one expects from drawing more members, and no impurity is needed to explain it. An impurity would show instead as power-law growth P^δ in one particular member, which at these sizes would be invisible unless P^δ exceeded the height of the zero.
+
+## A suspected impurity: Siegel zeros and small L(1, χ) (author's question)
+
+`siegel_check.py` computes L(1, (·/q)) for every odd prime q ≤ 20000 (2261 characters, tail error at most 0.037). Output: `siegel_check.json`. A Siegel zero would make L(1, χ) abnormally small, of order (1 − β) log q, which is below 1/log q (about 0.1 here). The smallest value found is 0.2459, at q = 163, where class number one gives L(1, χ) = π/√163 = 0.2461. All other values are at least 0.26. The most "impurity-like" member is therefore a genuine extreme value with an arithmetic explanation (the last imaginary quadratic field of class number one), not an off-line zero. The data show no outlier beyond the ordinary extreme-value range. This does not, and cannot, prove that Siegel zeros do not exist.

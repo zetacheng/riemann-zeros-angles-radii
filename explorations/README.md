@@ -28,3 +28,13 @@ The number of equations never depends on |S|, yet R vanishes to order M at all 2
 - The three constraints L₀, L_K, H_c with the stated weights combine to B ≥ (7+18δ_c)/(9+18δ_c), independently of the length parameters (checked).
 
 Contrast with stage A: Stepanov's method has a parameter, the multiplicity M, that grows with p, and the bound improves without limit as it grows. This comparison system has no such parameter; its counting exponent is a fixed constant.
+
+## Stage C, first experiment: how close does the helix come to closing?
+
+`torus_closure.py` places each prime on its own circle: the line t ↦ (t log p / 2π mod 1) for p ≤ P on the torus (Bohr's lift). It finds the first time at which every coordinate lies within ε of an integer, which is an approximate common lattice. Output: `torus_closure.json`.
+
+| primes (k) | 2 | 4 | 6 | 8 | 10 | 12 |
+|---|---|---|---|---|---|---|
+| first near-closure t, ε = 0.1 | 45 | 1.6·10³ | 3.0·10⁴ | 3.4·10⁵ | 5.5·10⁷ | 1.0·10⁹ |
+
+Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and about 10.3 at ε = 0.05, close to the heuristic 1/(2ε). With ε = 0.1, the helix nearly closes on about 17 primes by height 3·10¹² (the verified range), while the approximate functional equation at that height involves about 56,000 primes (those up to √(T/2π)). An approximate common lattice therefore covers only logarithmically many primes, so Stepanov's first ingredient cannot be obtained by approximation. Near-closure times of this kind are the classical mechanism for large values of ζ(1+it) (Bohr–Landau); they give extreme values, not RH.

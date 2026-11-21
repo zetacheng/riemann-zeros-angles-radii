@@ -38,3 +38,11 @@ Contrast with stage A: Stepanov's method has a parameter, the multiplicity M, th
 | first near-closure t, ε = 0.1 | 45 | 1.6·10³ | 3.0·10⁴ | 3.4·10⁵ | 5.5·10⁷ | 1.0·10⁹ |
 
 Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and about 10.3 at ε = 0.05, close to the heuristic 1/(2ε). With ε = 0.1, the helix nearly closes on about 17 primes by height 3·10¹² (the verified range), while the approximate functional equation at that height involves about 56,000 primes (those up to √(T/2π)). An approximate common lattice therefore covers only logarithmically many primes, so Stepanov's first ingredient cannot be obtained by approximation. Near-closure times of this kind are the classical mechanism for large values of ζ(1+it) (Bohr–Landau); they give extreme values, not RH.
+
+## One spiral arm per prime (the author's drawing)
+
+`prime_spirals.py` draws, at s = 1/2 + 14.1347i, the points p^{-ks} (k = 1, 2, …) for p ≤ 13, then adds the arms tip to tail over the primes up to 10⁵ (`prime_spirals.png`).
+
+- The arms are not separate curves. p^{-us} = e^{-(u log p)s}, so every arm lies on the same logarithmic spiral e^{-x s}, and prime p occupies the points x = k log p on it. The spiral is the helix of §2 with radius e^{-x/2}. Over F_q every point would sit at a multiple of log q, a common lattice on the spiral; over ℤ the spacings log p are incommensurable.
+- Each arm sums to the Euler factor −log(1 − p^{-s}), which converges. The sum over all arms converges at σ = 3/2, but on the critical line it winds outward without converging, which is why analytic continuation is needed.
+- The arms become genuinely separate only when each prime's point is rotated by an extra angle, such as a character value χ(p) or a Satake angle. That is the picture for an L-function in a family, and averaging over the family rotates the arms independently.

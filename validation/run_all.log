@@ -1,0 +1,1469 @@
+{
+"E2": [
+{
+"corr": 0.989,
+"prime_powers_hit": 30,
+"composite_false": 0,
+"stray": 0,
+"label": "true zeros",
+"kind": "true",
+"param": null
+},
+{
+"corr": 0.989,
+"prime_powers_hit": 30,
+"composite_false": 0,
+"stray": 0,
+"label": "on-line, gamma jitter sd=0.01",
+"kind": "jitter",
+"param": 0.01
+},
+{
+"corr": 0.973,
+"prime_powers_hit": 30,
+"composite_false": 0,
+"stray": 0,
+"label": "on-line, gamma jitter sd=0.05",
+"kind": "jitter",
+"param": 0.05
+},
+{
+"corr": 0.813,
+"prime_powers_hit": 28,
+"composite_false": 1,
+"stray": 0,
+"label": "on-line, gamma jitter sd=0.2",
+"kind": "jitter",
+"param": 0.2
+},
+{
+"corr": 0.045,
+"prime_powers_hit": 19,
+"composite_false": 31,
+"stray": 171,
+"label": "on-line, gamma jitter sd=1.0",
+"kind": "jitter",
+"param": 1.0
+},
+{
+"corr": 0.989,
+"prime_powers_hit": 30,
+"composite_false": 0,
+"stray": 0,
+"label": "off-line, all zeros delta=0.05",
+"kind": "offline",
+"param": 0.05
+},
+{
+"corr": 0.989,
+"prime_powers_hit": 30,
+"composite_false": 0,
+"stray": 0,
+"label": "off-line, all zeros delta=0.1",
+"kind": "offline",
+"param": 0.1
+},
+{
+"corr": 0.979,
+"prime_powers_hit": 31,
+"composite_false": 0,
+"stray": 0,
+"label": "off-line, all zeros delta=0.25",
+"kind": "offline",
+"param": 0.25
+},
+{
+"corr": 0.921,
+"prime_powers_hit": 33,
+"composite_false": 0,
+"stray": 0,
+"label": "off-line, all zeros delta=0.49",
+"kind": "offline",
+"param": 0.49
+},
+{
+"corr": 0.912,
+"prime_powers_hit": 31,
+"composite_false": 0,
+"stray": 0,
+"label": "off-line, 10% of zeros delta=0.45",
+"kind": "offline_partial",
+"param": 0.45
+},
+{
+"corr": -0.028,
+"prime_powers_hit": 16,
+"composite_false": 29,
+"stray": 210,
+"label": "null: uniform random heights on the line",
+"kind": "null",
+"param": null
+}
+],
+"E3_spacing": {
+"mean": 1.0001,
+"min": 0.1376,
+"frac": {
+"0.1": [
+0.0,
+0.0952,
+0.0011
+],
+"0.25": [
+0.0067,
+0.2212,
+0.0161
+],
+"0.5": [
+0.0742,
+0.3935,
+0.112
+]
+}
+},
+"E3_mean_cos": {
+"2": -0.1075,
+"3": -0.1376,
+"4": -0.0752,
+"5": -0.1564,
+"6": 0.0015,
+"10": 0.0023,
+"12": 0.0025
+},
+"E3_angles_b2_hist12": [
+57,
+99,
+109,
+106,
+113,
+114,
+117,
+109,
+108,
+112,
+102,
+54
+],
+"E3_li_angle_deg": {
+"first": 4.052,
+"last": 0.0348
+}
+}
+{'n': 2, 'observed': 41.47, 'predicted': 41.48, 'baseline': -0.59}
+{'n': 3, 'observed': 53.67, 'predicted': 53.68, 'baseline': -0.83}
+{'n': 4, 'observed': 29.33, 'predicted': 29.33, 'baseline': -0.98}
+{'n': 5, 'observed': 60.9, 'predicted': 60.91, 'baseline': -1.11}
+{'n': 6, 'observed': -0.0, 'predicted': 0.0, 'baseline': -1.22}
+{'n': 7, 'observed': 62.23, 'predicted': 62.24, 'baseline': -1.32}
+{'n': 8, 'observed': 20.74, 'predicted': 20.74, 'baseline': -1.41}
+{'n': 9, 'observed': 30.99, 'predicted': 30.99, 'baseline': -1.5}
+{'n': 10, 'observed': -0.0, 'predicted': 0.0, 'baseline': -1.58}
+{'n': 11, 'observed': 61.18, 'predicted': 61.19, 'baseline': -1.65}
+{'n': 12, 'observed': -0.0, 'predicted': 0.0, 'baseline': -1.73}
+{'n': 13, 'observed': 60.19, 'predicted': 60.2, 'baseline': -1.8}
+{'n': 14, 'observed': 0.0, 'predicted': 0.0, 'baseline': -1.87}
+{'n': 15, 'observed': -0.0, 'predicted': 0.0, 'baseline': -1.94}
+{'n': 16, 'observed': 14.66, 'predicted': 14.66, 'baseline': -2.0}
+{'n': 17, 'observed': 58.15, 'predicted': 58.15, 'baseline': -2.06}
+{'n': 18, 'observed': 0.0, 'predicted': 0.0, 'baseline': -2.12}
+{'n': 19, 'observed': 57.16, 'predicted': 57.17, 'baseline': -2.18}
+{'n': 20, 'observed': -0.0, 'predicted': 0.0, 'baseline': -2.24}
+{'n': 21, 'observed': 0.0, 'predicted': 0.0, 'baseline': -2.29}
+{'n': 22, 'observed': -0.0, 'predicted': 0.0, 'baseline': -2.34}
+{'n': 23, 'observed': 55.32, 'predicted': 55.33, 'baseline': -2.4}
+{'n': 24, 'observed': 0.0, 'predicted': 0.0, 'baseline': -2.45}
+{'n': 25, 'observed': 27.24, 'predicted': 27.24, 'baseline': -2.5}
+{'n': 26, 'observed': 0.0, 'predicted': 0.0, 'baseline': -2.55}
+{'n': 27, 'observed': 17.89, 'predicted': 17.89, 'baseline': -2.6}
+max |observed - predicted| = 0.010000000000005116
+{
+ "background": [
+  {
+   "n": 2,
+   "observed": -0.587,
+   "pole": -1.061,
+   "arch": 0.471,
+   "total": -0.589
+  },
+  {
+   "n": 6,
+   "observed": -1.219,
+   "pole": -1.429,
+   "arch": 0.21,
+   "total": -1.219
+  },
+  {
+   "n": 12,
+   "observed": -1.731,
+   "pole": -1.876,
+   "arch": 0.145,
+   "total": -1.731
+  },
+  {
+   "n": 27,
+   "observed": -2.597,
+   "pole": -2.694,
+   "arch": 0.096,
+   "total": -2.598
+  }
+ ],
+ "filling": [
+  {
+   "N": 40,
+   "T": 122.9,
+   "max_gap_deg": 55.6,
+   "random_scale_deg": 33.2,
+   "mean_cos": -0.2392,
+   "landau": -0.2398
+  },
+  {
+   "N": 100,
+   "T": 236.5,
+   "max_gap_deg": 29.58,
+   "random_scale_deg": 16.58,
+   "mean_cos": -0.1743,
+   "landau": -0.1845
+  },
+  {
+   "N": 300,
+   "T": 541.8,
+   "max_gap_deg": 10.61,
+   "random_scale_deg": 6.84,
+   "mean_cos": -0.1414,
+   "landau": -0.1409
+  },
+  {
+   "N": 600,
+   "T": 939.0,
+   "max_gap_deg": 8.7,
+   "random_scale_deg": 3.84,
+   "mean_cos": -0.1222,
+   "landau": -0.1221
+  },
+  {
+   "N": 1200,
+   "T": 1648.3,
+   "max_gap_deg": 2.5,
+   "random_scale_deg": 2.13,
+   "mean_cos": -0.1075,
+   "landau": -0.1071
+  }
+ ],
+ "landau_asymptotic": {
+  "1e+06": -0.0446,
+  "1e+12": -0.0198,
+  "1e+24": -0.0093
+ },
+ "spacing": {
+  "0.1": [
+   0.0,
+   0.104,
+   0.095
+  ],
+  "0.25": [
+   0.007,
+   0.242,
+   0.221
+  ],
+  "0.5": [
+   0.074,
+   0.397,
+   0.393
+  ]
+ }
+}
+{
+ "L": 2.5649493574615367,
+ "e_L": 13.0,
+ "N": 8,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13
+ ],
+ "eig_formula": [
+  -0.0002572024751476052,
+  -3.538423483036886e-05,
+  -1.381172422005259e-05,
+  -4.637709796422074e-06,
+  0.000636601352591176,
+  0.001611601198444829,
+  0.06838643956071026,
+  3.044600875104804
+ ],
+ "eig_zero_side": [
+  -3.8161825904776754e-17,
+  3.835667430744421e-17,
+  3.928416005136934e-13,
+  2.862462339752666e-09,
+  1.1439708878441043e-05,
+  0.0008448181596324415,
+  0.06828650657952573,
+  3.0445868290124567
+ ],
+ "max_abs_diff": 0.0009396422180609502,
+ "max_entry": 2.457507314862972,
+ "arch_tail_bound": 1.925207683717332e-08,
+ "ground_state_zeros": [
+  5.322499112495563,
+  8.23801369006845,
+  11.18714593572968,
+  14.13479067395337,
+  19.37230436152181,
+  20.822029110145554,
+  23.271656358281792,
+  24.715431077155387
+ ],
+ "zeta_zeros": [
+  14.134725141734695,
+  21.022039638771556,
+  25.01085758014569,
+  30.424876125859512,
+  32.93506158773919,
+  37.586178158825675,
+  40.9187190121475,
+  43.327073280915
+ ]
+}
+{
+ "L": "2.56494935746",
+ "e_L": "13.0",
+ "N": 8,
+ "dps": 80,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11
+ ],
+ "eigenvalues": [
+  "1.26578365953e-22",
+  "2.37970846631e-17",
+  "3.92951042052e-13",
+  "2.86286510715e-9",
+  "1.14401937952e-5",
+  "0.000844831290411",
+  "0.0682867333585",
+  "3.04458683902"
+ ],
+ "ground_state_zeros": [
+  "14.1347251417",
+  "21.0220398232",
+  "25.0109359489",
+  "30.7554782992",
+  "39.6173843648",
+  "56.2129084765"
+ ],
+ "basis_frequencies": [
+  "1.2248166",
+  "3.6744499",
+  "6.1240832",
+  "8.5737165",
+  "11.02335",
+  "13.472983",
+  "15.922616",
+  "18.37225"
+ ]
+}
+{
+ "L": "2.56494935746",
+ "e_L": "13.0",
+ "N": 4,
+ "dps": 90,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13
+ ],
+ "eigenvalues": [
+  "6.21401827026e-14",
+  "4.17942195807e-9",
+  "3.57295392862e-5",
+  "0.0323764587615"
+ ],
+ "ground_state_zeros": [
+  "14.1349498066",
+  "23.8607055884",
+  "47.6811270609"
+ ],
+ "basis_frequencies": [
+  "1.2248166",
+  "3.6744499",
+  "6.1240832",
+  "8.5737165"
+ ]
+}
+{
+ "L": "2.56494935746",
+ "e_L": "13.0",
+ "N": 6,
+ "dps": 90,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13
+ ],
+ "eigenvalues": [
+  "1.70137717603e-18",
+  "2.25245821753e-13",
+  "1.88307551735e-9",
+  "3.3498421945e-6",
+  "0.00426329627371",
+  "2.57893310978"
+ ],
+ "ground_state_zeros": [
+  "14.1347251418",
+  "21.0327295748",
+  "25.0742771399",
+  "39.8026359141"
+ ],
+ "basis_frequencies": [
+  "1.2248166",
+  "3.6744499",
+  "6.1240832",
+  "8.5737165",
+  "11.02335",
+  "13.472983"
+ ]
+}
+{
+ "L": "2.56494935746",
+ "e_L": "13.0",
+ "N": 8,
+ "dps": 90,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13
+ ],
+ "eigenvalues": [
+  "1.26578365953e-22",
+  "2.37970846631e-17",
+  "3.92951042052e-13",
+  "2.86286510715e-9",
+  "1.14401937952e-5",
+  "0.000844831290411",
+  "0.0682867333585",
+  "3.04458683902"
+ ],
+ "ground_state_zeros": [
+  "14.1347251417",
+  "21.0220398232",
+  "25.0109359489",
+  "30.7554782992",
+  "39.6173843648",
+  "56.2129084765"
+ ],
+ "basis_frequencies": [
+  "1.2248166",
+  "3.6744499",
+  "6.1240832",
+  "8.5737165",
+  "11.02335",
+  "13.472983",
+  "15.922616",
+  "18.37225"
+ ]
+}
+{
+ "L": "2.56494935746",
+ "e_L": "13.0",
+ "N": 10,
+ "dps": 90,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13
+ ],
+ "eigenvalues": [
+  "1.12198546687e-25",
+  "1.27063366687e-20",
+  "2.61605600652e-16",
+  "2.64246574424e-12",
+  "7.10830766538e-9",
+  "4.00221091132e-6",
+  "0.00354408209393",
+  "0.446445055118",
+  "2.85383504749",
+  "3.53728392204"
+ ],
+ "ground_state_zeros": [
+  "14.1347251417",
+  "21.0220396388",
+  "25.0108575826",
+  "30.433662945",
+  "33.5618082966",
+  "39.4794094147"
+ ],
+ "basis_frequencies": [
+  "1.2248166",
+  "3.6744499",
+  "6.1240832",
+  "8.5737165",
+  "11.02335",
+  "13.472983",
+  "15.922616",
+  "18.37225",
+  "20.821883",
+  "23.271516"
+ ]
+}
+{
+ "L": "2.56494935746",
+ "e_L": "13.0",
+ "N": 12,
+ "dps": 90,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13
+ ],
+ "eigenvalues": [
+  "6.21910769555e-29",
+  "1.7518487625e-23",
+  "9.47630070479e-19",
+  "1.33193875058e-14",
+  "3.48588394553e-11",
+  "3.24947703418e-8",
+  "2.01502107028e-5",
+  "0.00292937606354",
+  "0.0555980104826",
+  "2.55069314996",
+  "3.24445128818",
+  "3.75802420928"
+ ],
+ "ground_state_zeros": [
+  "14.1347251417",
+  "21.0220396388",
+  "25.0108575801",
+  "30.4248763377",
+  "32.9353407698",
+  "37.6224830722"
+ ],
+ "basis_frequencies": [
+  "1.2248166",
+  "3.6744499",
+  "6.1240832",
+  "8.5737165",
+  "11.02335",
+  "13.472983",
+  "15.922616",
+  "18.37225",
+  "20.821883",
+  "23.271516",
+  "25.721149",
+  "28.170783"
+ ]
+}
+{
+ "L": "2.56494935746",
+ "e_L": "13.0",
+ "N": 14,
+ "dps": 90,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13
+ ],
+ "eigenvalues": [
+  "7.00458628139e-32",
+  "4.07003748661e-26",
+  "2.53583299498e-21",
+  "6.03637565943e-17",
+  "1.83798157375e-13",
+  "9.61392431138e-10",
+  "6.3780154369e-7",
+  "0.000183926075685",
+  "0.0359235829752",
+  "2.5497295003",
+  "2.97745976238",
+  "3.21335549655",
+  "3.51749889676",
+  "4.01073633632"
+ ],
+ "ground_state_zeros": [
+  "14.1347251417",
+  "21.0220396388",
+  "25.0108575801",
+  "30.4248761259",
+  "32.9350615877",
+  "37.5861944965"
+ ],
+ "basis_frequencies": [
+  "1.2248166",
+  "3.6744499",
+  "6.1240832",
+  "8.5737165",
+  "11.02335",
+  "13.472983",
+  "15.922616",
+  "18.37225",
+  "20.821883",
+  "23.271516",
+  "25.721149",
+  "28.170783",
+  "30.620416",
+  "33.070049"
+ ]
+}
+{
+ "L": "4.60517018599",
+ "e_L": "100.0",
+ "N": 16,
+ "dps": 70,
+ "prime_powers": [
+  2,
+  3,
+  4,
+  5,
+  7,
+  8,
+  9,
+  11,
+  13,
+  16,
+  17,
+  19,
+  23,
+  25,
+  27,
+  29,
+  31,
+  32,
+  37,
+  41,
+  43,
+  47,
+  49,
+  53,
+  59,
+  61,
+  64,
+  67,
+  71,
+  73,
+  79,
+  81,
+  83,
+  89,
+  97
+ ],
+ "eigenvalues": [
+  "9.98611998739e-52",
+  "2.28595351988e-45",
+  "6.88019484243e-40",
+  "4.42860679875e-35",
+  "1.29822826581e-30",
+  "2.22183287229e-26",
+  "1.73327476204e-22",
+  "9.89872800544e-19",
+  "4.12649386398e-15",
+  "5.11947181142e-12",
+  "4.53619381636e-9",
+  "3.51150055053e-6",
+  "0.000969964673212",
+  "0.0978826258069",
+  "10.4747812646",
+  "10.7406177515"
+ ],
+ "ground_state_zeros": [
+  "14.1347251417",
+  "21.0220396388",
+  "25.0108575801",
+  "30.4248761259",
+  "32.9350615881",
+  "37.5862907864"
+ ],
+ "basis_frequencies": [
+  "0.68218818",
+  "2.0465645",
+  "3.4109409",
+  "4.7753172",
+  "6.1396936",
+  "7.5040699",
+  "8.8684463",
+  "10.232823",
+  "11.597199",
+  "12.961575",
+  "14.325952",
+  "15.690328",
+  "17.054704",
+  "18.419081",
+  "19.783457",
+  "21.147833"
+ ]
+}
+Rc files read:
+  /etc/LatexMk
+Latexmk: This is Latexmk, John Collins, 31 Jan. 2024. Version 4.83.
+No existing .aux file, so I'll make a simple one, and require run of *latex.
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Category 'other':
+  Rerun of 'pdflatex' forced or previously required:
+    Reason or flag: 'Initial setup'
+
+------------
+Run number 1 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "Angles_and_Radii_of_the_Riemann_Zeros.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./Angles_and_Radii_of_the_Riemann_Zeros.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo))
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty)
+(/usr/share/texmf/tex/latex/lm/lmodern.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amscls/amsthm.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mathtools.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/calc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mhsetup.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.sty
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype-pdftex.def)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty)
+(/usr/share/texmf/tex/latex/lm/t1lmr.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+(./Angles_and_Radii_of_the_Riemann_Zeros.aux)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-cmr.cfg)
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(/usr/share/texmf/tex/latex/lm/ot1lmr.fd)
+(/usr/share/texmf/tex/latex/lm/omllmm.fd)
+(/usr/share/texmf/tex/latex/lm/omslmsy.fd)
+(/usr/share/texmf/tex/latex/lm/omxlmex.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg)
+
+LaTeX Warning: Citation `Weil1948' on page 1 undefined on input line 28.
+
+
+LaTeX Warning: Citation `Weil1952' on page 1 undefined on input line 30.
+
+
+LaTeX Warning: Citation `Landau1912' on page 1 undefined on input line 30.
+
+
+LaTeX Warning: Citation `Li1997' on page 1 undefined on input line 30.
+
+
+LaTeX Warning: Citation `Montgomery1973' on page 1 undefined on input line 30.
+
+
+LaTeX Warning: Citation `Odlyzko1987' on page 1 undefined on input line 30.
+
+[1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/en
+c/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/s
+hare/texmf/fonts/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm
+-mathsy.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}]
+
+LaTeX Warning: Citation `SakhrBhaduriVanZyl2003' on page 2 undefined on input l
+ine 32.
+
+
+LaTeX Warning: Reference `sec:reverse' on page 2 undefined on input line 32.
+
+
+LaTeX Warning: Reference `sec:angle-radius' on page 2 undefined on input line 3
+2.
+
+
+LaTeX Warning: Reference `tab:heights' on page 2 undefined on input line 32.
+
+
+LaTeX Warning: Reference `tab:background' on page 2 undefined on input line 32.
+
+
+
+LaTeX Warning: Citation `FordZaharescu2005' on page 2 undefined on input line 3
+2.
+
+
+LaTeX Warning: Citation `FordSoundararajanZaharescu' on page 2 undefined on inp
+ut line 32.
+
+
+LaTeX Warning: Citation `FordMengZaharescu' on page 2 undefined on input line 3
+2.
+
+
+LaTeX Warning: Reference `sec:stats' on page 2 undefined on input line 32.
+
+
+LaTeX Warning: Reference `tab:wrap' on page 2 undefined on input line 32.
+
+
+LaTeX Warning: Reference `sec:pictures' on page 2 undefined on input line 34.
+
+
+LaTeX Warning: Reference `sec:reverse' on page 2 undefined on input line 34.
+
+
+LaTeX Warning: Reference `sec:angle-radius' on page 2 undefined on input line 3
+4.
+
+
+LaTeX Warning: Reference `sec:stats' on page 2 undefined on input line 34.
+
+
+LaTeX Warning: Reference `sec:impurities' on page 2 undefined on input line 34.
+
+
+
+LaTeX Warning: Reference `sec:filling' on page 2 undefined on input line 34.
+
+
+LaTeX Warning: Reference `sec:weilform' on page 2 undefined on input line 34.
+
+
+LaTeX Warning: Reference `sec:discussion' on page 2 undefined on input line 34.
+
+
+
+LaTeX Warning: Reference `sec:conclusion' on page 2 undefined on input line 34.
+
+
+
+LaTeX Warning: Reference `sec:limits' on page 2 undefined on input line 34.
+
+
+LaTeX Warning: Citation `DavenportHeilbronn1936' on page 2 undefined on input l
+ine 42.
+
+[2]
+
+LaTeX Warning: Reference `sec:stats' on page 3 undefined on input line 51.
+
+
+LaTeX Warning: Citation `Li1997' on page 3 undefined on input line 54.
+
+
+LaTeX Warning: Citation `BombieriLagarias1999' on page 3 undefined on input lin
+e 54.
+
+
+LaTeX Warning: Citation `Weil1952' on page 3 undefined on input line 65.
+
+
+LaTeX Warning: Reference `eq:explicit' on page 3 undefined on input line 77.
+
+
+LaTeX Warning: Reference `fig:reverse' on page 3 undefined on input line 79.
+
+[3]
+
+LaTeX Warning: Reference `tab:heights' on page 4 undefined on input line 83.
+
+
+LaTeX Warning: Reference `eq:height' on page 4 undefined on input line 83.
+
+
+LaTeX Warning: Reference `eq:height' on page 4 undefined on input line 83.
+
+
+LaTeX Warning: Reference `eq:explicit' on page 4 undefined on input line 110.
+
+[4 <./figures/fig1_reverse_trace.pdf>]
+
+LaTeX Warning: Reference `tab:angle-radius' on page 5 undefined on input line 1
+56.
+
+
+LaTeX Warning: Reference `fig:angle-radius' on page 5 undefined on input line 1
+56.
+
+
+LaTeX Warning: Reference `tab:angle-radius' on page 5 undefined on input line 1
+58.
+
+
+LaTeX Warning: Citation `vonKoch1901' on page 5 undefined on input line 158.
+
+
+LaTeX Warning: Citation `Ingham1932' on page 5 undefined on input line 158.
+
+[5]
+
+LaTeX Warning: Reference `tab:heights' on page 6 undefined on input line 160.
+
+
+LaTeX Warning: Reference `eq:RvM' on page 6 undefined on input line 163.
+
+
+LaTeX Warning: Reference `tab:spacing' on page 6 undefined on input line 163.
+
+
+LaTeX Warning: Reference `fig:stats' on page 6 undefined on input line 163.
+
+
+LaTeX Warning: Citation `Montgomery1973' on page 6 undefined on input line 163.
+
+
+
+LaTeX Warning: Citation `Odlyzko1987' on page 6 undefined on input line 163.
+
+
+LaTeX Warning: Citation `KatzSarnak1999' on page 6 undefined on input line 163.
+
+
+[6 <./figures/fig2_angle_vs_radius.pdf>]
+
+LaTeX Warning: Reference `sec:pictures' on page 7 undefined on input line 184.
+
+
+LaTeX Warning: Reference `fig:stats' on page 7 undefined on input line 184.
+
+
+LaTeX Warning: Citation `Landau1912' on page 7 undefined on input line 184.
+
+
+LaTeX Warning: Citation `FordZaharescu2005' on page 7 undefined on input line 2
+05.
+
+[7 <./figures/fig3_statistics.pdf>]
+
+LaTeX Warning: Reference `fig:reverse' on page 8 undefined on input line 208.
+
+
+LaTeX Warning: Reference `eq:explicit' on page 8 undefined on input line 208.
+
+
+LaTeX Warning: Reference `tab:background' on page 8 undefined on input line 208
+.
+
+
+LaTeX Warning: Reference `tab:heights' on page 8 undefined on input line 208.
+
+
+Overfull \hbox (16.2882pt too wide) in paragraph at lines 208--209
+\T1/lmr/m/n/10.95 (-20) term $\OMS/lmsy/m/n/10.95 ^^@[]\OT1/lmr/m/n/10.95 (-20)
+ [\OML/lmm/m/it/10.95 h\OT1/lmr/m/n/10.95 (-20) ([]) + \OML/lmm/m/it/10.95 h\OT
+1/lmr/m/n/10.95 (-20) (\OMS/lmsy/m/n/10.95 ^^@[]\OT1/lmr/m/n/10.95 (-20) )] = \
+OMS/lmsy/m/n/10.95 ^^@\OML/lmm/m/it/10.95 e[] []\OT1/lmr/m/n/10.95 (-20) (\OML/
+lmm/m/it/10.95 t=\OT1/lmr/m/n/10.95 (-20) 2)$\T1/lmr/m/n/10.95 (-20) , and the 
+archimedean term $\OMS/lmsy/m/n/10.95 ^^@[] [][] \OML/lmm/m/it/10.95 w\OT1/lmr/
+m/n/10.95 (-20) (\OML/lmm/m/it/10.95 r\OT1/lmr/m/n/10.95 (-20) ) [](\OML/lmm/m/
+it/10.95 rt\OT1/lmr/m/n/10.95 (-20) ) [] []([] +
+
+LaTeX Warning: Reference `sec:angle-radius' on page 8 undefined on input line 2
+25.
+
+
+LaTeX Warning: Reference `tab:background' on page 8 undefined on input line 225
+.
+
+
+LaTeX Warning: Reference `fig:circle' on page 8 undefined on input line 225.
+
+
+LaTeX Warning: Reference `sec:stats' on page 8 undefined on input line 229.
+
+
+LaTeX Warning: Reference `sec:stats' on page 8 undefined on input line 229.
+
+
+LaTeX Warning: Citation `Bombieri2000' on page 8 undefined on input line 232.
+
+
+LaTeX Warning: Citation `Bombieri2000' on page 8 undefined on input line 244.
+
+
+LaTeX Warning: Citation `Weil1952' on page 8 undefined on input line 244.
+
+
+LaTeX Warning: Citation `Bombieri2000' on page 8 undefined on input line 244.
+
+[8]
+
+LaTeX Warning: Citation `Hlawka1975' on page 9 undefined on input line 247.
+
+
+LaTeX Warning: Citation `Fujii1976' on page 9 undefined on input line 247.
+
+
+LaTeX Warning: Citation `FordSoundararajanZaharescu' on page 9 undefined on inp
+ut line 247.
+
+
+LaTeX Warning: Reference `tab:filling' on page 9 undefined on input line 247.
+
+[9 <./figures/fig4_circle.pdf>]
+
+LaTeX Warning: Reference `tab:wrap' on page 10 undefined on input line 267.
+
+
+LaTeX Warning: Reference `tab:spacing' on page 10 undefined on input line 267.
+
+
+LaTeX Warning: Reference `sec:impurities' on page 10 undefined on input line 28
+4.
+
+
+LaTeX Warning: Citation `CCM2023' on page 10 undefined on input line 284.
+
+
+LaTeX Warning: Citation `CCM2025' on page 10 undefined on input line 284.
+
+
+LaTeX Warning: Citation `Groskin2026' on page 10 undefined on input line 284.
+
+
+LaTeX Warning: Reference `eq:explicit' on page 10 undefined on input line 290.
+
+[10] (/usr/share/texmf/tex/latex/lm/ot1lmss.fd)
+(/usr/share/texmf/tex/latex/lm/t1lmtt.fd)
+
+LaTeX Warning: Reference `tab:weilcheck' on page 11 undefined on input line 296
+.
+
+
+LaTeX Warning: Citation `CCM2023' on page 11 undefined on input line 321.
+
+
+LaTeX Warning: Reference `tab:weilscan' on page 11 undefined on input line 323.
+
+
+
+LaTeX Warning: Citation `Groskin2026' on page 11 undefined on input line 342.
+
+
+LaTeX Warning: Reference `sec:reverse' on page 11 undefined on input line 345.
+
+
+LaTeX Warning: Reference `sec:stats' on page 11 undefined on input line 345.
+
+
+LaTeX Warning: Reference `sec:filling' on page 11 undefined on input line 345.
+
+
+LaTeX Warning: Reference `sec:angle-radius' on page 11 undefined on input line 
+345.
+
+[11]
+
+LaTeX Warning: Reference `eq:explicit' on page 12 undefined on input line 352.
+
+
+LaTeX Warning: Reference `tab:heights' on page 12 undefined on input line 352.
+
+
+LaTeX Warning: Citation `Connes1999' on page 12 undefined on input line 355.
+
+
+LaTeX Warning: Citation `Meyer2005' on page 12 undefined on input line 355.
+
+
+LaTeX Warning: Citation `ConnesConsani2021' on page 12 undefined on input line 
+355.
+
+
+LaTeX Warning: Reference `sec:angle-radius' on page 12 undefined on input line 
+355.
+
+
+LaTeX Warning: Reference `sec:reverse' on page 12 undefined on input line 357.
+
+
+LaTeX Warning: Citation `DMV2006' on page 12 undefined on input line 357.
+
+
+LaTeX Warning: Citation `Tate1966' on page 12 undefined on input line 357.
+
+
+LaTeX Warning: Citation `Honda1968' on page 12 undefined on input line 357.
+
+[12]
+
+LaTeX Warning: Reference `tab:heights' on page 13 undefined on input line 362.
+
+
+LaTeX Warning: Reference `tab:filling' on page 13 undefined on input line 362.
+
+
+LaTeX Warning: Reference `tab:spacing' on page 13 undefined on input line 362.
+
+
+LaTeX Warning: Reference `tab:wrap' on page 13 undefined on input line 362.
+
+
+LaTeX Warning: Reference `sec:impurities' on page 13 undefined on input line 36
+4.
+
+
+LaTeX Warning: Reference `sec:angle-radius' on page 13 undefined on input line 
+364.
+
+
+LaTeX Warning: Reference `sec:discussion' on page 13 undefined on input line 36
+6.
+
+
+LaTeX Warning: Citation `BombieriLagarias1999' on page 13 undefined on input li
+ne 366.
+
+
+LaTeX Warning: Reference `sec:weilform' on page 13 undefined on input line 366.
+
+
+
+LaTeX Warning: Citation `PlattTrudgian2021' on page 13 undefined on input line 
+370.
+
+
+LaTeX Warning: Reference `sec:angle-radius' on page 13 undefined on input line 
+371.
+
+
+LaTeX Warning: Reference `tab:heights' on page 13 undefined on input line 372.
+
+
+LaTeX Warning: Reference `tab:spacing' on page 13 undefined on input line 372.
+
+
+LaTeX Warning: Reference `tab:angle-radius' on page 13 undefined on input line 
+373.
+
+
+LaTeX Warning: Reference `sec:weilform' on page 13 undefined on input line 374.
+
+
+[13]
+
+LaTeX Warning: Reference `sec:angle-radius' on page 14 undefined on input line 
+380.
+
+
+LaTeX Warning: Reference `tab:heights' on page 14 undefined on input line 380.
+
+
+LaTeX Warning: Reference `sec:impurities' on page 14 undefined on input line 38
+2.
+
+
+LaTeX Warning: Reference `fig:circle' on page 14 undefined on input line 382.
+
+
+LaTeX Warning: Reference `sec:filling' on page 14 undefined on input line 382.
+
+
+LaTeX Warning: Reference `sec:conclusion' on page 14 undefined on input line 38
+2.
+
+
+LaTeX Warning: Reference `sec:impurities' on page 14 undefined on input line 38
+4.
+
+
+LaTeX Warning: Reference `sec:angle-radius' on page 14 undefined on input line 
+386.
+
+
+LaTeX Warning: Citation `SakhrBhaduriVanZyl2003' on page 14 undefined on input 
+line 386.
+
+
+LaTeX Warning: Reference `sec:stats' on page 14 undefined on input line 386.
+
+
+LaTeX Warning: Citation `FordZaharescu2005' on page 14 undefined on input line 
+386.
+
+
+LaTeX Warning: Citation `FordSoundararajanZaharescu' on page 14 undefined on in
+put line 386.
+
+
+LaTeX Warning: Citation `FordMengZaharescu' on page 14 undefined on input line 
+386.
+
+
+LaTeX Warning: Citation `FordSoundararajanZaharescu' on page 14 undefined on in
+put line 386.
+
+
+LaTeX Warning: Citation `Hlawka1975' on page 14 undefined on input line 386.
+
+
+LaTeX Warning: Citation `ConnesConsani2021' on page 14 undefined on input line 
+386.
+
+
+LaTeX Warning: Citation `Meyer2005' on page 14 undefined on input line 386.
+
+
+LaTeX Warning: Citation `PlattTrudgian2021' on page 14 undefined on input line 
+386.
+
+
+LaTeX Warning: Reference `sec:weilform' on page 14 undefined on input line 388.
+
+
+[14] [15] (./Angles_and_Radii_of_the_Riemann_Zeros.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+
+Package rerunfilecheck Warning: File `Angles_and_Radii_of_the_Riemann_Zeros.out
+' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+ )
+(see the transcript file for additional information)</usr/share/texmf/fonts/typ
+e1/public/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></us
+r/share/texmf/fonts/type1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/pu
+blic/lm/lmmi10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/shar
+e/texmf/fonts/type1/public/lm/lmmi7.pfb></usr/share/texmf/fonts/type1/public/lm
+/lmmi8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/
+fonts/type1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/lm/lmr17.p
+fb></usr/share/texmf/fonts/type1/public/lm/lmr6.pfb></usr/share/texmf/fonts/typ
+e1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/sh
+are/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts/type1/public
+/lm/lmss8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/te
+xmf/fonts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/public/lm/lms
+y7.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/font
+s/type1/public/lm/lmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/symbols/msbm10.pfb>
+Output written on Angles_and_Radii_of_the_Riemann_Zeros.pdf (15 pages, 515358 b
+ytes).
+Transcript written on Angles_and_Radii_of_the_Riemann_Zeros.log.
+Latexmk: Getting log file 'Angles_and_Radii_of_the_Riemann_Zeros.log'
+Latexmk: Examining 'Angles_and_Radii_of_the_Riemann_Zeros.fls'
+Latexmk: Examining 'Angles_and_Radii_of_the_Riemann_Zeros.log'
+Latexmk: References changed.
+Latexmk: References changed.
+Latexmk: Log file says output to 'Angles_and_Radii_of_the_Riemann_Zeros.pdf'
+Latexmk: Log file says output to 'Angles_and_Radii_of_the_Riemann_Zeros.pdf'
+Latexmk: applying rule 'pdflatex'...
+Rule 'pdflatex':  Reasons for rerun
+Changed files or newly in use/created:
+  Angles_and_Radii_of_the_Riemann_Zeros.aux
+  Angles_and_Radii_of_the_Riemann_Zeros.out
+
+------------
+Run number 2 of rule 'pdflatex'
+------------
+------------
+Running 'pdflatex  -interaction=nonstopmode -halt-on-error -recorder  "Angles_and_Radii_of_the_Riemann_Zeros.tex"'
+------------
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./Angles_and_Radii_of_the_Riemann_Zeros.tex
+LaTeX2e <2023-11-01> patch level 1
+L3 programming layer <2024-01-22>
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo))
+(/usr/share/texlive/texmf-dist/tex/latex/base/fontenc.sty)
+(/usr/share/texmf/tex/latex/lm/lmodern.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/amsfonts.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/amscls/amsthm.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mathtools.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/calc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mhsetup.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.sty
+(/usr/share/texlive/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype-pdftex.def)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/microtype.cfg))
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/ifvtex.sty
+(/usr/share/texlive/texmf-dist/tex/generic/iftex/iftex.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/share/texlive/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/share/texlive/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/share/texlive/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+(/usr/share/texlive/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/share/texlive/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty)
+(/usr/share/texlive/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/share/texlive/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/usr/share/texlive/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/share/texlive/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/usr/share/texlive/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty)))
+(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty)
+(/usr/share/texlive/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty)
+(/usr/share/texmf/tex/latex/lm/t1lmr.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+(./Angles_and_Radii_of_the_Riemann_Zeros.aux)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-cmr.cfg)
+(/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
+(/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg))
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+(./Angles_and_Radii_of_the_Riemann_Zeros.out)
+(./Angles_and_Radii_of_the_Riemann_Zeros.out)
+(/usr/share/texmf/tex/latex/lm/ot1lmr.fd)
+(/usr/share/texmf/tex/latex/lm/omllmm.fd)
+(/usr/share/texmf/tex/latex/lm/omslmsy.fd)
+(/usr/share/texmf/tex/latex/lm/omxlmex.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msa.cfg)
+(/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd)
+(/usr/share/texlive/texmf-dist/tex/latex/microtype/mt-msb.cfg) [1{/var/lib/texm
+f/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec
+.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc}{/usr/share/texmf/fonts
+/enc/dvips/lm/lm-rm.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-mathsy.enc}{/us
+r/share/texmf/fonts/enc/dvips/lm/lm-mathex.enc}] [2] [3] [4 <./figures/fig1_rev
+erse_trace.pdf>] [5] [6 <./figures/fig2_angle_vs_radius.pdf>] [7 <./figures/fig
+3_statistics.pdf>] [8] [9 <./figures/fig4_circle.pdf>] [10]
+(/usr/share/texmf/tex/latex/lm/ot1lmss.fd)
+(/usr/share/texmf/tex/latex/lm/t1lmtt.fd) [11] [12] [13] [14] [15]
+(./Angles_and_Radii_of_the_Riemann_Zeros.aux) )</usr/share/texmf/fonts/type1/pu
+blic/lm/lmbx10.pfb></usr/share/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/sha
+re/texmf/fonts/type1/public/lm/lmex10.pfb></usr/share/texmf/fonts/type1/public/
+lm/lmmi10.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi6.pfb></usr/share/tex
+mf/fonts/type1/public/lm/lmmi7.pfb></usr/share/texmf/fonts/type1/public/lm/lmmi
+8.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf/fonts
+/type1/public/lm/lmr12.pfb></usr/share/texmf/fonts/type1/public/lm/lmr17.pfb></
+usr/share/texmf/fonts/type1/public/lm/lmr6.pfb></usr/share/texmf/fonts/type1/pu
+blic/lm/lmr7.pfb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/t
+exmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts/type1/public/lm/l
+mss8.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy10.pfb></usr/share/texmf/f
+onts/type1/public/lm/lmsy6.pfb></usr/share/texmf/fonts/type1/public/lm/lmsy7.pf
+b></usr/share/texmf/fonts/type1/public/lm/lmsy8.pfb></usr/share/texmf/fonts/typ
+e1/public/lm/lmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
+nts/symbols/msbm10.pfb>
+Output written on Angles_and_Radii_of_the_Riemann_Zeros.pdf (15 pages, 520999 b
+ytes).
+Transcript written on Angles_and_Radii_of_the_Riemann_Zeros.log.
+Latexmk: Getting log file 'Angles_and_Radii_of_the_Riemann_Zeros.log'
+Latexmk: Examining 'Angles_and_Radii_of_the_Riemann_Zeros.fls'
+Latexmk: Examining 'Angles_and_Radii_of_the_Riemann_Zeros.log'
+Latexmk: Log file says output to 'Angles_and_Radii_of_the_Riemann_Zeros.pdf'
+Latexmk: Log file says output to 'Angles_and_Radii_of_the_Riemann_Zeros.pdf'
+Latexmk: All targets (Angles_and_Radii_of_the_Riemann_Zeros.pdf) are up-to-date
+

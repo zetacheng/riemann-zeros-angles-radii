@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Regenerate every number, table and figure of the paper, then compile it.
+set -euo pipefail
+cd "$(dirname "$0")"
+python3 -I experiments.py              # Figures 1-3, Tables 2-3, results.json (about 1 minute)
+python3 -I peak_heights.py             # Table 1
+python3 -I impurities_and_circle.py    # Tables 4-6, Figure 4
+python3 -I weil_form_zero_side.py "math.log(13)" 8     # zero-side cross-check for Table 7
+python3 -I weil_form_mp.py "log(13)" 8 80              # Table 7, left column
+for n in 4 6 8 10 12 14; do python3 -I weil_form_mp.py "log(13)" $n 90; done   # Table 8
+python3 -I weil_form_mp.py "log(100)" 16 70            # e^L = 100 ground state
+cd ../paper && latexmk -pdf -interaction=nonstopmode -halt-on-error Angles_and_Radii_of_the_Riemann_Zeros.tex

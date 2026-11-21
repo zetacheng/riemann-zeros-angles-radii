@@ -124,3 +124,16 @@ In this language, every finite computation sees an apparent critical point stric
 ## A "latent heat" that absorbs the approach? (author's idea)
 
 `latent_heat.py` follows the closest pair of the first 1200 zeros (γ = 1329.04) backward under the heat flow, integrating a cluster of 41 zeros. Outputs: `latent_heat.json` and `latent_heat.png`. The squared gap falls in a straight line, with slope 7.89 against exactly 8 for an isolated pair and a maximum deviation from linearity of 0.3%, all the way to the collision at t = −0.0132. The log-gas energy −2 log d diverges only logarithmically, which does not slow the gradient flow. No absorption occurs near the collision. The transition behaves like a continuous one, without latent heat. A buffer of positive width that kept the zeros real under small backward deformations would mean Λ < 0, which Rodgers–Tao exclude; any protective buffer at t = 0 must therefore have zero width.
+
+## Lee–Yang: a hard wall that puts zeros on a circle (author's request)
+
+`lee_yang.py` computes the partition function of the Ising model on the 4×4 periodic lattice (16 spins, 32 bonds) exactly, as a polynomial in the fugacity z = e^{−2βh}, and finds its roots at 60 digits. Outputs: `lee_yang.json` and `lee_yang.png`.
+
+| couplings | max \|\|z\| − 1\| |
+|---|---|
+| ferromagnetic, K = 0.3 | 8·10⁻⁶² (on the circle) |
+| ferromagnetic, random K ∈ (0, 1) | 8·10⁻⁶² (on the circle) |
+| antiferromagnetic, K = −0.3 | 64 |
+| mixed signs, K = ±0.5 | 7.6 |
+
+All four polynomials are palindromic (the symmetry z ↔ 1/z, an analogue of the functional equation). Only the ferromagnetic ones have all their zeros on the circle, as the Lee–Yang theorem guarantees. In the other two cases the zeros leave the circle in pairs reflected across it (z, 1/z), exactly the shape of the impurities of §6. Symmetry alone does not force the circle; a structural positivity condition does. This is the statistical-mechanics counterpart of Davenport–Heilbronn (functional equation without Euler product).

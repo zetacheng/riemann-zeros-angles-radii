@@ -1,0 +1,27 @@
+{
+ "1": {
+  "max_E_over_sqrtx": 0.6370492648457219,
+  "min_E_over_sqrtx": -0.5320262383366007,
+  "max_E_over_sqrtx_log2": 0.012082400278572061
+ },
+ "3": {
+  "max_E_over_sqrtx": 1.0778927345896556,
+  "min_E_over_sqrtx": -1.0269211458161167,
+  "max_E_over_sqrtx_log2": 0.018192810161440167
+ },
+ "5": {
+  "max_E_over_sqrtx": 1.546783231587477,
+  "min_E_over_sqrtx": -1.7351529639605783,
+  "max_E_over_sqrtx_log2": 0.022660826988763247
+ },
+ "7": {
+  "max_E_over_sqrtx": 4.058249753485962,
+  "min_E_over_sqrtx": -3.0252877871676715,
+  "max_E_over_sqrtx_log2": 0.04932653720380038
+ },
+ "11": {
+  "max_E_over_sqrtx": 5.2239338715334585,
+  "min_E_over_sqrtx": -4.445989317531741,
+  "max_E_over_sqrtx_log2": 0.09334246618699757
+ }
+}

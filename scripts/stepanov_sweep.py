@@ -45,4 +45,4 @@ for p in (1009, 4001, 10007, 40009, 100003):
     pred.append(dict(p=p, M=b[3], J=b[1], K=b[2], predicted_bound=round(b[0], 1), excess=round(ex, 1), excess_over_sqrtp=round(ex / math.sqrt(p), 2)))
     print('predicted', pred[-1], flush=True)
 out['predicted_larger_p'] = pred
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stepanov_results.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'stepanov_results.json'), 'w'), indent=1)

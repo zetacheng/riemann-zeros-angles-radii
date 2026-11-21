@@ -1,6 +1,6 @@
 # Angles and Radii of the Riemann Zeros
 
-**A numerical study of the zeros of ζ as a discrete spectrum** · Zeta Hoi-Ho Cheng · Version 7, 21 November 2026
+**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 8, 21 November 2026
 
 [Paper (PDF)](paper/Angles_and_Radii_of_the_Riemann_Zeros.pdf) · [LaTeX source](paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 
@@ -20,8 +20,10 @@ Write a nontrivial zero as ρ = β + iγ and map it to α = b^ρ. The height γ 
 | The projected angles fill the circle uniformly (Hlawka), but the prime bias and the eigenvalue repulsion are lost in the limit. | §7, Tables 5–6 |
 | A truncated Weil quadratic form computed from primes alone is positive in every case tested. Using only the primes up to 11, its ground state recovers the first five ordinates of ζ to twelve digits, and at fixed support its smallest eigenvalue tends to 0. | §8, Tables 7–8 |
 | Turning the circle n times (α ↦ αⁿ) on an elliptic curve over F₇, where Frobenius exists, keeps the normalised radius at 1. A pair of off-circle roots gives "point counts" that are positive integers with all the divisibility relations of a curve; turning reveals it only relative to an a priori bound O(q^{n/2}), which must come from geometry. For ζ the analogue is ψ(2ⁿ) − 2ⁿ. | §9, Table 9, Figure 5 |
+| Stepanov's method carried out for y² = x³ + x + 1 over F₄₀₁: an auxiliary polynomial fixed by linear conditions that do not depend on the number of points vanishes to order M at all 215 of them; the bound falls from 603 (M = 1) to 224 (M = 16). The multiplicity M is the parameter that reaches the circle. | §10, Table 10, Figure 6 |
+| The recursion behind the announced quasi-Riemann bound 0.874957… (Liu, arXiv:2610.12234), reproduced from its stated formulas: one step from the trivial bound reaches 0.87506, and the limit is fixed by a constant counting exponent 2/3, not by accumulated losses. | §11, Table 11, Figure 6 |
 
-**Conclusion of the paper:** the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape asserted by the Riemann Hypothesis. A proof needs a bridge from one to the other. Weil positivity is such a bridge, and §8 shows numerically why it is delicate: it holds, but with no margin. §9 shows the same structure on the amplitude route: turning the circle converts a uniform bound into a statement of shape, but the bound itself is the hard part.
+**Structure and conclusion.** The picture α = b^ρ, with every point on the circle, is taken as the answer. Part I (§2–7) studies what it encodes: the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape. Part II (§8–11) follows the two known routes from the primes to the circle as far as computation allows: positivity holds but with no margin; the amplitude route needs a uniform bound with a constant loss, which Frobenius supplies through Stepanov's multiplicity and which the quasi-Riemann method, lacking such a parameter, cannot reach. Part III (§12) states what an operation equivalent to α = b^ρ would need: input from the primes alone, a spectrum that for ℤ must come from a flow rather than a single Frobenius, and a structure that forces the spectrum onto the circle. The paper locates this gap; it does not fill it.
 
 ## Related work
 
@@ -36,7 +38,7 @@ cd scripts
 ./run_all.sh
 ```
 
-This regenerates every number, table and figure and recompiles the paper. It takes about two minutes. All randomness uses a fixed seed (0). A clean run reproduces the stored outputs in `validation/` exactly.
+This regenerates every number, table and figure and recompiles the paper. It takes about eight minutes. All randomness uses a fixed seed (0). A clean run reproduces the stored outputs in `validation/` exactly.
 
 | Script | Produces |
 |---|---|
@@ -46,12 +48,16 @@ This regenerates every number, table and figure and recompiles the paper. It tak
 | `weil_form_mp.py L N dps` | Truncated Weil form from primes alone (Tables 7–8) |
 | `weil_form_zero_side.py L N` | The same matrix built from the zeros, as an independent check |
 | `frobenius_turns.py` | Table 9, Figure 5, `validation/frobenius_turns.json` |
+| `stepanov.py p M J K`, `stepanov_sweep.py` | Table 10, `validation/stepanov_results.json` (the sweep takes about 6 minutes) |
+| `quasi_rh_recursion.py` | Table 11, `validation/quasi_rh_recursion.json` |
+| `fig6_routes.py` | Figure 6 |
 
 ## Limitations
 
 - The zeros come from `mpmath.zetazero`, which searches on the critical line. That they all lie on the line in this range follows from published verifications (Platt–Trudgian, up to 3·10¹²), not from this computation.
 - The off-line experiment manipulates the zero set formally. It does not describe any L-function.
 - The Weil-form computations use high-precision floating point checked by raising the precision. They are **not interval-certified**.
+- §11 reproduces the quasi-Riemann recursion from the formulas stated in the cited preprint and checks their internal consistency; it does not verify the analytic estimates behind them. The quasi-Riemann and Alpöge announcements were unrefereed at the time of writing, and nothing in the paper depends on them.
 
 ## Collaboration
 

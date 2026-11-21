@@ -8,7 +8,7 @@ Working experiments that are not (yet) part of the paper.
 
 ## Stage A: Stepanov's method, carried out explicitly
 
-`stepanov.py p M J K` builds Stepanov's auxiliary polynomial for y² = x³ + x + 1 over F_p and verifies, point by point, that it vanishes to order M on every x with f(x) a nonzero square. `stepanov_sweep.py` writes `stepanov_results.json`.
+`scripts/stepanov.py p M J K` (moved to `scripts/` in version 8, now §10 of the paper) builds Stepanov's auxiliary polynomial for y² = x³ + x + 1 over F_p and verifies, point by point, that it vanishes to order M on every x with f(x) a nonzero square. `scripts/stepanov_sweep.py` writes `validation/stepanov_results.json`.
 
 Bound on |S| (true value 215) for p = 401 as the multiplicity M grows:
 
@@ -21,7 +21,7 @@ The number of equations never depends on |S|, yet R vanishes to order M at all 2
 
 ## Stage B: the quasi-RH recursion
 
-`quasi_rh_recursion.py` reproduces the length-optimisation recursion of B. Liu, *Improved zero-free half-planes for the quasi-Riemann hypothesis*, arXiv:2610.12234 (building on OpenAI's 7/8 argument), from the formulas stated there: κ = 2σ − 1, the critical-class equation (216κ−18)δ² − (468κ−57)δ + 150κ − 20 = 0 (counting exponent 2/3), and B(ξ) = (18ξ+7)/(18ξ+9). Output in `quasi_rh_recursion.json`.
+`scripts/quasi_rh_recursion.py` (now §11 of the paper) reproduces the length-optimisation recursion of B. Liu, *Improved zero-free half-planes for the quasi-Riemann hypothesis*, arXiv:2610.12234 (building on OpenAI's 7/8 argument), from the formulas stated there: κ = 2σ − 1, the critical-class equation (216κ−18)δ² − (468κ−57)δ + 150κ − 20 = 0 (counting exponent 2/3), and B(ξ) = (18ξ+7)/(18ξ+9). Output in `validation/quasi_rh_recursion.json`.
 
 - The fixed point is B_new = 0.874957019420…, the root of 1188ξ³ − 2160ξ² + 171ξ + 190 = 0, as stated in the paper; B at κ = 3/4 reproduces B_alg = (1507 − 2√921)/1653.
 - Starting from the trivial hypothesis σ = 1, one step already gives 0.87506. The sensitivity dB/dσ at the fixed point is 0.0012, and even the strongest moment input allowed (κ = 13/18) gives 0.87494. The barrier is therefore not an accumulation of losses: it is set by the critical counting exponent 2/3.

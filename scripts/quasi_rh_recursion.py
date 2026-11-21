@@ -47,4 +47,4 @@ def comb(d, M, l):
 chk = [comb(mp.mpf(d), mp.mpf(M), mp.mpf(l)) for d, M, l in ((0.39, 0.3, 0.17), (0.2, 0.9, 0.05), (0.5, 0.1, 0.4))]
 out['weighted_combination_independent_of_M_l'] = all(abs(a - b) < mp.mpf(10) ** -25 for a, b in chk)
 print(json.dumps(out, indent=1))
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'quasi_rh_recursion.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'quasi_rh_recursion.json'), 'w'), indent=1)

@@ -46,3 +46,12 @@ Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and a
 - The arms are not separate curves. p^{-us} = e^{-(u log p)s}, so every arm lies on the same logarithmic spiral e^{-x s}, and prime p occupies the points x = k log p on it. The spiral is the helix of §2 with radius e^{-x/2}. Over F_q every point would sit at a multiple of log q, a common lattice on the spiral; over ℤ the spacings log p are incommensurable.
 - Each arm sums to the Euler factor −log(1 − p^{-s}), which converges. The sum over all arms converges at σ = 3/2, but on the critical line it winds outward without converging, which is why analytic continuation is needed.
 - The arms become genuinely separate only when each prime's point is rotated by an extra angle, such as a character value χ(p) or a Satake angle. That is the picture for an L-function in a family, and averaging over the family rotates the arms independently.
+
+## Rotating the arms: the family of Dirichlet characters mod q
+
+`character_family.py` rotates each prime's arm by χ(p) for every Dirichlet character χ mod q (q = 101, 1009 and 10007, at s = 1/2 + 14.1347i). It computes W_χ(P), the logarithm of the partial Euler product over p ≤ P, for P up to 10⁶. Outputs: `character_family.json` and `character_family.png`.
+
+- **Claude's prediction was wrong.** Claude expected the family mean square of |W_χ|² to leave the diagonal Σ1/p once P exceeds q, growing like the large-sieve worst case (1 + P/q). Instead it stays at the diagonal (ratio 0.94–1.09) up to P = 10⁴q. The twist p^{-it} already decorrelates the arms within each residue class, so the worst case of the large sieve is far from attained.
+- What the average controls is the *typical* size, |W_χ|² ≈ Σ1/p ≈ log log P, a Gaussian picture of the kind in Selberg's central limit theorem. The largest member grows with the family: max_{χ≠1}|W_χ|² at P = 10⁶ is about 9, 14 and 22 for the three values of q. Averaging pins down most members, not each one.
+- The trivial member (ζ) is the outlier, oscillating up to |W|² ≈ 22 because of the pole at s = 1, the known impurity. Rotating the arms by χ ≠ 1 removes it.
+- An off-line zero at height γ with β = 1/2 + δ becomes visible only when P^δ exceeds about γ (§9), so none of these statistics can see one. Turning a family statement into a statement about one member requires an amplifier or a multiplicity-type mechanism.

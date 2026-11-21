@@ -1,0 +1,326 @@
+{
+ "vs_M_p401": [
+  {
+   "p": 401,
+   "M": 1,
+   "J": 1,
+   "K": 2,
+   "equations": 2,
+   "unknowns": 4,
+   "rank": 2,
+   "solve_s": 0.0,
+   "degR": 603,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 603.0,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 2,
+   "J": 2,
+   "K": 4,
+   "equations": 12,
+   "unknowns": 16,
+   "rank": 12,
+   "solve_s": 0.0,
+   "degR": 609,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 304.5,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 4,
+   "J": 3,
+   "K": 13,
+   "equations": 72,
+   "unknowns": 78,
+   "rank": 64,
+   "solve_s": 0.0,
+   "degR": 1022,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 255.5,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 6,
+   "J": 4,
+   "K": 28,
+   "equations": 216,
+   "unknowns": 224,
+   "rank": 192,
+   "solve_s": 0.02,
+   "degR": 1439,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 239.83333333333334,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 8,
+   "J": 5,
+   "K": 49,
+   "equations": 480,
+   "unknowns": 490,
+   "rank": 432,
+   "solve_s": 0.31,
+   "degR": 1860,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 232.5,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 10,
+   "J": 6,
+   "K": 76,
+   "equations": 900,
+   "unknowns": 912,
+   "rank": 820,
+   "solve_s": 1.87,
+   "degR": 2285,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 228.5,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 12,
+   "J": 7,
+   "K": 109,
+   "equations": 1512,
+   "unknowns": 1526,
+   "rank": 1392,
+   "solve_s": 8.34,
+   "degR": 2714,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 226.16666666666666,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 14,
+   "J": 8,
+   "K": 148,
+   "equations": 2352,
+   "unknowns": 2368,
+   "rank": 2184,
+   "solve_s": 38.49,
+   "degR": 3147,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 224.78571428571428,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  },
+  {
+   "p": 401,
+   "M": 16,
+   "J": 9,
+   "K": 193,
+   "equations": 3456,
+   "unknowns": 3474,
+   "rank": 3232,
+   "solve_s": 145.09,
+   "degR": 3584,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 224.0,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  }
+ ],
+ "scaling": [
+  {
+   "p": 101,
+   "M": 5,
+   "J": 3,
+   "K": 36,
+   "equations": 210,
+   "unknowns": 216,
+   "rank": 194,
+   "solve_s": 0.01,
+   "degR": 379,
+   "vanishes_to_order_M_on_S": true,
+   "S": 52,
+   "bound": 75.8,
+   "trivial_bound_deg_g_minus_1": 150,
+   "half_p": 50.5,
+   "affine_points": 104,
+   "hasse_interval": [
+    81.90024875775822,
+    122.09975124224178
+   ]
+  },
+  {
+   "p": 211,
+   "M": 13,
+   "J": 8,
+   "K": 87,
+   "equations": 1378,
+   "unknowns": 1392,
+   "rank": 1234,
+   "solve_s": 6.58,
+   "degR": 1700,
+   "vanishes_to_order_M_on_S": true,
+   "S": 111,
+   "bound": 130.76923076923077,
+   "trivial_bound_deg_g_minus_1": 315,
+   "half_p": 105.5,
+   "affine_points": 222,
+   "hasse_interval": [
+    182.94832190733212,
+    241.05167809266788
+   ]
+  },
+  {
+   "p": 307,
+   "M": 14,
+   "J": 8,
+   "K": 148,
+   "equations": 2352,
+   "unknowns": 2368,
+   "rank": 2184,
+   "solve_s": 35.2,
+   "degR": 2442,
+   "vanishes_to_order_M_on_S": true,
+   "S": 150,
+   "bound": 174.42857142857142,
+   "trivial_bound_deg_g_minus_1": 459,
+   "half_p": 153.5,
+   "affine_points": 300,
+   "hasse_interval": [
+    272.9571690641295,
+    343.0428309358705
+   ]
+  },
+  {
+   "p": 401,
+   "M": 16,
+   "J": 9,
+   "K": 193,
+   "equations": 3456,
+   "unknowns": 3474,
+   "rank": 3232,
+   "solve_s": 132.1,
+   "degR": 3584,
+   "vanishes_to_order_M_on_S": true,
+   "S": 215,
+   "bound": 224.0,
+   "trivial_bound_deg_g_minus_1": 600,
+   "half_p": 200.5,
+   "affine_points": 431,
+   "hasse_interval": [
+    361.9500312109984,
+    442.0499687890016
+   ]
+  }
+ ],
+ "predicted_larger_p": [
+  {
+   "p": 1009,
+   "M": 31,
+   "J": 17,
+   "K": 486,
+   "predicted_bound": 588.2,
+   "excess": 83.7,
+   "excess_over_sqrtp": 2.63
+  },
+  {
+   "p": 4001,
+   "M": 50,
+   "J": 26,
+   "K": 1876,
+   "predicted_bound": 2161.0,
+   "excess": 160.5,
+   "excess_over_sqrtp": 2.54
+  },
+  {
+   "p": 10007,
+   "M": 80,
+   "J": 41,
+   "K": 4801,
+   "predicted_bound": 5254.1,
+   "excess": 250.6,
+   "excess_over_sqrtp": 2.51
+  },
+  {
+   "p": 40009,
+   "M": 162,
+   "J": 82,
+   "K": 19684,
+   "predicted_bound": 20499.4,
+   "excess": 494.9,
+   "excess_over_sqrtp": 2.47
+  },
+  {
+   "p": 100003,
+   "M": 258,
+   "J": 130,
+   "K": 49924,
+   "predicted_bound": 50779.4,
+   "excess": 777.9,
+   "excess_over_sqrtp": 2.46
+  }
+ ]
+}

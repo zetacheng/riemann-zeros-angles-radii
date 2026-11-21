@@ -90,3 +90,14 @@ The largest member grows like ln N (the ratio stays near 2.2). In every case but
 - **This pair produces a slow drift.** It contributes about −2 Re(x^{iγ}/ρ)·√x to ψ(x, χ), an oscillation of amplitude 2/|ρ| ≈ 3.7 in ψ/√x, with period 2π/0.203 ≈ 31 in log x; one full cycle ends near x ≈ 3·10¹³. Over x ≤ 3·10⁶ this looks like a steady trend from −4.4 to +3.7, and the predicted values (−3.5, −2.0, −0.3, 1.4, 2.8, 3.3 at x = 40, 10³, …, 3·10⁶) follow the observed ones (−4.4, −2.8, −1.3, 0.8, 2.3, 3.7). It is a "false impurity" in the author's sense: an effect so slow that it looks like gradual worsening. It stays bounded relative to √x, unlike a genuine off-line zero, whose contribution would grow like x^δ√x.
 
 **Literature check (2026-11-21).** The low zero of L(s, (·/163)) and its effect are known. Bays, Ford, Hudson and Rubinstein, *Zeros of Dirichlet L-functions near the real axis and Chebyshev's bias* (J. Number Theory 87 (2001), 54–76), give the first zero near 1/2 + 0.2029i. They explain it by the Chowla–Selberg formula: for class-number-one discriminants the leading term dominates, and −163 is the extreme case. They also show that the long quasi-period, about 31 in log x, makes the non-residue–residue prime race mod 163 negative for over 93% of integers below 10¹⁰, unlike every other modulus below 500. Our q = 163 observations are therefore a rediscovery of known results, with no priority claim.
+
+## Angles constrain the radius by counting (Turing-type check)
+
+`turing_count.py` compares, for several heights T, the total number N(T) of zeros in the critical strip (from the argument principle, independently of where the zeros are) with the number of sign changes of the real function Z(t) on the critical line. Output: `turing_count.json`.
+
+| T | 100 | 250 | 500 | 1000 | 1500 |
+|---|---|---|---|---|---|
+| N(T), argument principle | 29 | 108 | 269 | 649 | 1069 |
+| sign changes of Z on the line | 29 | 108 | 269 | 649 | 1069 |
+
+The counts agree at every height, and match the stored zeros. Off-line zeros come in pairs and produce no sign changes, so equality means that no zero with γ ≤ 1500 lies off the line: the count of angles on the circle leaves no room for an impurity. This is the classical method behind all numerical verifications, which reach 3·10¹² (Platt–Trudgian). Within its range the conclusion is the best possible (β = 1/2 exactly). Beyond T it says nothing, which is why it is complementary to, and not comparable with, a uniform bound such as the announced 0.875. The computation is high-precision floating point on a grid of step 0.02, with a scan for unresolved close pairs; it is not interval-certified.

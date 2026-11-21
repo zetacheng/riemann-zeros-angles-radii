@@ -8,5 +8,45 @@
   "agree": true,
   "suspicious_minima": [],
   "seconds": 8.5
+ },
+ {
+  "T": 250.0,
+  "N_argument": 108.0,
+  "S_T": 0.34856468407245456,
+  "N_rounded": 108,
+  "sign_changes_on_line": 108,
+  "agree": true,
+  "suspicious_minima": [],
+  "seconds": 39.9
+ },
+ {
+  "T": 500.0,
+  "N_argument": 269.0,
+  "S_T": -0.5867308812357959,
+  "N_rounded": 269,
+  "sign_changes_on_line": 269,
+  "agree": true,
+  "suspicious_minima": [],
+  "seconds": 104.7
+ },
+ {
+  "T": 1000.0,
+  "N_argument": 649.0,
+  "S_T": 0.38375805557630066,
+  "N_rounded": 649,
+  "sign_changes_on_line": 649,
+  "agree": true,
+  "suspicious_minima": [],
+  "seconds": 292.3
+ },
+ {
+  "T": 1500.0,
+  "N_argument": 1069.0,
+  "S_T": -0.28452170047791997,
+  "N_rounded": 1069,
+  "sign_changes_on_line": 1069,
+  "agree": true,
+  "suspicious_minima": [],
+  "seconds": 511.5
  }
 ]

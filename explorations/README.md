@@ -62,3 +62,16 @@ Each additional prime multiplies the waiting time by about 5.3 at ε = 0.1 and a
 
 - The gain over the trivial bound equals the number of amplifier primes while L < q, and grows more slowly beyond q. At L = 10⁵ the amplified bound is within a factor of 1.1 of the true value for the largest member and for ζ, and within 1.9 for a median member.
 - **Caveat:** the amplified moment is computed here *exactly* from the known W_χ. A proof must estimate it from orthogonality alone, which is exact only while the products ℓ·p^k stay below q, roughly L·P < q. Every run here lies far outside that range. The experiment therefore shows what amplification could achieve if the off-diagonal terms behaved as they do numerically. The difficulty of the method lies in the gap between this numerical behaviour and what can be proved.
+
+## Is the worst member an "impurity"? (author's question)
+
+`worst_member.py` asks whether the growth of the largest |W_χ|² with the family size is a sign of a new impurity (an off-line zero) or ordinary extreme-value statistics. It uses the families mod q for eight primes q from 31 to 100003 (up to 10⁵ members), with P = 10⁵. Output: `worst_member.json`.
+
+| q | members | largest \|W\|² | random model | extreme-value D(ln N + γ) | largest / ln N |
+|---|---|---|---|---|---|
+| 101 | 99 | 10.3 | 9.5 | 13.8 | 2.25 |
+| 1009 | 1007 | 15.1 | 16.4 | 21.1 | 2.18 |
+| 10007 | 10005 | 20.4 | 29.9 | 27.7 | 2.22 |
+| 100003 | 100001 | 28.2 | 31.3 | 34.4 | 2.45 |
+
+The largest member grows like ln N (the ratio stays near 2.2). In every case but one it lies below the maximum of a random model with independent random rotations, and it always lies below the exponential extreme-value prediction. The upper tail is in fact thinner than exponential: the fraction above 5D is at most 0.003, against e⁻⁵ ≈ 0.0067. The growth is therefore what one expects from drawing more members, and no impurity is needed to explain it. An impurity would show instead as power-law growth P^δ in one particular member, which at these sizes would be invisible unless P^δ exceeded the height of the zero.

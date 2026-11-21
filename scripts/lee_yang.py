@@ -7,7 +7,7 @@ Z is palindromic (a_k = a_{16-k}, the symmetry z <-> 1/z, like a functional equa
 Lee-Yang (1952): if every K_ij >= 0 (ferromagnetic), all zeros lie on |z| = 1.
 We compute the coefficients exactly (2^16 configurations) and the roots at 60 digits for
 uniform ferromagnetic couplings, random positive couplings, antiferromagnetic couplings and
-mixed signs, and record max ||z| - 1|.  Writes lee_yang.json and lee_yang.png.
+mixed signs, and record max ||z| - 1|.  Writes validation/lee_yang.json and paper/figures/fig12_leeyang.pdf.
 """
 import itertools, json, math, os
 import numpy as np
@@ -55,5 +55,5 @@ for ax, (name, K) in zip(axs, cases.items()):
     ax.set_aspect('equal'); ax.set_title(name + f'\nmax $||z|-1|$ = {dev:.1e}', fontsize=8.5)
     lim = max(1.6, 1.1 * max(abs(complex(r)) for r in roots))
     ax.set_xlim(-lim, lim); ax.set_ylim(-lim, lim); ax.tick_params(labelsize=7)
-fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lee_yang.png'), dpi=130, bbox_inches='tight')
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lee_yang.json'), 'w'), indent=1)
+fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'paper', 'figures', 'fig12_leeyang.pdf'), bbox_inches='tight')
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'lee_yang.json'), 'w'), indent=1)

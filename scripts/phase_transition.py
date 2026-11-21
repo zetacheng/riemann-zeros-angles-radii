@@ -12,7 +12,7 @@ neighbour corrections, and gaps are (2 pi / log(gamma/2 pi)) s with s the normal
 small gaps follow GUE, p(s) ~ (pi^2/3) s^2, the smallest normalised gap among N behaves like
 N^{-1/3} (Ben Arous-Bourgade), so |t_c(N)| ~ N^{-2/3} (log)^{-2}.
 We compare the zeta zeros with GUE samples (bulk, unfolded by the semicircle law).
-Writes phase_transition.json and phase_transition.png.
+Writes validation/phase_transition.json and paper/figures/fig11_phase.pdf.
 """
 import json, math, os
 import numpy as np
@@ -69,7 +69,7 @@ for N in (100, 300, 1199):
     m = np.array([np.max(np.sqrt(2 * np.maximum(tstar[:N] - t, 0))) for t in ts])
     curves[N] = m
 res['order_parameter_t'] = ts.tolist(); res['order_parameter'] = {str(k): v.tolist() for k, v in curves.items()}
-json.dump(res, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'phase_transition.json'), 'w'), indent=1)
+json.dump(res, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'phase_transition.json'), 'w'), indent=1)
 
 plt.rcParams.update({'font.size': 9})
 fig, ax = plt.subplots(1, 3, figsize=(13, 3.8))
@@ -89,4 +89,4 @@ ax[2].loglog(Ns[:L], gue_smin, 's-', color='#c0392b', ms=3.5, label=f'GUE ({samp
 ax[2].loglog(Ns[fit_lo], smin[fit_lo][0] * (Ns[fit_lo] / Ns[fit_lo][0]) ** (-1 / 3), '--', color='#888888', lw=0.9, label='slope $-1/3$')
 ax[2].set_xlabel('$N$'); ax[2].set_ylabel('smallest normalised gap'); ax[2].set_title('(c) the critical fluctuations: GUE')
 ax[2].legend(frameon=False, fontsize=8)
-fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'phase_transition.png'), dpi=130, bbox_inches='tight')
+fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'paper', 'figures', 'fig11_phase.pdf'), bbox_inches='tight')

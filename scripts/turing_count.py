@@ -49,4 +49,4 @@ for T in [float(x) for x in (sys.argv[1:] or ['100', '250', '500', '1000'])]:
     rows.append(dict(T=T, N_argument=float(N), S_T=float(S), N_rounded=int(mp.nint(N)), sign_changes_on_line=sc,
                      agree=(int(mp.nint(N)) == sc), suspicious_minima=sus, seconds=round(time.time() - t0, 1)))
     print(json.dumps(rows[-1]), flush=True)
-json.dump(rows, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'turing_count.json'), 'w'), indent=1)
+json.dump(rows, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'turing_count.json'), 'w'), indent=1)

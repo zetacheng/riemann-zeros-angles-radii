@@ -22,4 +22,9 @@ python3 -I siegel_check.py             # smallest L(1, chi)
 python3 -I q163.py                     # q = 163 prime sums (about 2 minutes)
 python3 -I q163_zeros.py               # Table 17
 python3 -I fig10_q163.py               # Figure 10
+python3 -I turing_count.py 100 250 500 1000 1500   # Table 17 (about 16 minutes)
+python3 -I heat_flow_spacing.py        # §17 heat flow
+python3 -I phase_transition.py         # Figure 11
+python3 -I latent_heat.py              # §17 latent heat
+python3 -I lee_yang.py                 # Table 18, Figure 12
 cd ../paper && latexmk -pdf -interaction=nonstopmode -halt-on-error Angles_and_Radii_of_the_Riemann_Zeros.tex

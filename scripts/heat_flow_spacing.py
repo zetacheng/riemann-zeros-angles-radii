@@ -12,12 +12,11 @@ come arbitrarily close to t = 0.  We use the first 1200 zeros of zeta:
      a cluster of 41 zeros around the closest pairs;
  (2) the smallest normalised gap, before and after running the flow forward to t = 0.05, 0.2.
 Truncation: zeros above the 1200th are ignored (their effect on a gap is a slowly varying shift).
-Writes heat_flow_spacing.json and heat_flow_spacing.png.
+Writes validation/heat_flow_spacing.json.
 """
 import json, math, os
 import numpy as np
 from scipy.integrate import solve_ivp
-import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 gam = np.array(json.load(open(os.path.join(ROOT, 'data', 'zeros_1200.json'))))
@@ -77,14 +76,5 @@ for T in (0.0, 0.05, 0.2):
     print('forward t=%.2f  min normalised gap %.4f  std %.4f' % (T, mg, sd), flush=True)
 
 out = dict(n_zeros=n, closest=checks, windows=wins, forward=fwd)
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'heat_flow_spacing.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'heat_flow_spacing.json'), 'w'), indent=1)
 
-plt.rcParams.update({'font.size': 9})
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.8))
-a1.semilogy([w['gamma_mid'] for w in wins], [w['min_abs_t'] for w in wins], 'o-', color='#1f4e79', ms=3.5)
-a1.set_xlabel('height $\\gamma$ (window of 100 zeros)'); a1.set_ylabel('earliest backward collision $|t^*|$')
-a1.set_title('(a) collisions approach $t=0$ from below')
-a2.bar([str(f['t']) for f in fwd], [f['std_normalised_gap'] for f in fwd], color='#2e7d32')
-a2.set_xlabel('forward heat-flow time $t$'); a2.set_ylabel('spread of normalised gaps (std)')
-a2.set_title('(b) forward flow evens out the spacing')
-fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'heat_flow_spacing.png'), dpi=130, bbox_inches='tight')

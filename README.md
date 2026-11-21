@@ -1,6 +1,6 @@
 # Angles and Radii of the Riemann Zeros
 
-**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 12, 21 November 2026
+**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 13, 21 November 2026
 
 [Paper (PDF)](paper/Angles_and_Radii_of_the_Riemann_Zeros.pdf) · [LaTeX source](paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 
@@ -26,8 +26,9 @@ Write a nontrivial zero as ρ = β + iγ and map it to α = b^ρ. The height γ 
 | One spiral arm per prime: for ζ every arm lies on a single spiral, with p at the points k log p. The arms separate only when twisted by characters. | §14, Figure 7 |
 | Arms rotated by Dirichlet characters: the family mean square stays at its diagonal far beyond the range that orthogonality guarantees, and an amplifier isolates one member to within 1.1× when the full family moments are computed numerically. This is empirical concentration, not an analytic bound. Orthogonality is exact, but it removes the congruence off-diagonal terms only for L·P < q; bounding them beyond that range is the open problem, which resembles the gap at which the quasi-Riemann method stops. | §15, Tables 14–15, Figures 8–9 |
 | Apparent impurities tested. In a finite-sample comparison, the worst member of a family grows roughly like ln N, consistent with an extreme-value heuristic. The smallest L(1, χ) for prime q ≤ 20000 is at q = 163 (class number one). There an anomalously low zero (0.2029) produces a slow wave that looks like a trend. This is known (Bays–Ford–Hudson–Rubinstein 2001); we make no priority claim. | §16, Table 16, Figure 10 |
+| A critical point. Counting sign changes forces every zero up to T = 1500 onto the circle, but only up to T. Under the heat flow, close pairs collide ever nearer to t = 0, with no slowing (no buffer; a buffer would contradict Rodgers–Tao, Λ ≥ 0). The Lee–Yang theorem, reproduced for a 4×4 Ising model, shows the exact structural "hard wall" that would be needed: palindromic symmetry alone fails, ferromagnetism succeeds. | §17, Tables 17–18, Figures 11–12 |
 
-**Structure and conclusion.** The picture α = b^ρ, with every point on the circle, is taken as the answer. Part I (§2–7) studies what it encodes: the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape. Part II (§8–11) follows the two known routes from the primes to the circle as far as computation allows: positivity holds but, numerically, with no margin; the amplitude route needs a uniform bound with a constant loss, which Frobenius supplies through Stepanov's multiplicity and which the quasi-Riemann method, lacking such a parameter, cannot reach. Part III (§12) states what an operation equivalent to α = b^ρ would need: input from the primes alone, a spectrum that for ℤ, within the Frobenius analogy, would naturally come from a flow rather than a single map, and a structure that forces the spectrum onto the circle. Part IV (§13–17) explores a route of our own, starting from the author's pictures (one circle per prime, one spiral arm per prime). It converges on the structure of the quasi-Riemann method: numerically, the cross terms cancel far beyond what can be proved. The paper locates this gap; it does not fill it.
+**Structure and conclusion.** The picture α = b^ρ, with every point on the circle, is taken as the answer. Part I (§2–7) studies what it encodes: the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape. Part II (§8–11) follows the two known routes from the primes to the circle as far as computation allows: positivity holds but, numerically, with no margin; the amplitude route needs a uniform bound with a constant loss, which Frobenius supplies through Stepanov's multiplicity and which the quasi-Riemann method, lacking such a parameter, cannot reach. Part III (§12) states what an operation equivalent to α = b^ρ would need: input from the primes alone, a spectrum that for ℤ, within the Frobenius analogy, would naturally come from a flow rather than a single map, and a structure that forces the spectrum onto the circle. Part IV (§13–18) explores a route of our own, starting from the author's pictures (one circle per prime, one spiral arm per prime). It converges on the structure of the quasi-Riemann method: numerically, the cross terms cancel far beyond what can be proved. The paper locates this gap; it does not fill it.
 
 ## Related work
 
@@ -42,7 +43,7 @@ cd scripts
 ./run_all.sh
 ```
 
-This regenerates every number, table and figure and recompiles the paper. It takes about half an hour, most of it for `torus_closure.py`. All randomness uses a fixed seed (0). A clean run reproduces the stored outputs in `validation/` exactly.
+This regenerates every number, table and figure and recompiles the paper. It takes about an hour, most of it for `torus_closure.py` and `turing_count.py`. All randomness uses a fixed seed (0). A clean run reproduces the stored outputs in `validation/` exactly.
 
 | Script | Produces |
 |---|---|
@@ -61,6 +62,9 @@ This regenerates every number, table and figure and recompiles the paper. It tak
 | `amplifier.py` | Table 15, Figure 9, `validation/amplifier.json` |
 | `worst_member.py`, `siegel_check.py` | Table 16, smallest L(1, χ) |
 | `q163.py`, `q163_zeros.py`, `fig10_q163.py` | §16, Figure 10 |
+| `turing_count.py` | Table 17 (about 16 minutes) |
+| `heat_flow_spacing.py`, `phase_transition.py`, `latent_heat.py` | §17, Figure 11 |
+| `lee_yang.py` | Table 18, Figure 12 |
 
 ## Limitations
 

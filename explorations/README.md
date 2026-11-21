@@ -93,7 +93,7 @@ The largest member grows like ln N (the ratio stays near 2.2). In every case but
 
 ## Angles constrain the radius by counting (Turing-type check)
 
-`turing_count.py` compares, for several heights T, the total number N(T) of zeros in the critical strip (from the argument principle, independently of where the zeros are) with the number of sign changes of the real function Z(t) on the critical line. Output: `turing_count.json`.
+`scripts/turing_count.py` (now §17 of the paper) compares, for several heights T, the total number N(T) of zeros in the critical strip (from the argument principle, independently of where the zeros are) with the number of sign changes of the real function Z(t) on the critical line. Output: `validation/turing_count.json`.
 
 | T | 100 | 250 | 500 | 1000 | 1500 |
 |---|---|---|---|---|---|
@@ -104,7 +104,7 @@ The counts agree at every height, and match the stored zeros. Off-line zeros com
 
 ## Can spacing work at every height? The heat flow (author's question)
 
-`heat_flow_spacing.py` runs the de Bruijn–Newman heat flow on the first 1200 zeros, using the zero dynamics dz_k/dt = 2 Σ_{j≠k} 1/(z_k − z_j) with z = 2γ. Outputs: `heat_flow_spacing.json` and `heat_flow_spacing.png`.
+`scripts/heat_flow_spacing.py` (now §17) runs the de Bruijn–Newman heat flow on the first 1200 zeros, using the zero dynamics dz_k/dt = 2 Σ_{j≠k} 1/(z_k − z_j) with z = 2γ. Output: `validation/heat_flow_spacing.json`.
 
 - **Backward in t**, close pairs collide and leave the real line. For an isolated pair the collision time is t* = −Δγ²/2. The closest pair (γ = 1329.04, Δγ = 0.1615) collides at t* = −0.0132; a direct integration of a cluster of 41 zeros gives −0.0132, the linearised estimate −0.0133. The earliest collision per window of 100 zeros moves towards t = 0 with height, from −0.31 near γ ≈ 150 to −0.013 near γ ≈ 1360, with fluctuations.
 - **Forward in t**, the zeros repel and the spacing evens out. The smallest normalised gap rises from 0.138 to 0.295 at t = 0.05 and 0.486 at t = 0.2, and the spread of the normalised gaps falls from 0.38 to 0.29.
@@ -113,7 +113,7 @@ This is why spacing arguments work at all heights only after deformation. For t 
 
 ## The heat flow as a phase transition (author's proposal)
 
-`phase_transition.py` treats the heat-flow time t as a control parameter. For t ≥ Λ all zeros are real (one phase); for t < Λ some are complex. Rodgers–Tao proved Λ ≥ 0, so RH ⇔ Λ = 0. The number N of zeros used plays the role of system size. Outputs: `phase_transition.json` and `phase_transition.png`.
+`scripts/phase_transition.py` (now §17, Figure 11) treats the heat-flow time t as a control parameter. For t ≥ Λ all zeros are real (one phase); for t < Λ some are complex. Rodgers–Tao proved Λ ≥ 0, so RH ⇔ Λ = 0. The number N of zeros used plays the role of system size. Outputs: `validation/phase_transition.json` and `paper/figures/fig11_phase.pdf`.
 
 - **Order parameter** m(t) = max Im z(t), which is zero in the ordered phase. It switches on with a square-root onset m ≈ √(2(t* − t)), a mean-field-like exponent of 1/2 for each colliding pair. The onset moves towards t = 0 as N grows: −0.31 for N = 100, −0.10 for N = 300, −0.013 for N = 1199.
 - **Apparent critical point** t_c(N), the backward collision closest to 0, rises steadily from −1.05 (N = 30) to −0.013 (N = 1199), always from below. A fit gives |t_c| ∝ N^{−1.25}, or N^{−0.90} after removing the (log)^{−2} factor of the mean spacing. A GUE heuristic predicts N^{−2/3} with that factor. With one sequence of 1200 zeros, an extreme-value statistic and strong low-height corrections, the exponent is not determined to better than this.
@@ -123,11 +123,11 @@ In this language, every finite computation sees an apparent critical point stric
 
 ## A "latent heat" that absorbs the approach? (author's idea)
 
-`latent_heat.py` follows the closest pair of the first 1200 zeros (γ = 1329.04) backward under the heat flow, integrating a cluster of 41 zeros. Outputs: `latent_heat.json` and `latent_heat.png`. The squared gap falls in a straight line, with slope 7.89 against exactly 8 for an isolated pair and a maximum deviation from linearity of 0.3%, all the way to the collision at t = −0.0132. The log-gas energy −2 log d diverges only logarithmically, which does not slow the gradient flow. No absorption occurs near the collision. The transition behaves like a continuous one, without latent heat. A buffer of positive width that kept the zeros real under small backward deformations would mean Λ < 0, which Rodgers–Tao exclude; any protective buffer at t = 0 must therefore have zero width.
+`scripts/latent_heat.py` (now §17) follows the closest pair of the first 1200 zeros (γ = 1329.04) backward under the heat flow, integrating a cluster of 41 zeros. Output: `validation/latent_heat.json`. The squared gap falls in a straight line, with slope 7.89 against exactly 8 for an isolated pair and a maximum deviation from linearity of 0.3%, all the way to the collision at t = −0.0132. The log-gas energy −2 log d diverges only logarithmically, which does not slow the gradient flow. No absorption occurs near the collision. The transition behaves like a continuous one, without latent heat. A buffer of positive width that kept the zeros real under small backward deformations would mean Λ < 0, which Rodgers–Tao exclude; any protective buffer at t = 0 must therefore have zero width.
 
 ## Lee–Yang: a hard wall that puts zeros on a circle (author's request)
 
-`lee_yang.py` computes the partition function of the Ising model on the 4×4 periodic lattice (16 spins, 32 bonds) exactly, as a polynomial in the fugacity z = e^{−2βh}, and finds its roots at 60 digits. Outputs: `lee_yang.json` and `lee_yang.png`.
+`scripts/lee_yang.py` (now §17, Figure 12) computes the partition function of the Ising model on the 4×4 periodic lattice (16 spins, 32 bonds) exactly, as a polynomial in the fugacity z = e^{−2βh}, and finds its roots at 60 digits. Outputs: `validation/lee_yang.json` and `paper/figures/fig12_leeyang.pdf`.
 
 | couplings | max \|\|z\| − 1\| |
 |---|---|

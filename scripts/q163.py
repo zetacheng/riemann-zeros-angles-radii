@@ -8,12 +8,11 @@ chi = (./163), the character of Q(sqrt(-163)), class number one, L(1, chi) = pi/
     Without one, psi(x, chi) is of size sqrt(x) times logarithms.
 (3) L(sigma, chi) on the real segment 1/2 <= sigma <= 1: a real zero would be a sign change.
 (4) Low zeros on the critical line: minima of |L(1/2 + it, chi)|.
-Writes q163.json and q163.png.
+Writes validation/q163.json (Figure 10 is drawn by fig10_q163.py).
 """
 import json, math, os
 import numpy as np
 import mpmath as mp
-import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 
 q = 163
 chi = [0] + [1 if pow(a, (q - 1) // 2, q) == 1 else -1 for a in range(1, q)]
@@ -55,17 +54,5 @@ for i in range(1, len(ts) - 1):
         mins.append(dict(t=ts[i], absL=absL[i]))
 out['critical_line_minima'] = mins
 print('minima of |L(1/2+it)| (t<=25):', [(round(m['t'], 2), round(m['absL'], 4)) for m in mins])
-ROOT = os.path.dirname(os.path.abspath(__file__))
-json.dump(out, open(os.path.join(ROOT, 'q163.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'q163.json'), 'w'), indent=1)
 
-plt.rcParams.update({'font.size': 9})
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 3.8))
-a1.semilogx(xs, ratio, color='#1f4e79', lw=0.9, label=r'$\psi(x,\chi)/x$, $q=163$')
-for beta in (0.95, 0.99):
-    a1.semilogx(xs, -xs ** (beta - 1) / beta, '--', lw=0.8, label=fr'Siegel model $-x^{{\beta-1}}/\beta$, $\beta={beta}$')
-a1.axhline(0, color='#888888', lw=0.6); a1.axvline(41, color='#c0392b', lw=0.6, ls=':')
-a1.set_xlabel('$x$'); a1.set_title('(a) the prime sum against a Siegel-zero model'); a1.legend(frameon=False, fontsize=7.5)
-a2.semilogx(xs, norm, color='#1f4e79', lw=0.9)
-a2.axhline(0, color='#888888', lw=0.6); a2.axvline(41, color='#c0392b', lw=0.6, ls=':')
-a2.set_xlabel('$x$'); a2.set_ylabel(r'$\psi(x,\chi)/\sqrt{x}$'); a2.set_title(r'(b) normalised by $\sqrt{x}$')
-fig.tight_layout(); fig.savefig(os.path.join(ROOT, 'q163.png'), dpi=130, bbox_inches='tight')

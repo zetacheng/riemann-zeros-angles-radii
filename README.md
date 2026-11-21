@@ -1,6 +1,6 @@
 # Angles and Radii of the Riemann Zeros
 
-**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 10, 21 November 2026
+**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 11, 21 November 2026
 
 [Paper (PDF)](paper/Angles_and_Radii_of_the_Riemann_Zeros.pdf) · [LaTeX source](paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 
@@ -25,8 +25,9 @@ Write a nontrivial zero as ρ = β + iγ and map it to α = b^ρ. The height γ 
 | One circle per prime (Bohr's lift): the first time the helix nearly closes on the first k primes grows by a factor of about 1/(2ε) per prime. By height 3·10¹², only about 17 primes close together, against about 56,000 that enter at that height. | §13, Table 13 |
 | One spiral arm per prime: for ζ every arm lies on a single spiral, with p at the points k log p. The arms separate only when twisted by characters. | §14, Figure 7 |
 | Arms rotated by Dirichlet characters: the family mean square stays at its diagonal far beyond the range that orthogonality guarantees, and an amplifier isolates one member to within 1.1× when moments are computed exactly. A proof can use orthogonality only for L·P < q, which leads back to the gap at which the quasi-Riemann method stops. | §15, Tables 14–15, Figures 8–9 |
+| Apparent impurities tested. The worst member of a family grows like ln N, as for extreme values. The smallest L(1, χ) for prime q ≤ 20000 is at q = 163 (class number one). There an anomalously low zero (0.2029) produces a slow wave that looks like a trend. This is known (Bays–Ford–Hudson–Rubinstein 2001); we make no priority claim. | §16, Table 16, Figure 10 |
 
-**Structure and conclusion.** The picture α = b^ρ, with every point on the circle, is taken as the answer. Part I (§2–7) studies what it encodes: the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape. Part II (§8–11) follows the two known routes from the primes to the circle as far as computation allows: positivity holds but, numerically, with no margin; the amplitude route needs a uniform bound with a constant loss, which Frobenius supplies through Stepanov's multiplicity and which the quasi-Riemann method, lacking such a parameter, cannot reach. Part III (§12) states what an operation equivalent to α = b^ρ would need: input from the primes alone, a spectrum that for ℤ, within the Frobenius analogy, would naturally come from a flow rather than a single map, and a structure that forces the spectrum onto the circle. Part IV (§13–16) explores a route of our own, starting from the author's pictures (one circle per prime, one spiral arm per prime). It converges on the structure of the quasi-Riemann method: numerically, the cross terms cancel far beyond what can be proved. The paper locates this gap; it does not fill it.
+**Structure and conclusion.** The picture α = b^ρ, with every point on the circle, is taken as the answer. Part I (§2–7) studies what it encodes: the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape. Part II (§8–11) follows the two known routes from the primes to the circle as far as computation allows: positivity holds but, numerically, with no margin; the amplitude route needs a uniform bound with a constant loss, which Frobenius supplies through Stepanov's multiplicity and which the quasi-Riemann method, lacking such a parameter, cannot reach. Part III (§12) states what an operation equivalent to α = b^ρ would need: input from the primes alone, a spectrum that for ℤ, within the Frobenius analogy, would naturally come from a flow rather than a single map, and a structure that forces the spectrum onto the circle. Part IV (§13–17) explores a route of our own, starting from the author's pictures (one circle per prime, one spiral arm per prime). It converges on the structure of the quasi-Riemann method: numerically, the cross terms cancel far beyond what can be proved. The paper locates this gap; it does not fill it.
 
 ## Related work
 
@@ -58,6 +59,8 @@ This regenerates every number, table and figure and recompiles the paper. It tak
 | `prime_spirals.py` | Figure 7 |
 | `character_family.py` | Table 14, Figure 8, `validation/character_family.json` |
 | `amplifier.py` | Table 15, Figure 9, `validation/amplifier.json` |
+| `worst_member.py`, `siegel_check.py` | Table 16, smallest L(1, χ) |
+| `q163.py`, `q163_zeros.py`, `fig10_q163.py` | §16, Figure 10 |
 
 ## Limitations
 

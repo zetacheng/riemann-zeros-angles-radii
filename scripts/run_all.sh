@@ -17,4 +17,9 @@ python3 -I torus_closure.py            # Table 13 (about 20 minutes)
 python3 -I prime_spirals.py            # Figure 7
 python3 -I character_family.py         # Table 14, Figure 8
 python3 -I amplifier.py                # Table 15, Figure 9
+python3 -I worst_member.py             # Table 16
+python3 -I siegel_check.py             # smallest L(1, chi)
+python3 -I q163.py                     # q = 163 prime sums (about 2 minutes)
+python3 -I q163_zeros.py               # Table 17
+python3 -I fig10_q163.py               # Figure 10
 cd ../paper && latexmk -pdf -interaction=nonstopmode -halt-on-error Angles_and_Radii_of_the_Riemann_Zeros.tex

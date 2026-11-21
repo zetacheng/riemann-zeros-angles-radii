@@ -30,4 +30,4 @@ for q in (131, 139, 151, 163, 167, 179, 191, 199, 211, 223):
     z, lam0 = first_zero(q)
     rows.append(dict(q=q, first_zero=z, Lambda_half=lam0))
     print(q, 'first zero on the line at t =', None if z is None else round(z, 5), '  Lambda(1/2) =', round(lam0, 4), flush=True)
-json.dump(rows, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'q163_zeros.json'), 'w'), indent=1)
+json.dump(rows, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'q163_zeros.json'), 'w'), indent=1)

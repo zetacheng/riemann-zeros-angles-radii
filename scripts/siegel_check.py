@@ -37,4 +37,4 @@ out = dict(QMAX=QMAX, count=len(rows), smallest=smallest,
            max_tail_bound=float(max(r['tail_bound'] for r in rows)))
 print(json.dumps({k: v for k, v in out.items() if k != 'smallest'}, indent=1))
 for r in smallest: print(r['q'], r['parity'], round(r['L1'], 4), 'L1*log q =', round(r['L1'] * math.log(r['q']), 3))
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'siegel_check.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'siegel_check.json'), 'w'), indent=1)

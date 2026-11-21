@@ -55,4 +55,4 @@ for q in (31, 101, 307, 1009, 3001, 10007, 30011, 100003):
                      frac_above_3D=float(np.mean(W2[1:] > 3 * D)), frac_above_5D=float(np.mean(W2[1:] > 5 * D)),
                      ReW_of_max=float(W[jmax].real), ImW_of_max=float(W[jmax].imag)))
     print(json.dumps({k: round(v, 4) if isinstance(v, float) else v for k, v in rows[-1].items()}), flush=True)
-json.dump(rows, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'worst_member.json'), 'w'), indent=1)
+json.dump(rows, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'worst_member.json'), 'w'), indent=1)

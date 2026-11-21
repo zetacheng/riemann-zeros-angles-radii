@@ -37,7 +37,7 @@ push = v[1:] - v[:-1]                       # d(gap)/dt at t = 0, including the 
 tstar = -d ** 2 / (2 * d * push)
 order = np.argsort(np.abs(tstar))
 checks = []
-for k in order[:5]:
+for k in order[:4]:
     lo, hi = max(0, k - 20), min(n, k + 22)
     zc = z0[lo:hi].copy(); i = k - lo
     def rhs(t, y): return -velocity(y)        # integrate backward in t (tau = -t)
@@ -68,8 +68,10 @@ for T in (0.0, 0.05, 0.2):
     if T == 0:
         z = z0.copy()
     else:
-        sol = solve_ivp(lambda t, y: velocity(y), (0, T), z0, rtol=1e-8, atol=1e-10)
-        z = sol.y[:, -1]
+        z = z0.copy(); dt = 2.5e-4; steps = int(round(T / dt))   # fixed-step RK4; gaps only grow forward
+        for _ in range(steps):
+            k1 = velocity(z); k2 = velocity(z + dt / 2 * k1); k3 = velocity(z + dt / 2 * k2); k4 = velocity(z + dt * k3)
+            z = z + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
     mg, sd = norm_min_gap(z)
     fwd.append(dict(t=T, min_normalised_gap=mg, std_normalised_gap=sd))
     print('forward t=%.2f  min normalised gap %.4f  std %.4f' % (T, mg, sd), flush=True)

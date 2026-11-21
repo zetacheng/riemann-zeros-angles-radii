@@ -101,3 +101,12 @@ The largest member grows like ln N (the ratio stays near 2.2). In every case but
 | sign changes of Z on the line | 29 | 108 | 269 | 649 | 1069 |
 
 The counts agree at every height, and match the stored zeros. Off-line zeros come in pairs and produce no sign changes, so equality means that no zero with γ ≤ 1500 lies off the line: the count of angles on the circle leaves no room for an impurity. This is the classical method behind all numerical verifications, which reach 3·10¹² (Platt–Trudgian). Within its range the conclusion is the best possible (β = 1/2 exactly). Beyond T it says nothing, which is why it is complementary to, and not comparable with, a uniform bound such as the announced 0.875. The computation is high-precision floating point on a grid of step 0.02, with a scan for unresolved close pairs; it is not interval-certified.
+
+## Can spacing work at every height? The heat flow (author's question)
+
+`heat_flow_spacing.py` runs the de Bruijn–Newman heat flow on the first 1200 zeros, using the zero dynamics dz_k/dt = 2 Σ_{j≠k} 1/(z_k − z_j) with z = 2γ. Outputs: `heat_flow_spacing.json` and `heat_flow_spacing.png`.
+
+- **Backward in t**, close pairs collide and leave the real line. For an isolated pair the collision time is t* = −Δγ²/2. The closest pair (γ = 1329.04, Δγ = 0.1615) collides at t* = −0.0132; a direct integration of a cluster of 41 zeros gives −0.0132, the linearised estimate −0.0133. The earliest collision per window of 100 zeros moves towards t = 0 with height, from −0.31 near γ ≈ 150 to −0.013 near γ ≈ 1360, with fluctuations.
+- **Forward in t**, the zeros repel and the spacing evens out. The smallest normalised gap rises from 0.138 to 0.295 at t = 0.05 and 0.486 at t = 0.2, and the spread of the normalised gaps falls from 0.38 to 0.29.
+
+This is why spacing arguments work at all heights only after deformation. For t > 0 the flow makes high zeros regular enough for an asymptotic argument (Polymath 15: Λ ≤ 0.22). For ζ itself (t = 0), arbitrarily close pairs keep occurring, the collisions approach t = 0, and Rodgers–Tao proved Λ ≥ 0: the Riemann Hypothesis, if true, holds with no margin.

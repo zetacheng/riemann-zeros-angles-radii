@@ -1,0 +1,12 @@
+[
+ {
+  "T": 100.0,
+  "N_argument": 29.0,
+  "S_T": -0.00240990227181678,
+  "N_rounded": 29,
+  "sign_changes_on_line": 29,
+  "agree": true,
+  "suspicious_minima": [],
+  "seconds": 8.5
+ }
+]

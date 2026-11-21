@@ -18,3 +18,13 @@ Bound on |S| (true value 215) for p = 401 as the multiplicity M grows:
 | bound deg R / M | 603 | 304.5 | 255.5 | 232.5 | 226.2 | 224.0 |
 
 The number of equations never depends on |S|, yet R vanishes to order M at all 215 points (3440 conditions at M = 16). Without multiplicity (M = 1) the bound is worse than the trivial |S| ≤ p. The excess of the bound over p/2 grows like about 2.5√p (predicted from the parameter count for p up to 10⁵), which is the square-root bound. Frobenius enters twice: X^{pj} = X^j on F_p, and d/dX X^{pj} = 0 in characteristic p.
+
+## Stage B: the quasi-RH recursion
+
+`quasi_rh_recursion.py` reproduces the length-optimisation recursion of B. Liu, *Improved zero-free half-planes for the quasi-Riemann hypothesis*, arXiv:2610.12234 (building on OpenAI's 7/8 argument), from the formulas stated there: κ = 2σ − 1, the critical-class equation (216κ−18)δ² − (468κ−57)δ + 150κ − 20 = 0 (counting exponent 2/3), and B(ξ) = (18ξ+7)/(18ξ+9). Output in `quasi_rh_recursion.json`.
+
+- The fixed point is B_new = 0.874957019420…, the root of 1188ξ³ − 2160ξ² + 171ξ + 190 = 0, as stated in the paper; B at κ = 3/4 reproduces B_alg = (1507 − 2√921)/1653.
+- Starting from the trivial hypothesis σ = 1, one step already gives 0.87506. The sensitivity dB/dσ at the fixed point is 0.0012, and even the strongest moment input allowed (κ = 13/18) gives 0.87494. The barrier is therefore not an accumulation of losses: it is set by the critical counting exponent 2/3.
+- The three constraints L₀, L_K, H_c with the stated weights combine to B ≥ (7+18δ_c)/(9+18δ_c), independently of the length parameters (checked).
+
+Contrast with stage A: Stepanov's method has a parameter, the multiplicity M, that grows with p, and the bound improves without limit as it grows. This comparison system has no such parameter; its counting exponent is a fixed constant.

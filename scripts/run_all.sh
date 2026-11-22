@@ -27,4 +27,8 @@ python3 -I heat_flow_spacing.py        # §17 heat flow
 python3 -I phase_transition.py         # Figure 11
 python3 -I latent_heat.py              # §17 latent heat
 python3 -I lee_yang.py                 # Table 18, Figure 12
+python3 -I positivity_by_design.py     # Figure 13
+python3 -I one_sided_check.py          # §20 step 1 data
+python3 -I what_star_needs.py          # Table 21
+python3 -I engine_toys.py              # Table 22, Figure 14
 cd ../paper && latexmk -pdf -interaction=nonstopmode -halt-on-error Angles_and_Radii_of_the_Riemann_Zeros.tex

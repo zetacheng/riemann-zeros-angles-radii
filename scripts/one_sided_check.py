@@ -3,7 +3,7 @@
 
 By the criterion in skeleton.md, GRH for the characters mod q is equivalent to
 E_q(x) <= C x^theta for every theta > 1/2.  Here we only look at the data up to X = 5e6.
-Writes one_sided_check.json.
+Writes validation/one_sided_check.json.
 """
 import json, math, os
 import numpy as np
@@ -31,4 +31,4 @@ for q in (1, 3, 5, 7, 11):
     out[str(q)] = dict(max_E_over_sqrtx=float(norm[late].max()), min_E_over_sqrtx=float(norm[late].min()),
                        max_E_over_sqrtx_log2=float((E / (np.sqrt(grid) * np.log(grid) ** 2))[late].max()))
     print(q, {k: round(v, 3) for k, v in out[str(q)].items()})
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'one_sided_check.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'one_sided_check.json'), 'w'), indent=1)

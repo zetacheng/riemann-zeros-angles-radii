@@ -13,7 +13,7 @@ replacement, and each replacement has a cost.
  (C) Multiplicity by iteration costs exponentially over Z.  The chain N_j = a^{n p^j} - 1 gains one
      power of p per step (lifting the exponent), but log N_j grows by a factor p per step.  Over F_p,
      Stepanov's multiplicity M costs only linearly (step A of explorations/README; Table 10 of the paper).
-Writes engine_toys.json and engine_toys.png.
+Writes validation/engine_toys.json and paper/figures/fig14_engine.pdf.
 """
 import json, math, os
 from math import comb, log
@@ -79,9 +79,9 @@ for j in range(0, 7):
     chain.append(dict(step=j, exponent=e, p_adic_valuation=vj, log_height=height, gain_per_height=vj * log(p) / height))
     print(f'(C) step {j}: v_7(2^{e}-1) = {vj},  log height = {height:.1f},  (gain in log p)/(height) = {vj*log(p)/height:.4f}')
 out['lte_chain'] = chain
-step = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'validation', 'stepanov_results.json')))
+step = json.load(open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'stepanov_results.json')))
 out['stepanov_p401'] = [dict(M=r['M'], degR=r['degR'], degR_over_M=r['bound']) for r in step['vs_M_p401']]
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'engine_toys.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'engine_toys.json'), 'w'), indent=1)
 
 plt.rcParams.update({'font.size': 9})
 fig, ax = plt.subplots(1, 3, figsize=(13, 3.6))
@@ -102,4 +102,4 @@ ax[2].semilogy(ms, [r['degR_over_M'] for r in out['stepanov_p401']], 's-', color
 ax[2].set_xlabel('multiplicity gained'); ax[2].set_ylabel('cost per unit of multiplicity')
 ax[2].set_title('(C) multiplicity: exponential vs bounded cost')
 ax[2].legend(frameon=False, fontsize=7)
-fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'engine_toys.png'), dpi=130, bbox_inches='tight')
+fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'paper', 'figures', 'fig14_engine.pdf'), bbox_inches='tight')

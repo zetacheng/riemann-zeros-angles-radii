@@ -1,6 +1,6 @@
 # Angles and Radii of the Riemann Zeros
 
-**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 14, 21 November 2026
+**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 15, 21 November 2026
 
 [Paper (PDF)](paper/Angles_and_Radii_of_the_Riemann_Zeros.pdf) · [LaTeX source](paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 
@@ -28,8 +28,9 @@ Write a nontrivial zero as ρ = β + iγ and map it to α = b^ρ. The height γ 
 | Apparent impurities tested. In a finite-sample comparison, the worst member of a family grows roughly like ln N, consistent with an extreme-value heuristic. The smallest L(1, χ) for prime q ≤ 20000 is at q = 163 (class number one). There an anomalously low zero (0.2029) produces a slow wave that looks like a trend. This is known (Bays–Ford–Hudson–Rubinstein 2001); we make no priority claim. | §16, Table 16, Figure 10 |
 | A critical point. Counting sign changes forces every zero up to T = 1500 onto the circle, but only up to T. Under the heat flow, close pairs collide ever nearer to t = 0, with no slowing (no buffer; a buffer would contradict Rodgers–Tao, Λ ≥ 0). The Lee–Yang theorem, reproduced for a 4×4 Ising model, shows the exact structural "hard wall" that would be needed: palindromic symmetry alone fails, ferromagnetism succeeds. | §17, Tables 17–18, Figures 11–12 |
 | Postscript: Alpöge's Lean-formalised proof was certified by the Lean FRO and the Mathlib Initiative on 21 Nov 2026. Read through an unsigned architecture guide, it passes our sticking points with positive-weight families and one-sided bounds (no off-diagonal estimate), multiplicity from divisibility of iterated theta lifts, Bost's slope inequality and a cyclotomic tower. It uses no Weil positivity and no spectral operator. The table records what this note got right and what it got wrong. | §19, Table 19 |
+| Towards a human path. Step 1: a one-sided criterion with full proof (Landau's theorem); for prime q, GRH mod q is equivalent to a one-sided lower bound for primes ≡ 1 mod q, and impurities cannot hide in a positive family. Step 2: the target is exponent 1/2 + ε, with a constant growing like φ(q)^0.84 on our data, and an engine whose chain cost is linear. Step 3: toy engine over ℤ (Siegel's lemma, size in place of degree, multiplicity), with exponential cost by naive iteration; Roth's theorem as a human precedent. The expert core, multiplicity at linear cost from theta lifts, remains. | §20, Tables 20–21, Figures 13–14 |
 
-**Structure and conclusion.** The picture α = b^ρ, with every point on the circle, is taken as the answer. Part I (§2–7) studies what it encodes: the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape. Part II (§8–11) follows the two known routes from the primes to the circle as far as computation allows: positivity holds but, numerically, with no margin; the amplitude route needs a uniform bound with a constant loss, which Frobenius supplies through Stepanov's multiplicity and which the quasi-Riemann method, lacking such a parameter, cannot reach. Part III (§12) states what an operation equivalent to α = b^ρ would need: input from the primes alone, a spectrum that for ℤ, within the Frobenius analogy, would naturally come from a flow rather than a single map, and a structure that forces the spectrum onto the circle. Part IV (§13–18) explores a route of our own, starting from the author's pictures (one circle per prime, one spiral arm per prime). It converges on the structure of the quasi-Riemann method: numerically, the cross terms cancel far beyond what can be proved. The paper locates this gap; it does not fill it. A postscript (§19) compares it with the architecture of the formally verified proof.
+**Structure and conclusion.** The picture α = b^ρ, with every point on the circle, is taken as the answer. Part I (§2–7) studies what it encodes: the helix (the critical line with its heights) carries the arithmetic, and the circle carries the shape. Part II (§8–11) follows the two known routes from the primes to the circle as far as computation allows: positivity holds but, numerically, with no margin; the amplitude route needs a uniform bound with a constant loss, which Frobenius supplies through Stepanov's multiplicity and which the quasi-Riemann method, lacking such a parameter, cannot reach. Part III (§12) states what an operation equivalent to α = b^ρ would need: input from the primes alone, a spectrum that for ℤ, within the Frobenius analogy, would naturally come from a flow rather than a single map, and a structure that forces the spectrum onto the circle. Part IV (§13–18) explores a route of our own, starting from the author's pictures (one circle per prime, one spiral arm per prime). It converges on the structure of the quasi-Riemann method: numerically, the cross terms cancel far beyond what can be proved. The paper locates this gap; it does not fill it. A postscript (§19) compares it with the architecture of the formally verified proof, and §20 begins a human-readable path along it.
 
 ## Related work
 
@@ -66,6 +67,9 @@ This regenerates every number, table and figure and recompiles the paper. It tak
 | `turing_count.py` | Table 17 (about 16 minutes) |
 | `heat_flow_spacing.py`, `phase_transition.py`, `latent_heat.py` | §17, Figure 11 |
 | `lee_yang.py` | Table 18, Figure 12 |
+| `positivity_by_design.py`, `one_sided_check.py` | §20 step 1, Table 20, Figure 13 |
+| `what_star_needs.py` | §20 step 2, Table 21 |
+| `engine_toys.py` | §20 step 3, Figure 14 |
 
 ## Limitations
 

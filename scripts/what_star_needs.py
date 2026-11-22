@@ -8,7 +8,7 @@ E_q(x) = x - phi(q) psi(x; q, 1) for q = 1 and primes q <= 47, x <= X = 5e6.
      i.e. what a localised one-sided bound must allow in every window;
  (4) exponent arithmetic: an engine whose error terms are x/m + m^a + sqrt(x) gives, at the best
      chain length m = x^{1/(a+1)}, the exponent theta = max(a/(a+1), 1/2).
-Writes what_star_needs.json and what_star_needs.png.
+Writes validation/what_star_needs.json (the preview figure goes to $TMPDIR).
 """
 import json, math, os
 import numpy as np
@@ -56,7 +56,7 @@ print('q=5 windows:', [(w['logY'], round(w['max'], 2), round(w['min'], 2)) for w
 
 arith = [dict(a=a_, chain=f'm = x^(1/{a_ + 1})', theta=max(a_ / (a_ + 1), 0.5)) for a_ in (0.5, 1, 1.5, 2, 3)]
 out = dict(X=X, rows=rows, growth_exponent_in_members=slope, windows_q5=wins, exponent_arithmetic=arith)
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'what_star_needs.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'what_star_needs.json'), 'w'), indent=1)
 
 plt.rcParams.update({'font.size': 9})
 fig, ax = plt.subplots(1, 3, figsize=(13, 3.6))
@@ -73,4 +73,4 @@ for a_, lab in ((1, '$a=1$: $\\theta=1/2$'), (2, '$a=2$: $\\theta=2/3$')):
     ax[2].plot(a_, max(a_ / (a_ + 1), 0.5), 'o', color='#c0392b'); ax[2].annotate(lab, (a_, max(a_ / (a_ + 1), 0.5)), xytext=(6, 6 if a_ == 1 else -12), textcoords='offset points', fontsize=8)
 ax[2].set_xlabel('cost exponent $a$ of a chain of length $m$'); ax[2].set_ylabel('exponent $\\theta$ reached')
 ax[2].set_title('(c) error $x/m+m^a$: what the engine must cost')
-fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'what_star_needs.png'), dpi=130, bbox_inches='tight')
+fig.tight_layout(); fig.savefig(os.path.join(os.environ.get('TMPDIR', '/tmp'), 'what_star_needs.png'), dpi=130, bbox_inches='tight')

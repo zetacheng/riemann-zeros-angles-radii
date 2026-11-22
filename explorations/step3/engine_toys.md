@@ -8,7 +8,7 @@ Stepanov's method over F_p (paper §10) used three things:
 2. a degree that bounds the number of zeros;
 3. multiplicity obtained cheaply, because d/dX of X^p is 0.
 
-Step 2 showed what the number-field engine must deliver: errors x/m + m^a with a = 1, i.e. multiplicity at a cost linear in the chain length. This step computes toy versions of the replacements over ℤ and measures what each one costs. Script: `engine_toys.py`; output: `engine_toys.json` and `engine_toys.png`.
+Step 2 showed what the number-field engine must deliver: errors x/m + m^a with a = 1, i.e. multiplicity at a cost linear in the chain length. This step computes toy versions of the replacements over ℤ and measures what each one costs. Script: `scripts/engine_toys.py`; output: `validation/engine_toys.json` and `paper/figures/fig14_engine.pdf`.
 
 ## (A) Linear algebra is not free over ℤ: Siegel's lemma
 

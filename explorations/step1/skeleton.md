@@ -47,7 +47,7 @@ $$F(s):=\int_1^\infty g(x)\,x^{-s-1}\,dx=\frac{C}{s-\theta}-\frac1{s-1}+\frac{D_
 1. **Orientation matters (Siegel zeros).** If the hypothesis were the opposite one-sided bound $\varphi(q)\psi(x;q,1)-x\le Cx^\theta$, an upper bound for the primes, then the sign at a real zero would be $+\infty$ and there would be no contradiction. Landau's argument would still exclude complex zeros to the right of the largest real zero, but it could not exclude a real (Siegel-type) zero. The lower bound is the version that sees real zeros, because a real zero pushes $E_q$ up by $+x^\beta/\beta$. The architecture guide notes that in the verified proof real zeros near 1 likewise "have positive residue".
 2. **No off-diagonal estimate is needed.** The family is used as a whole: a zero of *any* member makes $D_q$ singular, and the one-sided bound excludes all of them at once. This replaces the step at which Part IV stopped (family to one member via two-sided moments and an amplifier).
 
-## Demonstration (`positivity_by_design.py`)
+## Demonstration (`scripts/positivity_by_design.py`, Figure 13 of the paper)
 
 Synthetic zero sets for four members, all on the line, with impurities planted. Main terms of the explicit formula only, normalised by √x, compared with a one-sided bound Cx^ε (ε = 0.02):
 
@@ -59,7 +59,7 @@ Synthetic zero sets for four members, all on the line, with impurities planted. 
 | real zero β = 0.8, statistic E = x − Σψ | log x ≈ 4.0 |
 | real zero β = 0.8, opposite orientation −E | none |
 
-## Real data (`one_sided_check.py`)
+## Real data (`scripts/one_sided_check.py`)
 
 For x ≤ 5·10⁶ the statistic $E_q(x)/\sqrt x$ stays between about −4.4 and +5.2 for q = 1, 3, 5, 7, 11, and $E_q(x)/(\sqrt x\log^2x)\le0.093$. This is consistent with ($\star_\theta$) for every θ > 1/2, but it is finite data and proves nothing.
 

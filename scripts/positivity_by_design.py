@@ -11,13 +11,13 @@ per member, all on the line) and plant impurities:
  (c) a real zero beta (Siegel-type) in one member, seen through the statistic
      E_hat = x - sum psi  (each real zero adds + x^beta/beta)  and through -E_hat.
 Statistics are normalised by sqrt(x) and compared with a one-sided bound C x^{eps}.
-Writes positivity_by_design.json and positivity_by_design.png.
+Writes validation/positivity_by_design.json and paper/figures/fig13_positivity.pdf.
 """
 import json, math, os
 import numpy as np
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 g0 = np.array(json.load(open(os.path.join(ROOT, 'data', 'zeros_1200.json'))))[:200]
 rng = np.random.default_rng(0)
 members = [g0 + rng.uniform(-3, 3)] + [g0 * rng.uniform(0.9, 1.1) + rng.uniform(-3, 3) for _ in range(3)]
@@ -61,7 +61,7 @@ out = dict(delta=delta, gamma_star=gstar, beta_real=beta_real, eps=eps, C=float(
            late_windows_violated_positive_impurity=windows_with_violation(pos_imp),
            max_abs_signed=float(np.max(np.abs(signed))), max_abs_clean=float(np.max(np.abs(pos_clean))))
 print(json.dumps(out, indent=1))
-json.dump(out, open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'positivity_by_design.json'), 'w'), indent=1)
+json.dump(out, open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'validation', 'positivity_by_design.json'), 'w'), indent=1)
 
 plt.rcParams.update({'font.size': 9})
 fig, ax = plt.subplots(1, 3, figsize=(13, 3.6))
@@ -79,4 +79,4 @@ ax[2].plot(u, -Ehat, color='#888888', lw=0.7, label='$-\\hat E$')
 ax[2].plot(u, bound, '--', color='#1f4e79', lw=1)
 ax[2].set_title(f'(c) a real zero $\\beta={beta_real}$: orientation matters'); ax[2].set_xlabel('$\\log x$')
 ax[2].legend(frameon=False, fontsize=7.5); ax[2].set_ylim(-60, 80)
-fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'positivity_by_design.png'), dpi=130, bbox_inches='tight')
+fig.tight_layout(); fig.savefig(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'paper', 'figures', 'fig13_positivity.pdf'), bbox_inches='tight')

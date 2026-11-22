@@ -6,7 +6,7 @@ Step 1 reduced GRH for the characters mod q to the one-sided bound
 
 $$E_q(x)=x-\varphi(q)\,\psi(x;q,1)\le C\,x^{\theta}\qquad(x\ge x_0)\tag{$\star_\theta$}$$
 
-for every θ > 1/2. This step measures what the bound has to absorb on real data. It also sets out the exponent arithmetic that a Stepanov-type engine must satisfy. Script: `what_star_needs.py`; output: `what_star_needs.json` and `what_star_needs.png`.
+for every θ > 1/2. This step measures what the bound has to absorb on real data. It also sets out the exponent arithmetic that a Stepanov-type engine must satisfy. Script: `scripts/what_star_needs.py`; output: `validation/what_star_needs.json`.
 
 ## 1. ε > 0 is necessary, and enough
 

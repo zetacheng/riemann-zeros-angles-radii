@@ -32,4 +32,5 @@ python3 -I positivity_by_design.py     # Figure 13
 python3 -I one_sided_check.py          # §20 step 1 data
 python3 -I what_star_needs.py          # Table 21
 python3 -I engine_toys.py              # Table 22, Figure 14
+python3 -I step4_engines.py            # explorations/step4 (b)
 cd ../paper && latexmk -pdf -interaction=nonstopmode -halt-on-error Angles_and_Radii_of_the_Riemann_Zeros.tex

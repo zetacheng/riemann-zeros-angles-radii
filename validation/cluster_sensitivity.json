@@ -1,0 +1,50 @@
+{
+ "gamma": 1329.0435179965186,
+ "gap_gamma": 0.161500788964986,
+ "isolated_pair_time": -0.01304125241815647,
+ "rows": [
+  {
+   "K": 0,
+   "cluster_size": 2,
+   "t_collision": -0.013041252728502461
+  },
+  {
+   "K": 5,
+   "cluster_size": 12,
+   "t_collision": -0.01317176857977322
+  },
+  {
+   "K": 10,
+   "cluster_size": 22,
+   "t_collision": -0.013181387152671399
+  },
+  {
+   "K": 20,
+   "cluster_size": 42,
+   "t_collision": -0.013186838891579504
+  },
+  {
+   "K": 40,
+   "cluster_size": 82,
+   "t_collision": -0.01318977145089137
+  },
+  {
+   "K": 80,
+   "cluster_size": 162,
+   "t_collision": -0.013191308444627773
+  },
+  {
+   "K": 160,
+   "cluster_size": 322,
+   "t_collision": -0.01319206672764707
+  },
+  {
+   "K": "all",
+   "cluster_size": 1200,
+   "t_collision": -0.01319254302882318
+  }
+ ],
+ "tail_rate_estimate": 0.00048020366110839964,
+ "pair_rate": 12.383840430857635,
+ "relative_tail_effect": 3.877663506644065e-05
+}

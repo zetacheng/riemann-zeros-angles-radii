@@ -1,6 +1,6 @@
 # Angles and Radii of the Riemann Zeros
 
-**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 15, 21 November 2026
+**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 16, 21 November 2026
 
 [Paper (PDF)](paper/Angles_and_Radii_of_the_Riemann_Zeros.pdf) · [LaTeX source](paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 
@@ -66,6 +66,7 @@ This regenerates every number, table and figure and recompiles the paper. It tak
 | `q163.py`, `q163_zeros.py`, `fig10_q163.py` | §16, Figure 10 |
 | `turing_count.py` | Table 17 (about 16 minutes) |
 | `heat_flow_spacing.py`, `phase_transition.py`, `latent_heat.py` | §17, Figure 11 |
+| `cluster_sensitivity.py` | §17: collision time against cluster size (finite-cluster approximation) |
 | `lee_yang.py` | Table 18, Figure 12 |
 | `positivity_by_design.py`, `one_sided_check.py` | §20 step 1, Table 20, Figure 13 |
 | `what_star_needs.py` | §20 step 2, Table 21 |

@@ -6,7 +6,7 @@
 
 \usepackage{enumitem}
 \usepackage{fancyhdr}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 16}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 17}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}\newtheorem{definition}[proposition]{Definition}
@@ -15,7 +15,7 @@
 
 \title{Angles and Radii of the Riemann Zeros:\\ the Circle as the Answer, and the Routes to It}
 \author{Zeta Hoi-Ho Cheng}
-\date{Version 16 --- 21 November 2026}
+\date{Version 17 --- 26 November 2026}
 
 \begin{document}
 \maketitle
@@ -30,6 +30,7 @@ Part~II computes the two known routes from primes to the circle. On the positivi
 Part~III states what an operation equivalent to $\alpha=b^\rho$ would have to provide: input from the primes alone; a spectrum which, since $\Z$ has no common base, the Frobenius analogy suggests should come from a one-parameter flow rather than a single map; and a structure that forces this spectrum onto the circle.
 
 Part~IV explores a route of our own along these lines. Giving each prime its own circle turns the helix into a line on an infinite torus, which closes in every coordinate but never in all at once: in experiments, the time for the first $k$ primes to close approximately grows by a factor of about $1/(2\varepsilon)$ per prime, so that, by a heuristic extrapolation from a finite search, only about $17$ primes close together by height $3\times10^{12}$, against about $56{,}000$ that enter there. Drawing one spiral arm per prime shows that for $\zeta$ all arms lie on a single spiral, and that they separate only when twisted by characters. Rotating the arms by Dirichlet characters, the family mean square stays at its diagonal far beyond the range in which congruence off-diagonal terms are absent. When the full family moments are computed numerically and fed back into the amplifier inequality, an amplifier isolates a single member to within a factor of $1.1$; this is empirical concentration, not an analytic bound. A proof would have to control the off-diagonal terms without computing every member, and in this respect the route arrives, by analogy, at the structure of the quasi-Riemann method. Finally, we test whether apparent ``impurities'' in these experiments are genuine. In a finite-sample comparison, the worst member of a family grows roughly like the logarithm of the family size, consistent with an extreme-value heuristic. The smallest $L(1,\chi)$ among the quadratic characters of prime modulus up to $20000$ belongs to $q=163$, a class-number-one case. There an anomalously low zero on the critical line, at height $0.2029$, produces a slow wave that looks like a trend over the computed range, a phenomenon already described by Bays, Ford, Hudson and Rubinstein. A last group of experiments looks at the problem as a critical point. Counting sign changes on the line forces every zero up to height $1500$ onto the circle, but only up to that height. Under the de Bruijn--Newman heat flow the closest pairs collide ever nearer to $t=0$ and approach without any slowing, so no protective buffer exists, as the theorem $\Lambda\ge0$ of Rodgers and Tao requires. The Lee--Yang theorem, reproduced for a $4\times4$ Ising model, shows the kind of exact structural ``hard wall'' that would be needed instead. A postscript compares these conclusions with the architecture of L.~Alp\"oge's Lean-formalised proof of the Riemann Hypothesis, certified by the Lean and Mathlib community on 21 November 2026. As described in an architecture guide, that proof passes our sticking points by positive-weight families with one-sided bounds, Stepanov-type multiplicity from divisibility of iterated theta lifts, Bost's slope inequality and a cyclotomic tower. It does not use Weil positivity or construct a spectral operator. A final section begins a human-readable path along that architecture. It proves a one-sided criterion for the family of characters modulo a prime by Landau's theorem, measures what the one-sided bound must achieve on real data, and computes toy versions of the engine over $\Z$. Multiplicity at linear cost emerges as the step that only the theta lifts of the verified proof supply. All theoretical statements are classical or taken from the cited works; the paper claims no new theorem and no progress toward the Riemann Hypothesis, which it does not prove.
+Part~VI explores phase encoding of M\"obius weights and relative regularized determinants. The Hilbert--Schmidt construction isolates the first-order prime-zeta term as the unresolved obstruction; it gives no new zero-free region.
 \end{abstract}
 
 \section{Introduction}
@@ -761,6 +762,85 @@ exponent $\theta$ & $1/2$ & $1/2$ & $3/5$ & $2/3$ & $3/4$\\
 
 \paragraph{Where the human path stands.} Step 1 is complete and readable. Step 2 fixes the target: a one-sided bound with exponent $\tfrac12+\varepsilon$ and a constant that may depend on $q$. Step 3 shows that two of the three ingredients have controlled replacements over $\Z$, and it locates the third: multiplicity at a cost linear in the chain length, which naive iteration over $\Z$ cannot give. According to the guide, the verified proof obtains it from divisibility of $m$-fold iterated theta lifts at inert primes. Explaining why theta lifts achieve linear cost is the next step and the expert core; it cannot be reduced to the toy computations of this note, which illustrate the architecture but do not validate it.
 
+\part{Phase encoding and relative regularized determinants}
+
+\section{Integer multiplicity at low height cost}
+For a fixed prime $p$, Legendre's formula gives
+\[
+v_p(m!)=\sum_{k\ge1}\lfloor m/p^k\rfloor
+=\frac{m}{p-1}+O_p(\log m),
+\qquad \log(m!)=m\log m-m+O(\log m).
+\]
+Thus linear multiplicity at a fixed prime need not entail exponential logarithmic height. The central binomial coefficient $B_m=\binom{2m}{m}$ has $\log B_m=m\log4+O(\log m)$ and
+\[
+v_p(B_m)=\sum_{k\ge1}
+(\lfloor2m/p^k\rfloor-2\lfloor m/p^k\rfloor).
+\]
+Each summand is zero or one, so its multiplicity is only $O(\log m/\log p)$. These elementary constructions do not establish a prime-distribution estimate. If an independent argument gave an error $O(x/M+M\log x)$, choosing $M\asymp\sqrt{x/\log x}$ would suffice for the one-sided criterion. No such argument is supplied here.
+
+Writing $F_j(x)=\log(\lfloor x/j\rfloor!)$, the identity $\log(n!)=\sum_{j\le n}\psi(n/j)$ gives by M\"obius inversion
+\[
+\psi(x)=\sum_{j\le x}\mu(j)F_j(x).
+\]
+The signed coefficients obstruct a direct positive estimate.
+
+\section{Phase encoding and the positive background}
+For $\omega(n)$ the number of distinct prime factors,
+$\mu(n)=\mu(n)^2 e^{i\pi\omega(n)}$. The nonnegative weights
+$P_\pm(n)=(\mu(n)^2\pm\mu(n))/2$ separate the two parities exactly.
+The Fej\'er kernel $K_M(\phi)=M^{-1}|\sum_{k=0}^{M-1}e^{ik\phi}|^2$ implements the same separation for even $M$:
+$P_\pm(n)=\mu(n)^2 K_M(\pi\omega(n)+\delta_\pm)/M$, with $\delta_+=0$, $\delta_-=\pi$.
+Increasing $M$ adds no information about these two phases.
+
+For $\mathrm{Re}\,s>1$ and real $\phi$, define
+\[
+G(s,\phi)=\prod_p(1+e^{i\phi}p^{-s})
+=\sum_{n\ge1}\mu(n)^2e^{i\omega(n)\phi}n^{-s}.
+\]
+The endpoints are $G(s,0)=\zeta(s)/\zeta(2s)$ and
+$G(s,\pi)=1/\zeta(s)$. Their sum has nonnegative coefficients
+$\mu(n)^2+\mu(n)$, but its pole at $1$ prevents a direct application of Landau's theorem to the desired half-plane. The intermediate phases need not have nonnegative coefficients.
+Writing $A(x)=\sum_{n\le x}\mu(n)^2$ and $M(x)=\sum_{n\le x}\mu(n)$, the elementary square-free counting estimate
+$A(x)=x/\zeta(2)+O(\sqrt{x})$ follows from
+$\mu(n)^2=\sum_{d^2\mid n}\mu(d)$.
+Thus estimating the positive sum $A(x)+M(x)$ to within
+$O_\varepsilon(x^{1/2+\varepsilon})$ of $x/\zeta(2)$ is equivalent to the classical Mertens formulation of RH, not a proof of it. The parity cancellation remains.
+
+\section{Relative determinants and Hilbert--Schmidt regularization}
+On $\ell^2$ indexed by primes let $T(s)e_p=p^{-s}e_p$ and let $T_N$ be its restriction to the first $N$ primes. For $\mathrm{Re}\,s>0$ the finite relative determinant is
+\[
+R_N(s)=\det((I-T_N)(I+T_N)^{-1})
+=\prod_{j\le N}\frac{1-p_j^{-s}}{1+p_j^{-s}}.
+\]
+In $\mathrm{Re}\,s>1$ the trace-class limit is
+\[
+R(s)=\frac{\zeta(2s)}{\zeta(s)^2}.
+\]
+Its meromorphic continuation to $\mathrm{Re}\,s>1/2$ has poles precisely at zeros of $\zeta$ there, of twice their multiplicity, and a zero of order two at $s=1$. For finite $N$, with $U_N=(I-T_N)(I+T_N)^{-1}$,
+$\det(U_N^*U_N)=|R_N|^2>0$. This real positivity neither bounds the limit nor preserves holomorphy.
+
+\begin{proposition}
+$T(s)$ is Hilbert--Schmidt exactly for $\mathrm{Re}\,s>1/2$. In this half-plane both $\det_2(I\pm T(s))$ are holomorphic and nonvanishing, and their quotient $D(s)$ satisfies
+\[
+D(s)=\exp\left(-2\sum_{\substack{k\ge3\\ k\ {\rm odd}}}
+\frac{P(ks)}{k}\right),\qquad P(z)=\sum_p p^{-z}.
+\]
+In $\mathrm{Re}\,s>1$, $R(s)=e^{-2P(s)}D(s)$.
+\end{proposition}
+\begin{proof}
+The squared Hilbert--Schmidt norm is $\sum_p p^{-2\mathrm{Re}\,s}$, finite precisely when $2\mathrm{Re}\,s>1$ (using divergence of the sum of reciprocal primes). The diagonal entries have modulus less than one. The regularized determinants are the locally uniformly convergent products
+$\prod_p(1\pm p^{-s})e^{\mp p^{-s}}$; their logarithms converge normally by the quadratic remainder estimate on compact subsets. Subtracting the logarithms cancels even powers and the linear term, giving the stated odd-power series. Restoring the linear term in the absolutely convergent region proves the last identity.
+\end{proof}
+
+In fact the odd-power series extends holomorphically to $\mathrm{Re}\,s>1/3$, where it converges normally. The regularized quotient therefore has a larger natural continuation domain than the individual Hilbert--Schmidt determinants. Its nonvanishing does not constrain the zeros of $\zeta$: the entire obstruction in the right half of the critical strip is carried by the removed first-order term. More explicitly, on $\mathrm{Re}\,s>1$,
+\[
+P(s)=\log\zeta(s)-\sum_{k\ge2}\frac{P(ks)}{k}.
+\]
+The sum on the right extends holomorphically to $\mathrm{Re}\,s>1/2$. Hence controlling the singularities of the removed term is equivalent to controlling those of $\log\zeta(s)$, including its known singularity at $1$. Merely subtracting it is circular as a route to RH.
+
+\paragraph{Next proof obligation.}
+A reference operator or arithmetic construction must independently control the first-order term after removal of the known pole contribution, or yield the one-sided estimate of the preceding part. The elementary phase identities and determinant regularization locate this obligation but do not discharge it. They are classical tools combined here as an exploratory route; novelty relative to the literature has not been established.
+
 \section{Conclusion}\label{sec:conclusion}
 The experiments separate two objects that are often identified. \emph{The helix} (the critical line with its heights) carries the arithmetic: the explicit formula ties the zeros to the prime powers through an exact identity (Table~\ref{tab:heights}), Landau's formula imprints each prime on the angles (Table~\ref{tab:filling}), and the zeros repel like eigenvalues along it (Tables~\ref{tab:spacing} and~\ref{tab:wrap}). \emph{The circle} carries the shape: the projected angles become equidistributed for any base and lose the arithmetic, and what survives is the radius. The Riemann Hypothesis is the statement that the closure of the picture consists of the circle together with the known impurities of Section~\ref{sec:impurities}. This division is a geometric interpretation, not a separation theorem: the explicit formula depends on both coordinates of every zero.
 
@@ -809,6 +889,8 @@ regenerate every number, table and figure from the stored zeros (or recompute th
 \paragraph{Changes in version 14.} Section~\ref{sec:verified} is added as a postscript (Table~\ref{tab:verified}). It records the certification of Alp\"oge's proof by the Lean and Mathlib community and compares the architecture of the proof, as described in an unsigned guide, with the sticking points of this note, stating what the note got right and wrong. Section~\ref{sec:quasirh} (the description of the announcement), Sections~\ref{sec:critical} and~\ref{sec:stands}, the abstract, the introduction, the conclusion and the limitations are updated. The postscript was written by Claude at the author's request and had not been reviewed by ChatGPT at the time of writing.
 
 \paragraph{Changes in version 15.} Section~\ref{sec:human} is added (Tables~\ref{tab:positivity}--\ref{tab:arith}, Figures~\ref{fig:positivity}--\ref{fig:engine}). It records steps 1--3 of a human-readable path along the architecture of the verified proof: a one-sided criterion with a full proof by Landau's theorem, the quantitative target of the one-sided bound, and toy versions of the engine over $\Z$, with a comparison to Roth's theorem. The abstract, introduction, conclusion and limitations are updated, and Widder, Littlewood, Thue, Roth and Bost are added to the references. The section was written by Claude at the author's request and had not been reviewed by ChatGPT at the time of writing.
+
+\paragraph{Changes in version 17.} Added the exploratory phase and relative determinant route, including the elementary integer-height identities, parity separation, and the regularized determinant proposition. The first-order prime-zeta obstruction is explicitly retained. No new numerical experiments or proof of RH are claimed.
 
 \paragraph{Changes in version 16.} Revisions in response to an independent review by ChatGPT of version~15 (repository issue~3). Section~\ref{sec:critical}: the heat-flow computations are labelled a finite-cluster approximation, the truncation is stated, and the sensitivity of the collision time to the cluster size and to the omitted zeros is reported (new script \texttt{cluster\_sensitivity.py}). The claim about arbitrarily small gaps is attributed to the GUE heuristic, distinct from the Rodgers--Tao theorem, and the Lee--Yang computation is stated to be a structural analogy, not a mechanism for $\zeta$. Section~\ref{sec:verified}: a provenance paragraph separates primary sources, the unsigned guide and our own deductions. Section~\ref{sec:human}: the proof of the one-sided criterion is expanded (convergence, continuation and the cancellation at $s=1$, signs and multiplicities at real zeros, the precise use of Landau's theorem, the endpoint $\theta=\tfrac12$, and the converse), the chain-cost model is stated not to establish the cost of theta lifts, and the Roth analogy is marked heuristic. Abstract: the torus figure is marked as a heuristic extrapolation. The scripts of Sections~\ref{sec:critical} and~\ref{sec:human} were rerun.
 

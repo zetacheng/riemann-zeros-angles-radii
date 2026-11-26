@@ -6,7 +6,7 @@
 
 \usepackage{enumitem}
 \usepackage{fancyhdr}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 18}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 19}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}\newtheorem{definition}[proposition]{Definition}
@@ -15,7 +15,7 @@
 
 \title{Angles and Radii of the Riemann Zeros:\\ the Circle as the Answer, and the Routes to It}
 \author{Zeta Hoi-Ho Cheng}
-\date{Version 18 --- 26 November 2026}
+\date{Version 19 --- 26 November 2026}
 
 \begin{document}
 \maketitle
@@ -32,6 +32,7 @@ Part~III states what an operation equivalent to $\alpha=b^\rho$ would have to pr
 Part~IV explores a route of our own along these lines. Giving each prime its own circle turns the helix into a line on an infinite torus, which closes in every coordinate but never in all at once: in experiments, the time for the first $k$ primes to close approximately grows by a factor of about $1/(2\varepsilon)$ per prime, so that, by a heuristic extrapolation from a finite search, only about $17$ primes close together by height $3\times10^{12}$, against about $56{,}000$ that enter there. Drawing one spiral arm per prime shows that for $\zeta$ all arms lie on a single spiral, and that they separate only when twisted by characters. Rotating the arms by Dirichlet characters, the family mean square stays at its diagonal far beyond the range in which congruence off-diagonal terms are absent. When the full family moments are computed numerically and fed back into the amplifier inequality, an amplifier isolates a single member to within a factor of $1.1$; this is empirical concentration, not an analytic bound. A proof would have to control the off-diagonal terms without computing every member, and in this respect the route arrives, by analogy, at the structure of the quasi-Riemann method. Finally, we test whether apparent ``impurities'' in these experiments are genuine. In a finite-sample comparison, the worst member of a family grows roughly like the logarithm of the family size, consistent with an extreme-value heuristic. The smallest $L(1,\chi)$ among the quadratic characters of prime modulus up to $20000$ belongs to $q=163$, a class-number-one case. There an anomalously low zero on the critical line, at height $0.2029$, produces a slow wave that looks like a trend over the computed range, a phenomenon already described by Bays, Ford, Hudson and Rubinstein. A last group of experiments looks at the problem as a critical point. Counting sign changes on the line forces every zero up to height $1500$ onto the circle, but only up to that height. Under the de Bruijn--Newman heat flow the closest pairs collide ever nearer to $t=0$ and approach without any slowing, so no protective buffer exists, as the theorem $\Lambda\ge0$ of Rodgers and Tao requires. The Lee--Yang theorem, reproduced for a $4\times4$ Ising model, shows the kind of exact structural ``hard wall'' that would be needed instead. A postscript compares these conclusions with the architecture of L.~Alp\"oge's Lean-formalised proof of the Riemann Hypothesis, certified by the Lean and Mathlib community on 21 November 2026. As described in an architecture guide, that proof passes our sticking points by positive-weight families with one-sided bounds, Stepanov-type multiplicity from divisibility of iterated theta lifts, Bost's slope inequality and a cyclotomic tower. It does not use Weil positivity or construct a spectral operator. A final section begins a human-readable path along that architecture. It proves a one-sided criterion for the family of characters modulo a prime by Landau's theorem, measures what the one-sided bound must achieve on real data, and computes toy versions of the engine over $\Z$. Multiplicity at linear cost emerges as the step that only the theta lifts of the verified proof supply. All theoretical statements are classical or taken from the cited works; the paper claims no new theorem and no progress toward the Riemann Hypothesis, which it does not prove.
 Part~VI explores phase encoding of M\"obius weights and relative regularized determinants. The Hilbert--Schmidt construction isolates the first-order prime-zeta term as the unresolved obstruction; it gives no new zero-free region.
 Part~VII develops prime Fourier epicycles, a conditional positive energy criterion for RH, and exact higher-moment bounds from unique factorization. Finite-window near-resonance control remains open.
+The dual-metric formulation and stationary-kernel proposal isolate the missing common spectral realization; they do not prove RH.
 \end{abstract}
 
 \section{Introduction}
@@ -902,6 +903,37 @@ This exact resonance selection rule is analogous to momentum conservation. It is
 At finite $T$ the averaging kernel is $\sin(T\Delta)/(T\Delta)$ with $\Delta=\log(n/r)$, where $n,r$ are products of $m$ primes. For distinct products bounded by $N^m$, $|\Delta|\ge N^{-m}$ by integration of $1/x$ between the two integers. This elementary separation is not uniform as $N$ grows. The exact selection rule therefore does not control the near-resonances in the infinite spectrum on a fixed window.
 
 A continuous reference density $e^u/u$ for $u\ge\log2$ removes the known logarithmic singularity of the prime zeta function at $1$ in the Laplace transform, initially for $\mathrm{Re}\,s>1$. The resulting signed measure is the difference between the prime counting measure in log coordinates and that reference density. Its local transform estimates remain unproved. Neither finite mean moments nor subtraction of the reference alone provides the positive energy estimate above.
+
+\section{Two invariant metrics and the common spectral-space obstruction}
+For a hypothetical reflected pair $\rho_\pm=1/2\pm a+i\gamma$, consider the normalized modes $\phi_\pm(u)=e^{(\pm a+i\gamma)u}$. Set $E=|\phi_+|^2+|\phi_-|^2$ and $Q=|\phi_+|^2-|\phi_-|^2$. Then
+\[
+E'=2aQ,\qquad Q'=2aE,\qquad E^2-Q^2=4.
+\]
+The last identity is a hyperbolic invariant, not positive energy conservation. Reflection symmetry alone allows growth and decay.
+
+\begin{proposition}
+Let $A=\operatorname{diag}(a+i\gamma,-a+i\gamma)$ for real $a,\gamma$, and let $J=\left(\begin{smallmatrix}0&1\\1&0\end{smallmatrix}\right)$. Then $A^*J+JA=0$. A positive definite Hermitian matrix $G$ satisfying $A^*G+GA=0$ exists if and only if $a=0$.
+\end{proposition}
+\begin{proof}
+The first identity follows by multiplication. For Hermitian $G=(g_{ij})$, the diagonal entries of $A^*G+GA$ are $2ag_{11}$ and $-2ag_{22}$, and its off-diagonal entries vanish. Positive definiteness implies $g_{11},g_{22}>0$, forcing $a=0$. Conversely $G=I$ works when $a=0$.
+\end{proof}
+The positive metric alone suffices to exclude growth; the indefinite metric records the already known reflection symmetry. The two-mode construction uses the zeros as input and is not an independent arithmetic derivation of a positive metric. It is a finite-dimensional illustration of the general fact that an eigenvector of a skew-adjoint generator in a positive Hilbert space has purely imaginary eigenvalue.
+
+\section{A candidate stationary correlation kernel}
+The proposed bridge is an arithmetic construction of a kernel $K(u,v)$ satisfying
+\[
+K(u+c,v+c)=K(u,v),\qquad
+\sum_{i,j}\overline{c_i}c_j K(u_i,u_j)\ge0.
+\]
+If the kernel is continuous, its reproducing-kernel Hilbert space carries a strongly continuous unitary translation group; equivalently Bochner's theorem represents its stationary correlation function by a finite positive measure on real frequencies. To imply RH one must additionally prove that every nontrivial zero gives a nonzero mode of this same group with exponent $\rho-1/2$, or establish an equivalent pole correspondence through an independently derived transform identity. Neither positivity nor stationarity alone establishes that correspondence.
+
+For comparison, the prime Fourier mean correlation at $\sigma>1/2$ is
+\[
+K_\sigma(u,v)=\sum_p p^{-2\sigma}e^{i(u-v)\log p}.
+\]
+It is continuous, stationary and positive definite by absolute convergence and the sum-of-squares identity. Its spectral measure is supported on the prime logarithms, not identified with the zeta zeros. Subtracting a continuous reference correlation from a positive kernel need not preserve positivity; forming a Gram kernel of a residual field preserves positivity when well-defined but does not establish stationarity, finite energy, or the required zero correspondence.
+
+The unresolved task is therefore a common spectral realization, not another formal conservation law. The relative determinant of Part VI is a possible starting point, but no such realization has been proved here.
 
 \section{Conclusion}\label{sec:conclusion}
 The experiments separate two objects that are often identified. \emph{The helix} (the critical line with its heights) carries the arithmetic: the explicit formula ties the zeros to the prime powers through an exact identity (Table~\ref{tab:heights}), Landau's formula imprints each prime on the angles (Table~\ref{tab:filling}), and the zeros repel like eigenvalues along it (Tables~\ref{tab:spacing} and~\ref{tab:wrap}). \emph{The circle} carries the shape: the projected angles become equidistributed for any base and lose the arithmetic, and what survives is the radius. The Riemann Hypothesis is the statement that the closure of the picture consists of the circle together with the known impurities of Section~\ref{sec:impurities}. This division is a geometric interpretation, not a separation theorem: the explicit formula depends on both coordinates of every zero.

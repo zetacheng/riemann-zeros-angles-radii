@@ -6,7 +6,7 @@
 
 \usepackage{enumitem}
 \usepackage{fancyhdr}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 19}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 20}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}\newtheorem{definition}[proposition]{Definition}
@@ -15,7 +15,7 @@
 
 \title{Angles and Radii of the Riemann Zeros:\\ the Circle as the Answer, and the Routes to It}
 \author{Zeta Hoi-Ho Cheng}
-\date{Version 19 --- 26 November 2026}
+\date{Version 20 --- 26 November 2026}
 
 \begin{document}
 \maketitle
@@ -33,6 +33,7 @@ Part~IV explores a route of our own along these lines. Giving each prime its own
 Part~VI explores phase encoding of M\"obius weights and relative regularized determinants. The Hilbert--Schmidt construction isolates the first-order prime-zeta term as the unresolved obstruction; it gives no new zero-free region.
 Part~VII develops prime Fourier epicycles, a conditional positive energy criterion for RH, and exact higher-moment bounds from unique factorization. Finite-window near-resonance control remains open.
 The dual-metric formulation and stationary-kernel proposal isolate the missing common spectral realization; they do not prove RH.
+Part~VIII develops the completed positive-real response criterion, its conditional Gram kernel, the full multiplicative phase symmetry, and local Cayley passivity. The infinite composition and normalization preserving global passivity remain open.
 \end{abstract}
 
 \section{Introduction}
@@ -934,6 +935,70 @@ K_\sigma(u,v)=\sum_p p^{-2\sigma}e^{i(u-v)\log p}.
 It is continuous, stationary and positive definite by absolute convergence and the sum-of-squares identity. Its spectral measure is supported on the prime logarithms, not identified with the zeta zeros. Subtracting a continuous reference correlation from a positive kernel need not preserve positivity; forming a Gram kernel of a residual field preserves positivity when well-defined but does not establish stationarity, finite energy, or the required zero correspondence.
 
 The unresolved task is therefore a common spectral realization, not another formal conservation law. The relative determinant of Part VI is a possible starting point, but no such realization has been proved here.
+
+\part{Multiplicative symmetry and spectral passivity}
+
+\section{The completed logarithmic derivative and its positive-real criterion}
+Write $z=s-1/2$, $\Xi_0(z)=\xi(1/2+z)$ and $H(z)=\Xi_0'(z)/\Xi_0(z)$. The functional equation implies that $\Xi_0$ is even and $H$ is odd. Pairing the zeros $\lambda=\rho-1/2$ with $-\lambda$ in the Hadamard product gives
+\[
+H(z)=\sum_{\lambda/\pm}\frac{2z}{z^2-\lambda^2},
+\]
+with multiplicities and locally normal convergence away from poles. The pairing removes the genus-one exponential factors; evenness removes the remaining linear exponential. The convergence follows from $\sum_\rho|\rho|^{-2}<\infty$.
+
+\begin{proposition}
+RH is equivalent to $H$ being holomorphic with nonnegative real part on $\mathrm{Re}\,z>0$.
+\end{proposition}
+\begin{proof}
+Under RH each paired term is $(z-i\gamma)^{-1}+(z+i\gamma)^{-1}$, whose real part is positive for $\mathrm{Re}\,z>0$. Conversely, a zero off the critical line gives, by reflection, a pole of $H$ in the right half-plane, with residue equal to its positive multiplicity. This contradicts holomorphy; even without assuming holomorphy, approaching the pole from its left gives negative real part.
+\end{proof}
+
+Define the candidate positive-real kernel
+\[
+K(z,w)=\frac{H(z)+\overline{H(w)}}{z+\overline w}.
+\]
+Under RH, pairing as above gives the absolutely convergent Gram representation
+\[
+K(z,w)=\sum_\gamma
+\frac{1}{(z-i\gamma)(\overline w+i\gamma)},
+\]
+where signed ordinates are counted with multiplicity. Conversely positivity on the diagonal wherever defined forces $\mathrm{Re}\,H(z)\ge0$ and excludes interior poles by the preceding argument. This is an equivalent positivity criterion, not an unconditional construction of a positive kernel.
+
+For $\mathrm{Re}\,s>1$ the same response has the arithmetic representation
+\[
+H(z)=\frac1s+\frac1{s-1}-\frac12\log\pi+
+\frac12\frac{\Gamma'(s/2)}{\Gamma(s/2)}
+-\sum_{n\ge2}\Lambda(n)n^{-s}.
+\]
+The pole at $s=1$ cancels in the completed response. The relative determinant of Part VI gives
+$\tfrac12 R'/R=\zeta'(2s)/\zeta(2s)-\zeta'(s)/\zeta(s)$;
+in $\mathrm{Re}\,s>1/2$ the first term is holomorphic, while the second has the known pole at $1$ and any hypothetical off-line zero poles. Thus the relative determinant isolates the relevant zero singularities but does not prove positivity.
+
+\section{The full multiplicative phase symmetry}
+Unique factorization identifies the multiplicative group of positive rationals with the direct sum $\bigoplus_p\mathbb Z$ via the valuation vector $(v_p(n))_p$. Positive integers correspond to its nonnegative cone. The logarithm is the injective additive projection $\log n=\sum_p v_p(n)\log p$ on this group. Its compact character group is
+\[
+\mathcal G=\prod_p U(1),\qquad
+\chi_{\boldsymbol\theta}(n)=\exp(i\sum_p v_p(n)\theta_p).
+\]
+The one-parameter path $\theta_p=-t\log p$ is dense by rational independence on every finite coordinate projection. Haar orthogonality of the characters reproduces the exact momentum selection rules of Part VII. This is a kinematic symmetry of the multiplicative group, not a derived physical conservation law.
+
+\section{Local Cayley passivity and the critical energy threshold}
+For each prime put $r_p(s)=p^{-s}$ and
+\[
+C_p(s)=\frac{1+r_p(s)}{1-r_p(s)},\qquad
+\mathrm{Re}\,C_p(s)=\frac{1-p^{-2\sigma}}{|1-p^{-s}|^2}>0
+\quad(\sigma=\mathrm{Re}\,s>0).
+\]
+Thus each Euler factor admits a positive-real Cayley response, without RH. Equivalently its reflection amplitude is contractive in this half-plane. The sum of squared reflection amplitudes is finite exactly for $\sigma>1/2$ (using divergence of the reciprocal-prime sum at the boundary). This threshold agrees with the reflection centre of the functional equation, but the agreement alone imposes no restriction on zero locations.
+
+\section{The composition and renormalization obstruction}
+The finite sum of local positive-real responses with positive weights is positive-real, but the unweighted infinite sum diverges because $C_p(s)\to1$. Subtracting the constant background yields
+$C_p-1=2p^{-s}/(1-p^{-s})$, which need not have nonnegative real part. Removing also the linear term yields
+\[
+C_p-1-2p^{-s}=\frac{2p^{-2s}}{1-p^{-s}},
+\]
+whose sum converges locally normally for $\sigma>1/2$, but whose real part likewise need not be nonnegative. For example a purely imaginary nonzero $r_p$ makes the real part of the latter expression negative. The first-order term is precisely the obstruction already identified in Part VI.
+
+A possible next step is a scattering composition of the local contractive amplitudes, with an independently justified normalization and a completed response equal to $H$ (or a transform with the same zero poles). Such a composition must preserve passivity, have a well-defined infinite limit, and establish the exact arithmetic-to-spectral identity. None of these joint requirements has been established here. In particular local Cayley passivity does not imply passivity of the completed zeta response. The remaining question is whether the full multiplicative phase symmetry can supply this missing positive realization.
 
 \section{Conclusion}\label{sec:conclusion}
 The experiments separate two objects that are often identified. \emph{The helix} (the critical line with its heights) carries the arithmetic: the explicit formula ties the zeros to the prime powers through an exact identity (Table~\ref{tab:heights}), Landau's formula imprints each prime on the angles (Table~\ref{tab:filling}), and the zeros repel like eigenvalues along it (Tables~\ref{tab:spacing} and~\ref{tab:wrap}). \emph{The circle} carries the shape: the projected angles become equidistributed for any base and lose the arithmetic, and what survives is the radius. The Riemann Hypothesis is the statement that the closure of the picture consists of the circle together with the known impurities of Section~\ref{sec:impurities}. This division is a geometric interpretation, not a separation theorem: the explicit formula depends on both coordinates of every zero.

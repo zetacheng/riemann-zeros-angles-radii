@@ -6,7 +6,7 @@
 
 \usepackage{enumitem}
 \usepackage{fancyhdr}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 17}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 18}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}\newtheorem{definition}[proposition]{Definition}
@@ -15,7 +15,7 @@
 
 \title{Angles and Radii of the Riemann Zeros:\\ the Circle as the Answer, and the Routes to It}
 \author{Zeta Hoi-Ho Cheng}
-\date{Version 17 --- 26 November 2026}
+\date{Version 18 --- 26 November 2026}
 
 \begin{document}
 \maketitle
@@ -31,6 +31,7 @@ Part~III states what an operation equivalent to $\alpha=b^\rho$ would have to pr
 
 Part~IV explores a route of our own along these lines. Giving each prime its own circle turns the helix into a line on an infinite torus, which closes in every coordinate but never in all at once: in experiments, the time for the first $k$ primes to close approximately grows by a factor of about $1/(2\varepsilon)$ per prime, so that, by a heuristic extrapolation from a finite search, only about $17$ primes close together by height $3\times10^{12}$, against about $56{,}000$ that enter there. Drawing one spiral arm per prime shows that for $\zeta$ all arms lie on a single spiral, and that they separate only when twisted by characters. Rotating the arms by Dirichlet characters, the family mean square stays at its diagonal far beyond the range in which congruence off-diagonal terms are absent. When the full family moments are computed numerically and fed back into the amplifier inequality, an amplifier isolates a single member to within a factor of $1.1$; this is empirical concentration, not an analytic bound. A proof would have to control the off-diagonal terms without computing every member, and in this respect the route arrives, by analogy, at the structure of the quasi-Riemann method. Finally, we test whether apparent ``impurities'' in these experiments are genuine. In a finite-sample comparison, the worst member of a family grows roughly like the logarithm of the family size, consistent with an extreme-value heuristic. The smallest $L(1,\chi)$ among the quadratic characters of prime modulus up to $20000$ belongs to $q=163$, a class-number-one case. There an anomalously low zero on the critical line, at height $0.2029$, produces a slow wave that looks like a trend over the computed range, a phenomenon already described by Bays, Ford, Hudson and Rubinstein. A last group of experiments looks at the problem as a critical point. Counting sign changes on the line forces every zero up to height $1500$ onto the circle, but only up to that height. Under the de Bruijn--Newman heat flow the closest pairs collide ever nearer to $t=0$ and approach without any slowing, so no protective buffer exists, as the theorem $\Lambda\ge0$ of Rodgers and Tao requires. The Lee--Yang theorem, reproduced for a $4\times4$ Ising model, shows the kind of exact structural ``hard wall'' that would be needed instead. A postscript compares these conclusions with the architecture of L.~Alp\"oge's Lean-formalised proof of the Riemann Hypothesis, certified by the Lean and Mathlib community on 21 November 2026. As described in an architecture guide, that proof passes our sticking points by positive-weight families with one-sided bounds, Stepanov-type multiplicity from divisibility of iterated theta lifts, Bost's slope inequality and a cyclotomic tower. It does not use Weil positivity or construct a spectral operator. A final section begins a human-readable path along that architecture. It proves a one-sided criterion for the family of characters modulo a prime by Landau's theorem, measures what the one-sided bound must achieve on real data, and computes toy versions of the engine over $\Z$. Multiplicity at linear cost emerges as the step that only the theta lifts of the verified proof supply. All theoretical statements are classical or taken from the cited works; the paper claims no new theorem and no progress toward the Riemann Hypothesis, which it does not prove.
 Part~VI explores phase encoding of M\"obius weights and relative regularized determinants. The Hilbert--Schmidt construction isolates the first-order prime-zeta term as the unresolved obstruction; it gives no new zero-free region.
+Part~VII develops prime Fourier epicycles, a conditional positive energy criterion for RH, and exact higher-moment bounds from unique factorization. Finite-window near-resonance control remains open.
 \end{abstract}
 
 \section{Introduction}
@@ -840,6 +841,67 @@ The sum on the right extends holomorphically to $\mathrm{Re}\,s>1/2$. Hence cont
 
 \paragraph{Next proof obligation.}
 A reference operator or arithmetic construction must independently control the first-order term after removal of the known pole contribution, or yield the one-sided estimate of the preceding part. The elementary phase identities and determinant regularization locate this obligation but do not discharge it. They are classical tools combined here as an exploratory route; novelty relative to the literature has not been established.
+
+\part{Momentum conservation, spectral energy and near-resonance analysis}
+
+\section{Prime epicycles and mean-square orthogonality}
+For a finite prime cutoff $N$, write
+\[
+\Phi_N(\sigma,t)=\sum_{p\le N}p^{-\sigma}e^{-it\log p}.
+\]
+This is a generalized Fourier polynomial with epicycle radii $p^{-\sigma}$ and angular frequencies $\log p$. Unique factorization makes the frequencies rationally independent. Write $\mathcal M f=\lim_{T\to\infty}(2T)^{-1}\int_{-T}^T f(t)\,dt$ when the limit exists. Orthogonality gives
+$\mathcal M|\Phi_N|^2=\sum_{p\le N}p^{-2\sigma}$.
+The polynomials converge in the Besicovitch mean-square completion for $\sigma>1/2$, as do their formal derivatives of every fixed order, since
+$\sum_p(\log p)^{2k}p^{-2\sigma}<\infty$.
+This is convergence in a mean seminorm completion, not local convergence of the prime series or a holomorphic continuation of it.
+
+\section{Density waves and a positive energy criterion}
+Put $u=\log x$ and $X(u)=e^{-u/2}(\psi(e^u)-e^u)$.
+The explicit formula, with its usual midpoint convention at jumps, expresses $X$ as a sum of modes $-e^{(\rho-1/2)u}/\rho$ and known correction terms. A real conjugate-pair mode $y$ with $a=\beta-1/2$ satisfies
+\[
+y''-2ay'+(a^2+\gamma^2)y=0,\qquad
+\frac{d}{du}\frac{y'^2+(a^2+\gamma^2)y^2}{2}=2ay'^2.
+\]
+This is a mode identity, not an independently derived equation of motion for the prime density. Reflection symmetry pairs growth and decay, but does not imply positive energy conservation: $e^{2au}+e^{-2au}=2\cosh(2au)$ is nonconstant for $a\ne0$.
+
+Translations on $L^2(\mathbb R)$ are unitary and have self-adjoint generator $-i\,d/du$ with domain $H^1(\mathbb R)$. They preserve a positive norm but have no nonzero square-integrable eigenfunctions. No identification of their spectrum with zeta zeros has been established.
+
+\begin{proposition}
+If $\int_2^Y|\psi(x)-x|^2x^{-2}\,dx=O(\log Y)$, then RH holds.
+\end{proposition}
+\begin{proof}
+The hypothesis says $\int_{\log2}^L|X(u)|^2du=O(L)$. For every $\delta>0$, Cauchy--Schwarz on successive unit intervals shows that $\int_{\log2}^\infty |X(u)|e^{-\delta u}du<\infty$ (the interval norms are $O(\sqrt{j+1})$). Hence
+\[
+F(s)=\int_2^\infty(\psi(x)-x)x^{-s-1}dx
+\]
+is holomorphic for $\mathrm{Re}\,s>1/2$ by locally uniform domination. For $\mathrm{Re}\,s>1$,
+$F(s)=-\zeta'(s)/(s\zeta(s))-1/(s-1)+A(s)$,
+where $A$ is entire from the finite interval $[1,2]$. The pole at $1$ cancels, while any zero in the open right half of the critical strip would give a nonzero residue. Reflection symmetry then proves RH.
+\end{proof}
+The energy estimate is not established here; the elementary translation symmetry does not imply it. In fact the same proof works with any fixed polynomial bound in $L$ for the integrated energy.
+
+\section{Momentum selection and higher moments}
+\begin{proposition}
+For every positive integer $m$ and finite $N$,
+\[
+\mathcal M|\Phi_N|^{2m}
+=\sum_{\substack{(r_p):\,r_p\ge0\\\sum r_p=m}}
+\left(\frac{m!}{\prod r_p!}\right)^2
+\prod_{p\le N}p^{-2\sigma r_p}
+\le m!\left(\sum_{p\le N}p^{-2\sigma}\right)^m.
+\]
+In particular $\mathcal M|\Phi_N|^4=2(\sum_{p\le N}p^{-2\sigma})^2-\sum_{p\le N}p^{-4\sigma}$.
+\end{proposition}
+\begin{proof}
+Expansion and time averaging retain precisely the terms with
+$\sum_{j=1}^m\log p_j=\sum_{j=1}^m\log q_j$. Unique factorization makes the two multisets equal. Counting their orderings gives the formula; bounding one multinomial factor by $m!$ and applying the multinomial theorem gives the inequality.
+\end{proof}
+This exact resonance selection rule is analogous to momentum conservation. It is not a dynamical conservation law. Applying the bound to prime tails also gives convergence in each fixed Besicovitch $2m$-seminorm for $\sigma>1/2$.
+
+\section{Finite-window near-resonance: the remaining bridge}
+At finite $T$ the averaging kernel is $\sin(T\Delta)/(T\Delta)$ with $\Delta=\log(n/r)$, where $n,r$ are products of $m$ primes. For distinct products bounded by $N^m$, $|\Delta|\ge N^{-m}$ by integration of $1/x$ between the two integers. This elementary separation is not uniform as $N$ grows. The exact selection rule therefore does not control the near-resonances in the infinite spectrum on a fixed window.
+
+A continuous reference density $e^u/u$ for $u\ge\log2$ removes the known logarithmic singularity of the prime zeta function at $1$ in the Laplace transform, initially for $\mathrm{Re}\,s>1$. The resulting signed measure is the difference between the prime counting measure in log coordinates and that reference density. Its local transform estimates remain unproved. Neither finite mean moments nor subtraction of the reference alone provides the positive energy estimate above.
 
 \section{Conclusion}\label{sec:conclusion}
 The experiments separate two objects that are often identified. \emph{The helix} (the critical line with its heights) carries the arithmetic: the explicit formula ties the zeros to the prime powers through an exact identity (Table~\ref{tab:heights}), Landau's formula imprints each prime on the angles (Table~\ref{tab:filling}), and the zeros repel like eigenvalues along it (Tables~\ref{tab:spacing} and~\ref{tab:wrap}). \emph{The circle} carries the shape: the projected angles become equidistributed for any base and lose the arithmetic, and what survives is the radius. The Riemann Hypothesis is the statement that the closure of the picture consists of the circle together with the known impurities of Section~\ref{sec:impurities}. This division is a geometric interpretation, not a separation theorem: the explicit formula depends on both coordinates of every zero.

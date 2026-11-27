@@ -501,4 +501,101 @@ theorem mellinTail_left_taylor_coeff_nonneg (g : ℝ → ℝ) (a s u : ℝ) (k :
 
 #print axioms mellinTail_iteratedDeriv
 #print axioms mellinTail_left_taylor_coeff_nonneg
+
+/-- A convergent leftward Taylor series of a nonnegative Mellin tail
+gives absolute convergence at the shifted parameter, with the same sum. -/
+theorem mellinTail_left_taylor_integrable (g : ℝ → ℝ) (a s u r L : ℝ)
+    (ha : 0 ≤ a) (hu : s < u) (hr : 0 ≤ r) (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)))
+    (hnonneg : ∀ t, a ≤ t → 0 ≤ g (Real.exp t))
+    (hsum : HasSum (fun n : ℕ =>
+      ((-1 : ℝ) ^ n * iteratedDeriv n (mellinTail g a) u) / (n.factorial : ℝ) * r ^ n) L) :
+    Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-(u - r) * t))
+        (volume.restrict (Set.Ici a)) ∧
+      mellinTail g a (u - r) = L := by
+  let μ := volume.restrict (Set.Ici a)
+  let kernel (v : ℝ) (t : ℝ) := g (Real.exp t) * Real.exp (-v * t)
+  let weight (n : ℕ) : ℝ := r ^ n / n.factorial
+  let term (n : ℕ) (t : ℝ) := kernel u t * t ^ n * weight n
+  have hkernel_meas (v : ℝ) : Measurable (kernel v) :=
+    (hg.comp Real.continuous_exp.measurable).mul (by fun_prop)
+  have hkernel_nonneg (v t : ℝ) (ht : a ≤ t) : 0 ≤ kernel v t :=
+    mul_nonneg (hnonneg t ht) (Real.exp_pos _).le
+  have hterm_nonneg (n : ℕ) (t : ℝ) (ht : a ≤ t) : 0 ≤ term n t :=
+    mul_nonneg (mul_nonneg (hkernel_nonneg u t ht) (pow_nonneg (ha.trans ht) n))
+      (div_nonneg (pow_nonneg hr n) (Nat.cast_nonneg _))
+  have hterm_meas (n : ℕ) : Measurable (term n) :=
+    ((hkernel_meas u).mul (measurable_id.pow_const n)).mul_const (weight n)
+  have hterm_int (n : ℕ) : Integrable (term n) μ :=
+    (mellin_moments_inside g a s u n ha hu hg hi).mul_const (weight n)
+  have hcoeff (n : ℕ) : (∫ t, term n t ∂μ) =
+      ((-1 : ℝ) ^ n * iteratedDeriv n (mellinTail g a) u) / (n.factorial : ℝ) * r ^ n := by
+    have hsign : (-1 : ℝ) ^ n * (-1 : ℝ) ^ n = 1 := by
+      rw [← mul_pow]
+      norm_num
+    dsimp only [term, weight, kernel, μ]
+    rw [integral_mul_const, mellinTail_iteratedDeriv g a s n ha hg hi u hu,
+      ← mul_assoc, hsign, one_mul]
+    simp only [div_eq_mul_inv]
+    ring
+  have hpoint (t : ℝ) : HasSum (fun n => term n t) (kernel (u - r) t) := by
+    have h := (NormedSpace.expSeries_div_hasSum_exp ℝ (r * t)).mul_left (kernel u t)
+    rw [← Real.exp_eq_exp_ℝ] at h
+    have heq : kernel u t * Real.exp (r * t) = kernel (u - r) t := by
+      dsimp [kernel]
+      rw [mul_assoc, ← Real.exp_add]
+      congr 2
+      ring
+    rw [heq] at h
+    simpa only [term, weight, mul_pow, div_eq_mul_inv, mul_assoc, mul_left_comm, mul_comm] using h
+  have hmem : ∀ᵐ t ∂μ, t ∈ Set.Ici a := ae_restrict_mem measurableSet_Ici
+  have hint_nonneg (n : ℕ) : 0 ≤ ∫ t, term n t ∂μ :=
+    integral_nonneg_of_ae (hmem.mono fun t ht => hterm_nonneg n t ht)
+  have hcoef_sum : HasSum (fun n => ∫ t, term n t ∂μ) L := by
+    simpa only [hcoeff] using hsum
+  have hlin : (∫⁻ t, ENNReal.ofReal (kernel (u - r) t) ∂μ) = ENNReal.ofReal L := by
+    calc
+      _ = ∫⁻ t, ∑' n, ENNReal.ofReal (term n t) ∂μ := by
+        apply lintegral_congr_ae
+        filter_upwards [hmem] with t ht
+        rw [← ENNReal.ofReal_tsum_of_nonneg (fun n => hterm_nonneg n t ht)
+          (hpoint t).summable, (hpoint t).tsum_eq]
+      _ = ∑' n, ∫⁻ t, ENNReal.ofReal (term n t) ∂μ :=
+        landau_tonelli (fun n t => ENNReal.ofReal (term n t)) a
+          (fun n => (hterm_meas n).ennreal_ofReal)
+      _ = ENNReal.ofReal L := by
+        simp_rw [← ofReal_integral_eq_lintegral_ofReal (hterm_int _)
+          (hmem.mono fun t ht => hterm_nonneg _ t ht)]
+        rw [← ENNReal.ofReal_tsum_of_nonneg hint_nonneg hcoef_sum.summable, hcoef_sum.tsum_eq]
+  have hnonneg_ae : 0 ≤ᵐ[μ] kernel (u - r) :=
+    hmem.mono fun t ht => hkernel_nonneg (u - r) t ht
+  have hshift : Integrable (kernel (u - r)) μ :=
+    (lintegral_ofReal_ne_top_iff_integrable
+      (hkernel_meas (u - r)).aestronglyMeasurable hnonneg_ae).mp
+      (hlin.trans_ne ENNReal.ofReal_ne_top)
+  have hL : 0 ≤ L := hcoef_sum.tsum_eq ▸ tsum_nonneg hint_nonneg
+  refine ⟨hshift, ?_⟩
+  change (∫ t, kernel (u - r) t ∂μ) = L
+  rw [integral_eq_lintegral_of_nonneg_ae hnonneg_ae hshift.aestronglyMeasurable,
+    hlin, ENNReal.toReal_ofReal hL]
+
+/-- A leftward Taylor series cannot converge at a point below a lower bound
+for absolute convergence of the original Mellin integral. -/
+theorem mellinTail_left_taylor_not_summable (g : ℝ → ℝ) (a s u r σ : ℝ)
+    (ha : 0 ≤ a) (hu : s < u) (hr : 0 ≤ r) (hleft : u - r < σ)
+    (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)))
+    (hnonneg : ∀ t, a ≤ t → 0 ≤ g (Real.exp t))
+    (hlower : ∀ v : ℝ, Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-v * t))
+      (volume.restrict (Set.Ici a)) → σ ≤ v) :
+    ¬ Summable (fun n : ℕ =>
+      ((-1 : ℝ) ^ n * iteratedDeriv n (mellinTail g a) u) / (n.factorial : ℝ) * r ^ n) := by
+  intro hsum
+  exact not_le_of_gt hleft (hlower _ (mellinTail_left_taylor_integrable g a s u r _
+    ha hu hr hg hi hnonneg hsum.hasSum).1)
+
+#print axioms mellinTail_left_taylor_integrable
+#print axioms mellinTail_left_taylor_not_summable
 end RiemannResearch

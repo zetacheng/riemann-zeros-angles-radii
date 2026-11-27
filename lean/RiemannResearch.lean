@@ -1741,3 +1741,191 @@ theorem oneSidedBound_of_vonKoch_estimate (θ : ℝ) (hθ : 1 / 2 < θ)
 #print axioms riemannHypothesis_iff_primeError_mellin_continuation
 #print axioms oneSidedBound_of_vonKoch_estimate
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Interval Topology
+
+/-- The oscillatory factor of the Perron kernel on a vertical line. -/
+noncomputable def perronOscillatoryKernel (c u t : ℝ) : ℂ :=
+  Complex.exp (((u : ℂ) * Complex.I) * (t : ℂ)) / ((c : ℂ) + (t : ℂ) * Complex.I)
+
+theorem continuous_perronOscillatoryKernel (c u : ℝ) (hc : 0 < c) :
+    Continuous (perronOscillatoryKernel c u) := by
+  unfold perronOscillatoryKernel
+  have hden (t : ℝ) : (c : ℂ) + (t : ℂ) * Complex.I ≠ 0 := by
+    intro h
+    exact hc.ne' (by simpa [Complex.mul_re] using congrArg Complex.re h)
+  exact (by fun_prop : Continuous fun t : ℝ => Complex.exp (((u : ℂ) * Complex.I) * (t : ℂ))).div
+    (by fun_prop) hden
+
+/-- Integration by parts gives a uniform tail bound for the oscillatory
+Perron kernel between any two positive heights. -/
+theorem perronOscillatoryKernel_tail_bound (c u a b : ℝ)
+    (hc : 0 < c) (hu : u ≠ 0) (ha : 0 < a) (hab : a ≤ b) :
+    ‖∫ t in a..b, perronOscillatoryKernel c u t‖ ≤ 2 / (|u| * a) := by
+  let D (t : ℝ) : ℂ := (c : ℂ) + (t : ℂ) * Complex.I
+  let E (t : ℝ) : ℂ := Complex.exp (((u : ℂ) * Complex.I) * (t : ℂ))
+  let K : ℂ := (u : ℂ) * Complex.I
+  let U (t : ℝ) : ℂ := (D t)⁻¹
+  let V (t : ℝ) : ℂ := E t / K
+  let U' (t : ℝ) : ℂ := -Complex.I / (D t) ^ 2
+  have hD (t : ℝ) : D t ≠ 0 := by
+    intro h
+    exact hc.ne' (by simpa [D, Complex.mul_re] using congrArg Complex.re h)
+  have hK : K ≠ 0 := mul_ne_zero (Complex.ofReal_ne_zero.mpr hu) Complex.I_ne_zero
+  have hU (t : ℝ) : HasDerivAt U (U' t) t := by
+    have h : HasDerivAt (fun z : ℂ => (c : ℂ) + z * Complex.I) Complex.I (t : ℂ) := by
+      simpa only [id_eq, one_mul] using
+        (((hasDerivAt_id (t : ℂ)).mul_const Complex.I).const_add (c : ℂ))
+    exact (h.inv (hD t)).comp_ofReal
+  have hV (t : ℝ) : HasDerivAt V (E t) t := by
+    have h := ((((hasDerivAt_id (t : ℂ)).const_mul K).cexp).div_const K).comp_ofReal
+    simpa only [V, E, K, id_eq, mul_one, mul_div_cancel_right₀ _ hK] using h
+  have hUc : Continuous U := continuous_iff_continuousAt.mpr fun t => (hU t).continuousAt
+  have hVc : Continuous V := continuous_iff_continuousAt.mpr fun t => (hV t).continuousAt
+  have hU'c : Continuous U' := by
+    exact continuous_const.div (by dsimp [D]; fun_prop) (fun t => pow_ne_zero _ (hD t))
+  have hEc : Continuous E := by dsimp [E]; fun_prop
+  have hby := intervalIntegral.integral_mul_deriv_eq_deriv_mul_of_hasDerivAt
+    hUc.continuousOn hVc.continuousOn (fun t _ => hU t) (fun t _ => hV t)
+      (hU'c.intervalIntegrable a b) (hEc.intervalIntegrable a b)
+  have heq : (fun t => U t * E t) = perronOscillatoryKernel c u := by
+    funext t
+    simp only [U, D, E, perronOscillatoryKernel, div_eq_mul_inv]
+    exact mul_comm _ _
+  simp_rw [heq] at hby
+  have hE (t : ℝ) : ‖E t‖ = 1 := by simp [E, Complex.norm_exp, Complex.mul_re, Complex.mul_im]
+  have hVnorm (t : ℝ) : ‖V t‖ = |u|⁻¹ := by
+    simp [V, norm_div, hE, K, Real.norm_eq_abs, one_div]
+  have hDnorm (t : ℝ) (ht : 0 ≤ t) : t ≤ ‖D t‖ := by
+    simpa [D, Complex.mul_im, abs_of_nonneg ht] using Complex.abs_im_le_norm (D t)
+  have hend (t : ℝ) (ht : 0 < t) : ‖U t * V t‖ ≤ t⁻¹ * |u|⁻¹ := by
+    rw [norm_mul, hVnorm]
+    apply mul_le_mul_of_nonneg_right _ (inv_nonneg.mpr (abs_nonneg u))
+    simp only [U, norm_inv]
+    exact inv_anti₀ ht (hDnorm t ht.le)
+  have hrem (t : ℝ) (ht : t ∈ Icc a b) : ‖U' t * V t‖ ≤ t ^ (-2 : ℤ) * |u|⁻¹ := by
+    have ht0 := ha.trans_le ht.1
+    simp only [norm_mul, hVnorm, U', norm_div, norm_neg, Complex.norm_I, norm_pow, one_div, zpow_neg,
+      zpow_ofNat]
+    apply mul_le_mul_of_nonneg_right _ (inv_nonneg.mpr (abs_nonneg u))
+    exact inv_anti₀ (pow_pos ht0 _) (pow_le_pow_left₀ ht0.le (hDnorm t ht0.le) _)
+  have hnot : (0 : ℝ) ∉ [[a, b]] := by
+    rw [uIcc_of_le hab]
+    exact fun hh => (not_le_of_gt ha) hh.1
+  have hmono := intervalIntegral.integral_mono_on hab
+    ((hU'c.mul hVc).norm.intervalIntegrable a b)
+    ((intervalIntegral.intervalIntegrable_zpow (μ := volume) (n := -2) (Or.inr hnot)).mul_const (|u|⁻¹)) hrem
+  have hcalc : (∫ t in a..b, t ^ (-2 : ℤ) * |u|⁻¹) =
+      (a⁻¹ - b⁻¹) * |u|⁻¹ := by
+    rw [intervalIntegral.integral_mul_const, integral_zpow (Or.inr ⟨by norm_num, hnot⟩)]
+    norm_num [zpow_neg]
+    ring_nf
+    simp
+  rw [hby]
+  calc
+    _ ≤ ‖U b * V b‖ + ‖U a * V a‖ + ‖∫ t in a..b, U' t * V t‖ :=
+      (norm_sub_le _ _).trans (add_le_add_right (norm_sub_le _ _) _)
+    _ ≤ b⁻¹ * |u|⁻¹ + a⁻¹ * |u|⁻¹ + (a⁻¹ - b⁻¹) * |u|⁻¹ := by
+      apply add_le_add (add_le_add (hend b (ha.trans_le hab)) (hend a ha))
+      exact (intervalIntegral.norm_integral_le_integral_norm hab).trans (hmono.trans_eq hcalc)
+    _ = _ := by rw [div_eq_mul_inv, mul_inv_rev]; ring
+
+/-- The positive-height integral of the oscillatory Perron kernel
+converges as an improper limit for a nonzero frequency. -/
+theorem perronOscillatoryKernel_tendsto_pos (c u : ℝ) (hc : 0 < c) (hu : u ≠ 0) :
+    ∃ L : ℂ, Tendsto (fun b : ℝ => ∫ t in (0 : ℝ)..b, perronOscillatoryKernel c u t)
+      atTop (𝓝 L) := by
+  apply CompleteSpace.complete
+  apply Metric.cauchySeq_iff'.mpr
+  intro ε hε
+  have hu0 : 0 < |u| := abs_pos.mpr hu
+  let N := max 1 (3 / (|u| * ε))
+  have hN : 0 < N := zero_lt_one.trans_le (le_max_left _ _)
+  have hsmall : 2 / (|u| * N) < ε := by
+    apply (div_lt_iff₀ (mul_pos hu0 hN)).mpr
+    calc
+      2 < 3 := by norm_num
+      _ ≤ N * (|u| * ε) := (div_le_iff₀ (mul_pos hu0 hε)).mp (le_max_right _ _)
+      _ = ε * (|u| * N) := by ring
+  refine ⟨N, fun b hb => ?_⟩
+  have hcont := continuous_perronOscillatoryKernel c u hc
+  rw [dist_eq_norm, ← intervalIntegral.integral_add_adjacent_intervals
+    (hcont.intervalIntegrable 0 N) (hcont.intervalIntegrable N b), add_sub_cancel_left]
+  exact (perronOscillatoryKernel_tail_bound c u N b hc hu hN hb).trans_lt hsmall
+
+/-- For x > 0, factoring out the positive real power leaves oscillation
+with frequency log x. -/
+theorem perron_kernel_eq_factor (x c t : ℝ) (hx : 0 < x) :
+    (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) / ((c : ℂ) + (t : ℂ) * Complex.I) =
+      (x ^ c : ℝ) * perronOscillatoryKernel c (Real.log x) t := by
+  have hx0 : (x : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hx.ne'
+  rw [perronOscillatoryKernel, Complex.ofReal_cpow hx.le, ← mul_div_assoc]
+  simp only [Complex.cpow_def_of_ne_zero hx0, ← Complex.ofReal_log hx.le, ← Complex.exp_add]
+  congr 2
+  ring
+
+/-- The vertical-line Perron kernel has an explicit truncation bound away
+from the threshold x = 1. -/
+theorem perron_kernel_tail_bound (x c a b : ℝ) (hx : 0 < x) (hx1 : x ≠ 1)
+    (hc : 0 < c) (ha : 0 < a) (hab : a ≤ b) :
+    ‖∫ t in a..b, (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) /
+      ((c : ℂ) + (t : ℂ) * Complex.I)‖ ≤ (x ^ c : ℝ) * (2 / (|Real.log x| * a)) := by
+  simp_rw [perron_kernel_eq_factor x c _ hx, intervalIntegral.integral_const_mul,
+    norm_mul, Complex.norm_real, Real.norm_of_nonneg (Real.rpow_nonneg hx.le _)]
+  have hlog : Real.log x ≠ 0 := by
+    intro he
+    exact hx1 ((Real.exp_log hx).symm.trans (by simp [he]))
+  exact mul_le_mul_of_nonneg_left
+    (perronOscillatoryKernel_tail_bound c (Real.log x) a b hc hlog ha hab) (Real.rpow_nonneg hx.le _)
+
+/-- Conjugate symmetry turns the positive-height limit into the
+symmetric vertical-line limit used in Perron's formula. -/
+theorem perronOscillatoryKernel_tendsto_symmetric (c u : ℝ) (hc : 0 < c) (hu : u ≠ 0) :
+    ∃ L : ℂ, Tendsto (fun b : ℝ => ∫ t in -b..b, perronOscillatoryKernel c u t)
+      atTop (𝓝 L) := by
+  obtain ⟨L, hL⟩ := perronOscillatoryKernel_tendsto_pos c u hc hu
+  have hsym (t : ℝ) :
+      perronOscillatoryKernel c u (-t) = (starRingEnd ℂ) (perronOscillatoryKernel c u t) := by
+    simp only [perronOscillatoryKernel, Complex.ofReal_neg, map_div₀, map_add, map_mul,
+      Complex.conj_ofReal, Complex.conj_I, ← Complex.exp_conj, neg_mul, mul_neg]
+  have hcont := continuous_perronOscillatoryKernel c u hc
+  have heq (b : ℝ) : (∫ t in -b..b, perronOscillatoryKernel c u t) =
+      (starRingEnd ℂ) (∫ t in (0 : ℝ)..b, perronOscillatoryKernel c u t) +
+        ∫ t in (0 : ℝ)..b, perronOscillatoryKernel c u t := by
+    rw [← intervalIntegral.integral_add_adjacent_intervals
+      (hcont.intervalIntegrable (-b) 0) (hcont.intervalIntegrable 0 b)]
+    congr 1
+    have hneg := intervalIntegral.integral_comp_neg (a := (0 : ℝ)) (b := b)
+      (f := perronOscillatoryKernel c u)
+    simp only [neg_zero] at hneg
+    rw [← hneg]
+    simp only [hsym, intervalIntegral, integral_conj, map_sub]
+  refine ⟨(starRingEnd ℂ) L + L, ?_⟩
+  have hconj : Continuous (starRingEnd ℂ : ℂ → ℂ) := Complex.continuous_conj
+  exact ((hconj.continuousAt.tendsto.comp hL).add hL).congr (fun b => (heq b).symm)
+
+/-- The symmetric improper vertical-line Perron integral exists for
+positive x away from the step threshold. -/
+theorem perron_kernel_tendsto_symmetric (x c : ℝ)
+    (hx : 0 < x) (hx1 : x ≠ 1) (hc : 0 < c) :
+    ∃ L : ℂ, Tendsto (fun b : ℝ => ∫ t in -b..b,
+        (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) / ((c : ℂ) + (t : ℂ) * Complex.I))
+      atTop (𝓝 L) := by
+  have hlog : Real.log x ≠ 0 := by
+    intro he
+    exact hx1 ((Real.exp_log hx).symm.trans (by simp [he]))
+  obtain ⟨L, hL⟩ := perronOscillatoryKernel_tendsto_symmetric c (Real.log x) hc hlog
+  refine ⟨(x ^ c : ℝ) * L, ?_⟩
+  simp_rw [perron_kernel_eq_factor x c _ hx, intervalIntegral.integral_const_mul]
+  exact hL.const_mul _
+
+#print axioms continuous_perronOscillatoryKernel
+#print axioms perronOscillatoryKernel_tail_bound
+#print axioms perronOscillatoryKernel_tendsto_pos
+#print axioms perron_kernel_eq_factor
+#print axioms perron_kernel_tail_bound
+#print axioms perronOscillatoryKernel_tendsto_symmetric
+#print axioms perron_kernel_tendsto_symmetric
+end RiemannResearch

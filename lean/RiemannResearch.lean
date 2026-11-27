@@ -260,7 +260,8 @@ theorem mellin_polynomial_bound_pos (t d : ℝ) (k : ℕ)
     (ht : 0 ≤ t) (hd : 0 < d) :
     t ^ k ≤ ((k.factorial : ℝ) / d ^ k) * Real.exp (d * t) := by
   apply mellin_polynomial_bound t d k hd
-  exact Real.pow_div_factorial_le_exp (mul_nonneg hd.le ht) k
+  apply Real.pow_div_factorial_le_exp
+  all_goals first | exact mul_nonneg hd.le ht | exact k
 
 /-- All polynomial moments are integrable strictly inside the real
 half-line of absolute convergence. -/
@@ -273,7 +274,7 @@ theorem mellin_moments_inside (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
   let C : ℝ := (k.factorial : ℝ) / (u - s) ^ k
   have hC : 0 ≤ C := by
     dsimp [C]
-    positivity
+    exact div_nonneg (Nat.cast_nonneg _) (pow_nonneg (sub_nonneg.mpr hs.le) _)
   apply (hi.const_mul C).mono
     (((hg.comp Real.continuous_exp.measurable).mul
     (Real.continuous_exp.comp (continuous_const.mul continuous_id)).measurable).mul
@@ -292,10 +293,13 @@ theorem mellin_moments_inside (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
           (C * Real.exp ((u - s) * t)) :=
       mul_le_mul_of_nonneg_left hp (mul_nonneg (abs_nonneg _) (Real.exp_pos _).le)
     _ = C * (|g (Real.exp t)| * Real.exp (-s * t)) := by
-      rw [show (u - s) * t = u * t - s * t by ring, Real.exp_sub]
-      rw [show -u * t = -(u * t) by ring, Real.exp_neg]
-      field_simp [ne_of_gt (Real.exp_pos (u * t))]
-      <;> ring
+      have he : Real.exp (-u * t) * Real.exp ((u - s) * t) = Real.exp (-s * t) := by
+        rw [← Real.exp_add]
+        congr 1
+        ring
+      calc
+        _ = C * (|g (Real.exp t)| * (Real.exp (-u * t) * Real.exp ((u - s) * t))) := by ring
+        _ = _ := by rw [he]
 
 /-- Complex exponential Mellin kernel on finite real intervals. -/
 theorem mellin_complex_exp_interval (s : ℂ) (a b : ℝ) (hs : s ≠ 0) :
@@ -305,7 +309,7 @@ theorem mellin_complex_exp_interval (s : ℂ) (a b : ℝ) (hs : s ≠ 0) :
   have hn : -s ≠ 0 := neg_ne_zero.mpr hs
   apply intervalIntegral.integral_eq_sub_of_hasDerivAt
   · intro t _
-    have h := ((Complex.ofRealCLM.hasDerivAt).const_mul (-s)).cexp.div_const (-s)
+    have h := ((Complex.ofRealCLM.hasDerivAt (x := t)).const_mul (-s)).cexp.div_const (-s)
     convert h using 1 <;> simp [hn]
   · exact (Complex.continuous_exp.comp
       (continuous_const.mul Complex.continuous_ofReal)).intervalIntegrable a b

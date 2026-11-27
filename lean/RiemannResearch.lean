@@ -1012,3 +1012,177 @@ theorem adjustedPrimeError_mellin_at_zeta_zero (C θ : ℝ) (ρ : ℂ)
 #print axioms adjustedPrimeError_mellin_removable_one
 #print axioms adjustedPrimeError_mellin_at_zeta_zero
 end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory Filter Set
+
+/-- The complex Mellin transform in logarithmic coordinates on a specified set. -/
+noncomputable def complexMellinOn (g : ℝ → ℝ) (S : Set ℝ) (z : ℂ) : ℂ :=
+  ∫ t in S, (g (Real.exp t) : ℂ) * Complex.exp (-z * (t : ℂ))
+
+/-- The absolute convergence test for a complex kernel only involves the real part. -/
+theorem complexMellinOn_integrable_iff (g : ℝ → ℝ) (S : Set ℝ) (z : ℂ)
+    (hg : Measurable g) :
+    IntegrableOn (fun t : ℝ => (g (Real.exp t) : ℂ) * Complex.exp (-z * (t : ℂ))) S ↔
+      IntegrableOn (fun t : ℝ => g (Real.exp t) * Real.exp (-z.re * t)) S := by
+  have hmeas := hg.comp Real.continuous_exp.measurable
+  have hc : Measurable (fun t : ℝ => (g (Real.exp t) : ℂ) * Complex.exp (-z * (t : ℂ))) :=
+    (Complex.continuous_ofReal.measurable.comp hmeas).mul (by fun_prop)
+  have hr : Measurable (fun t : ℝ => g (Real.exp t) * Real.exp (-z.re * t)) :=
+    hmeas.mul (by fun_prop)
+  change Integrable _ (volume.restrict S) ↔ Integrable _ (volume.restrict S)
+  rw [← integrable_norm_iff hc.aestronglyMeasurable, ← integrable_norm_iff hr.aestronglyMeasurable]
+  simp only [norm_mul, Complex.norm_real, mellin_complex_kernel_norm,
+    Real.norm_of_nonneg (Real.exp_pos _).le, Real.norm_eq_abs]
+
+/-- Integrability of the zeroth and first moments at a real parameter
+gives holomorphy to its right on a nonnegative domain of integration. -/
+theorem complexMellinOn_analyticOnNhd (g : ℝ → ℝ) (S : Set ℝ) (v : ℝ)
+    (hS : MeasurableSet S) (hS0 : S ⊆ Ici 0) (hg : Measurable g)
+    (h0 : IntegrableOn (fun t : ℝ => g (Real.exp t) * Real.exp (-v * t)) S)
+    (h1 : IntegrableOn (fun t : ℝ => g (Real.exp t) * Real.exp (-v * t) * t) S) :
+    AnalyticOnNhd ℂ (complexMellinOn g S) {z : ℂ | v < z.re} := by
+  apply DifferentiableOn.analyticOnNhd _ (isOpen_lt continuous_const Complex.continuous_re)
+  intro z hz
+  change v < z.re at hz
+  let μ := volume.restrict S
+  let F (w : ℂ) (t : ℝ) := (g (Real.exp t) : ℂ) * Complex.exp (-w * (t : ℂ))
+  let D (w : ℂ) (t : ℝ) := F w t * (-(t : ℂ))
+  have hFmeas (w : ℂ) : Measurable (F w) :=
+    (Complex.continuous_ofReal.measurable.comp (hg.comp Real.continuous_exp.measurable)).mul
+      (by fun_prop)
+  have hDom (t : ℝ) (ht : t ∈ S) (w : ℂ) (hw : v ≤ w.re) :
+      ‖F w t‖ ≤ ‖g (Real.exp t) * Real.exp (-v * t)‖ := by
+    simp only [F, norm_mul, Complex.norm_real, mellin_complex_kernel_norm,
+      Real.norm_of_nonneg (Real.exp_pos _).le]
+    exact mul_le_mul_of_nonneg_left (mellin_kernel_le t v w.re (hS0 ht) hw) (norm_nonneg _)
+  have hFi : Integrable (F z) μ := by
+    apply Integrable.mono h0 (hFmeas z).aestronglyMeasurable
+    filter_upwards [ae_restrict_mem hS] with t ht
+    exact hDom t ht z hz.le
+  have hDm : AEStronglyMeasurable (D z) μ :=
+    ((hFmeas z).mul (Complex.continuous_ofReal.neg.measurable)).aestronglyMeasurable
+  have hBd : ∀ᵐ t ∂μ, ∀ w ∈ Metric.ball z (z.re - v),
+      ‖D w t‖ ≤ ‖g (Real.exp t) * Real.exp (-v * t) * t‖ := by
+    filter_upwards [ae_restrict_mem hS] with t ht w hw
+    have hdist : ‖w - z‖ < z.re - v := by simpa [Metric.mem_ball, dist_eq_norm] using hw
+    have hre : -(z.re - v) < (w - z).re :=
+      neg_lt_of_abs_lt ((Complex.abs_re_le_norm _).trans_lt hdist)
+    rw [Complex.sub_re] at hre
+    dsimp only [D]
+    rw [norm_mul (F w t), norm_neg, Complex.norm_real,
+      norm_mul (g (Real.exp t) * Real.exp (-v * t)) t]
+    exact mul_le_mul_of_nonneg_right (hDom t ht w (by linarith)) (norm_nonneg t)
+  have hdiff (t : ℝ) (w : ℂ) : HasDerivAt (fun u => F u t) (D w t) w := by
+    have h := (((hasDerivAt_id w).neg.mul_const (t : ℂ)).cexp.const_mul
+      (g (Real.exp t) : ℂ))
+    simpa only [F, D, id_eq, neg_one_mul, mul_assoc] using h
+  exact (hasDerivAt_integral_of_dominated_loc_of_deriv_le (sub_pos.mpr hz)
+    (Eventually.of_forall fun w => (hFmeas w).aestronglyMeasurable) hFi hDm hBd h1.norm
+    (Eventually.of_forall fun t w _ => hdiff t w)).2.differentiableAt.differentiableWithinAt
+
+/-- On a compact initial segment, every exponential moment is integrable
+once a single exponential weight is integrable. -/
+theorem mellin_prefix_moment_integrable (g : ℝ → ℝ) (a r v : ℝ) (k : ℕ)
+    (hi : IntegrableOn (fun t : ℝ => g (Real.exp t) * Real.exp (-r * t)) (Ico 0 a)) :
+    IntegrableOn (fun t : ℝ => g (Real.exp t) * Real.exp (-v * t) * t ^ k) (Ico 0 a) := by
+  let w : ℝ → ℝ := fun t => Real.exp ((r - v) * t) * t ^ k
+  have hw : Continuous w := by dsimp [w]; fun_prop
+  obtain ⟨M, hM⟩ := isCompact_Icc.exists_bound_of_continuousOn hw.continuousOn (s := Icc 0 a)
+  have hbound : ∀ᵐ t ∂volume.restrict (Ico (0 : ℝ) a), ‖w t‖ ≤ M := by
+    filter_upwards [ae_restrict_mem measurableSet_Ico] with t ht
+    exact hM t (Ico_subset_Icc_self ht)
+  apply (hi.bdd_mul' hw.measurable.aestronglyMeasurable hbound).congr
+  apply Eventually.of_forall
+  intro t
+  dsimp [w]
+  calc
+    _ = g (Real.exp t) * (Real.exp ((r - v) * t) * Real.exp (-r * t)) * t ^ k := by ring
+    _ = _ := by
+      rw [← Real.exp_add]
+      congr 3
+      ring
+
+/-- The finite prefix of the logarithmic-coordinate Mellin transform is entire. -/
+theorem complexMellinOn_prefix_entire (g : ℝ → ℝ) (a r : ℝ) (hg : Measurable g)
+    (hi : IntegrableOn (fun t : ℝ => g (Real.exp t) * Real.exp (-r * t)) (Ico 0 a)) :
+    ∀ z : ℂ, AnalyticAt ℂ (complexMellinOn g (Ico 0 a)) z := by
+  intro z
+  apply complexMellinOn_analyticOnNhd g (Ico 0 a) (z.re - 1) measurableSet_Ico
+    (fun _ ht => ht.1) hg
+  · simpa using mellin_prefix_moment_integrable g a r (z.re - 1) 0 hi
+  · simpa using mellin_prefix_moment_integrable g a r (z.re - 1) 1 hi
+  · show z.re - 1 < z.re
+    linarith
+
+/-- The complex tail is holomorphic strictly to the right of every
+absolutely convergent real parameter. -/
+theorem complexMellinOn_tail_analyticOnNhd (g : ℝ → ℝ) (a s : ℝ) (ha : 0 ≤ a) (hg : Measurable g)
+    (hi : IntegrableOn (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t)) (Ici a)) :
+    AnalyticOnNhd ℂ (complexMellinOn g (Ici a)) {z : ℂ | s < z.re} := by
+  intro z hz
+  change s < z.re at hz
+  let v := (s + z.re) / 2
+  have hsv : s < v := by dsimp [v]; linarith
+  have hvz : v < z.re := by dsimp [v]; linarith
+  apply complexMellinOn_analyticOnNhd g (Ici a) v measurableSet_Ici (fun _ ht => ha.trans ht) hg
+  · exact mellin_integrable_right g a s v ha hsv.le hg hi
+  · simpa using mellin_moments_inside g a s v 1 ha hsv hg hi
+  · exact hvz
+
+/-- The adjustment to the prime error used in the one-sided criterion. -/
+noncomputable def adjustedPrimeError (C θ x : ℝ) : ℝ := C * x ^ θ - primeError x
+
+theorem measurable_adjustedPrimeError (C θ : ℝ) : Measurable (adjustedPrimeError C θ) := by
+  have hpsi : Measurable chebyshevPsi :=
+    (measurable_of_countable (f := fun n : ℕ =>
+      ∑ k ∈ Finset.range (n + 1), ArithmeticFunction.vonMangoldt k)).comp measurable_id.nat_floor
+  exact (measurable_id.pow_const θ |>.const_mul C).sub (measurable_id.sub hpsi)
+
+/-- A one-sided prime-error bound supplies a nonnegative tail and an
+entire prefix whose transforms add to the explicit formula on the
+initial half-plane. The tail converges absolutely there. -/
+theorem adjustedPrimeError_mellin_tail_split (θ : ℝ) (hθ : θ ≤ 1) (h : OneSidedBound θ) :
+    ∃ C a : ℝ, 0 ≤ a ∧
+      (∀ t ≥ a, 0 ≤ adjustedPrimeError C θ (Real.exp t)) ∧
+      (∀ z : ℂ, AnalyticAt ℂ (complexMellinOn (adjustedPrimeError C θ) (Ico 0 a)) z) ∧
+      ∀ z : ℂ, 1 < z.re →
+        IntegrableOn (fun t : ℝ => adjustedPrimeError C θ (Real.exp t) *
+          Real.exp (-z.re * t)) (Ici a) ∧
+        complexMellinOn (adjustedPrimeError C θ) (Ico 0 a) z +
+          complexMellinOn (adjustedPrimeError C θ) (Ici a) z =
+            (C : ℂ) / (z - (θ : ℂ)) - 1 / (z - 1) +
+              (-deriv riemannZeta z / riemannZeta z) / z := by
+  obtain ⟨C, x₀, _, hx₀, hbound⟩ := h
+  let a := Real.log x₀
+  have ha : 0 ≤ a := Real.log_nonneg hx₀
+  let g := adjustedPrimeError C θ
+  have hg : Measurable g := measurable_adjustedPrimeError C θ
+  have h0a : Ico (0 : ℝ) a ⊆ Ici 0 := fun _ ht => ht.1
+  have haa : Ici a ⊆ Ici 0 := Ici_subset_Ici.mpr ha
+  have hi := (complexMellinOn_integrable_iff g (Ici 0) (2 : ℂ) hg).mp
+    (adjustedPrimeError_mellin C θ 2 hθ (by norm_num)).1
+  refine ⟨C, a, ha, ?_, complexMellinOn_prefix_entire g a _ hg (hi.mono_set h0a), ?_⟩
+  · intro t ht
+    have htx : x₀ ≤ Real.exp t := (Real.exp_log (zero_lt_one.trans_le hx₀)).symm.le.trans
+      (Real.exp_le_exp.mpr ht)
+    exact sub_nonneg.mpr (hbound _ htx)
+  · intro z hz
+    have hfull := adjustedPrimeError_mellin C θ z hθ hz
+    have htail := hfull.1.mono_set haa
+    have hprefix := hfull.1.mono_set h0a
+    refine ⟨(complexMellinOn_integrable_iff g (Ici a) z hg).mp htail, ?_⟩
+    have hd : Disjoint (Ico (0 : ℝ) a) (Ici a) :=
+      Set.disjoint_left.mpr fun _ ht₁ ht₂ => not_lt_of_ge ht₂ ht₁.2
+    unfold complexMellinOn adjustedPrimeError
+    rw [← setIntegral_union hd measurableSet_Ici hprefix htail, Ico_union_Ici_eq_Ici ha]
+    exact hfull.2
+
+#print axioms complexMellinOn_integrable_iff
+#print axioms complexMellinOn_analyticOnNhd
+#print axioms mellin_prefix_moment_integrable
+#print axioms complexMellinOn_prefix_entire
+#print axioms complexMellinOn_tail_analyticOnNhd
+#print axioms measurable_adjustedPrimeError
+#print axioms adjustedPrimeError_mellin_tail_split
+end RiemannResearch

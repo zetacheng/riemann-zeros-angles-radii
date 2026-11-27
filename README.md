@@ -1,6 +1,6 @@
 # Angles and Radii of the Riemann Zeros
 
-**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 16, 21 November 2026
+**The circle as the answer, and the routes to it** · Zeta Hoi-Ho Cheng · Version 22, 26 November 2026
 
 [Paper (PDF)](paper/Angles_and_Radii_of_the_Riemann_Zeros.pdf) · [LaTeX source](paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 

@@ -693,3 +693,199 @@ theorem mellinTail_not_complex_analyticAt_abscissa (g : ℝ → ℝ) (a σ : ℝ
 #print axioms mellinTail_not_analyticAt_abscissa
 #print axioms mellinTail_not_complex_analyticAt_abscissa
 end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory Filter Set Asymptotics
+
+/-- Separate the zero term from the partial sum used by Abel summation. -/
+theorem chebyshevPsi_eq_sum_Icc (x : ℝ) :
+    chebyshevPsi x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n := by
+  rw [chebyshevPsi, Nat.range_succ_eq_Icc_zero, ← Nat.Icc_insert_succ_left (Nat.zero_le _),
+    Finset.sum_insert (by simp)]
+  simp
+
+/-- An elementary bound sufficient for absolute convergence to the right of one. -/
+theorem chebyshevPsi_bounds (x : ℝ) (hx : 1 ≤ x) :
+    0 ≤ chebyshevPsi x ∧ chebyshevPsi x ≤ x * Real.log x := by
+  rw [chebyshevPsi_eq_sum_Icc]
+  refine ⟨Finset.sum_nonneg (fun _ _ => ArithmeticFunction.vonMangoldt_nonneg), ?_⟩
+  calc
+    _ ≤ ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, Real.log x := by
+      apply Finset.sum_le_sum
+      intro n hn
+      have hn' := Finset.mem_Icc.mp hn
+      exact ArithmeticFunction.vonMangoldt_le_log.trans (Real.log_le_log
+        (Nat.cast_pos.mpr (Nat.zero_lt_one.trans_le hn'.1))
+        ((Nat.cast_le.mpr hn'.2).trans (Nat.floor_le (zero_le_one.trans hx))))
+    _ = (⌊x⌋₊ : ℝ) * Real.log x := by
+      simp [Nat.card_Icc, nsmul_eq_mul]
+    _ ≤ x * Real.log x :=
+      mul_le_mul_of_nonneg_right (Nat.floor_le (zero_le_one.trans hx)) (Real.log_nonneg hx)
+
+/-- The von Mangoldt L-series is the Mellin transform of the real Chebyshev
+step function, multiplied by the complex parameter. -/
+theorem chebyshevPsi_mellin_LSeries (s : ℂ) (hs : 1 < s.re) :
+    LSeries (fun n => (ArithmeticFunction.vonMangoldt n : ℂ)) s =
+      s * ∫ x in Ioi (1 : ℝ), (chebyshevPsi x : ℂ) * (x : ℂ) ^ (-(s + 1)) := by
+  let ε := (s.re - 1) / 2
+  have hε : 0 < ε := by dsimp [ε]; linarith
+  have hgrowth : (fun n : ℕ => ∑ k ∈ Finset.Icc 1 n, ArithmeticFunction.vonMangoldt k)
+      =O[atTop] fun n => (n : ℝ) ^ (1 + ε) := by
+    have hlog := (isLittleO_log_rpow_atTop hε).isBigO.natCast_atTop
+    have hprod := (isBigO_refl (fun n : ℕ => (n : ℝ)) atTop).mul hlog
+    have hbound : (fun n : ℕ => ∑ k ∈ Finset.Icc 1 n, ArithmeticFunction.vonMangoldt k)
+        =O[atTop] fun n => (n : ℝ) * Real.log n := by
+      apply IsBigO.of_bound 1
+      filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn
+      have hn' : (1 : ℝ) ≤ (n : ℝ) := by exact_mod_cast hn
+      obtain ⟨h0, hb⟩ := chebyshevPsi_bounds (n : ℝ) hn'
+      rw [chebyshevPsi_eq_sum_Icc, Nat.floor_natCast] at h0 hb
+      rw [one_mul, Real.norm_of_nonneg h0, Real.norm_of_nonneg
+        (mul_nonneg (Nat.cast_nonneg _) (Real.log_nonneg hn'))]
+      exact hb
+    refine (hbound.trans hprod).congr' EventuallyEq.rfl ?_
+    filter_upwards [eventually_gt_atTop (0 : ℕ)] with n hn
+    rw [Real.rpow_add (Nat.cast_pos.mpr hn), Real.rpow_one]
+  have h := LSeries_eq_mul_integral_of_nonneg ArithmeticFunction.vonMangoldt
+    (show 0 ≤ 1 + ε by linarith) (show 1 + ε < s.re by dsimp [ε]; linarith)
+    hgrowth (fun _ => ArithmeticFunction.vonMangoldt_nonneg)
+  simpa only [chebyshevPsi_eq_sum_Icc, Complex.ofReal_sum] using h
+
+/-- The logarithmic substitution for Mellin integrals on the full ray. -/
+theorem mellin_integral_comp_exp (g : ℝ → ℝ) (s : ℂ) :
+    (∫ x in Ioi (1 : ℝ), (g x : ℂ) * (x : ℂ) ^ (-(s + 1))) =
+      ∫ t in Ici (0 : ℝ), (g (Real.exp t) : ℂ) * Complex.exp (-s * (t : ℂ)) := by
+  have himage : Real.exp '' Ioi (0 : ℝ) = Ioi (1 : ℝ) := by
+    ext x
+    constructor
+    · rintro ⟨t, ht, rfl⟩
+      exact Real.one_lt_exp_iff.mpr ht
+    · intro hx
+      have hx' : 0 < x := zero_lt_one.trans hx
+      exact ⟨Real.log x, Real.log_pos hx, Real.exp_log hx'⟩
+  rw [← himage, integral_image_eq_integral_abs_deriv_smul measurableSet_Ioi
+    (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn,
+    integral_Ici_eq_integral_Ioi]
+  apply setIntegral_congr_fun measurableSet_Ioi
+  intro t _
+  change |Real.exp t| • ((g (Real.exp t) : ℂ) * (Real.exp t : ℂ) ^ (-(s + 1))) =
+    (g (Real.exp t) : ℂ) * Complex.exp (-s * (t : ℂ))
+  rw [abs_of_pos (Real.exp_pos _), Complex.real_smul, Complex.cpow_def_of_ne_zero
+    (Complex.ofReal_ne_zero.mpr (Real.exp_pos t).ne'),
+    ← Complex.ofReal_log (Real.exp_pos t).le, Real.log_exp, Complex.ofReal_exp,
+    mul_left_comm, ← Complex.exp_add]
+  congr 2
+  ring
+
+/-- In logarithmic coordinates the Chebyshev Mellin integral is the
+negative logarithmic derivative of zeta divided by the parameter. -/
+theorem mellin_chebyshevPsi_log (s : ℂ) (hs : 1 < s.re) :
+    (∫ t in Ici (0 : ℝ), (chebyshevPsi (Real.exp t) : ℂ) * Complex.exp (-s * (t : ℂ))) =
+      (- deriv riemannZeta s / riemannZeta s) / s := by
+  have hn : s ≠ 0 := Complex.ne_zero_of_re_pos (zero_lt_one.trans hs)
+  have h := chebyshevPsi_mellin_LSeries s hs
+  rw [ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div hs, mellin_integral_comp_exp] at h
+  exact ((div_eq_iff hn).mpr (h.trans (mul_comm _ _))).symm
+
+/-- The logarithmic-coordinate Chebyshev Mellin integral converges absolutely
+throughout the half-plane `1 < s.re`. -/
+theorem mellin_chebyshevPsi_log_integrable (s : ℂ) (hs : 1 < s.re) :
+    IntegrableOn (fun t : ℝ => (chebyshevPsi (Real.exp t) : ℂ) *
+      Complex.exp (-s * (t : ℂ))) (Ici 0) := by
+  let ε := (s.re - 1) / 2
+  have hε : 0 < ε := by dsimp [ε]; linarith
+  have hmajorant : IntegrableOn (fun t : ℝ => Real.exp ((1 - s.re + ε) * t) / ε) (Ici 0) :=
+    (integrableOn_Ici_iff_integrableOn_Ioi.mpr
+      (integrableOn_exp_mul_Ioi (a := 1 - s.re + ε) (by dsimp [ε]; linarith) 0)).div_const ε
+  have hpsi : Measurable chebyshevPsi :=
+    (measurable_of_countable (f := fun n : ℕ =>
+      ∑ k ∈ Finset.range (n + 1), ArithmeticFunction.vonMangoldt k)).comp measurable_id.nat_floor
+  apply Integrable.mono hmajorant (((Complex.continuous_ofReal.measurable.comp
+    (hpsi.comp Real.continuous_exp.measurable)).mul (by fun_prop)).aestronglyMeasurable)
+  filter_upwards [ae_restrict_mem measurableSet_Ici] with t ht
+  obtain ⟨h0, hb⟩ := chebyshevPsi_bounds (Real.exp t) (Real.one_le_exp_iff.mpr ht)
+  have ht' : t ≤ Real.exp (ε * t) / ε := (le_div_iff₀ hε).mpr (by
+    have hexp := Real.add_one_le_exp (ε * t)
+    linarith)
+  change ‖(chebyshevPsi (Real.exp t) : ℂ) * Complex.exp (-s * (t : ℂ))‖ ≤
+    ‖Real.exp ((1 - s.re + ε) * t) / ε‖
+  rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg h0, mellin_complex_kernel_norm,
+    Real.norm_of_nonneg (div_nonneg (Real.exp_pos _).le hε.le)]
+  calc
+    _ ≤ (Real.exp t * t) * Real.exp (-s.re * t) := by
+      rw [Real.log_exp] at hb
+      exact mul_le_mul_of_nonneg_right hb (Real.exp_pos _).le
+    _ = t * Real.exp ((1 - s.re) * t) := by
+      rw [mul_comm (Real.exp t) t, mul_assoc, ← Real.exp_add]
+      congr 2
+      ring
+    _ ≤ (Real.exp (ε * t) / ε) * Real.exp ((1 - s.re) * t) :=
+      mul_le_mul_of_nonneg_right ht' (Real.exp_pos _).le
+    _ = Real.exp ((1 - s.re + ε) * t) / ε := by
+      rw [div_mul_eq_mul_div, ← Real.exp_add]
+      congr 2
+      ring
+
+/-- The exponential kernel's half-line Bochner integral, with absolute
+convergence supplied by the exponential bound. -/
+theorem mellin_complex_integral_Ici (s : ℂ) (a : ℝ) (hs : 0 < s.re) :
+    (∫ t in Ici a, Complex.exp (-s * (t : ℂ))) = Complex.exp (-s * (a : ℂ)) / s := by
+  rw [integral_Ici_eq_integral_Ioi]
+  simpa only [neg_div_neg_eq] using
+    integral_exp_mul_complex_Ioi (a := -s) (by simpa only [Complex.neg_re, neg_lt_zero] using hs) a
+
+/-- The full-ray Mellin transform of the adjusted q = 1 prime error
+converges absolutely and has the v16 formula on the initial half-plane. -/
+theorem adjustedPrimeError_mellin (C θ : ℝ) (s : ℂ) (hθ : θ ≤ 1) (hs : 1 < s.re) :
+    IntegrableOn (fun t : ℝ => ((C * (Real.exp t) ^ θ - primeError (Real.exp t) : ℝ) : ℂ) *
+        Complex.exp (-s * (t : ℂ))) (Ici 0) ∧
+    (∫ t in Ici (0 : ℝ), ((C * (Real.exp t) ^ θ - primeError (Real.exp t) : ℝ) : ℂ) *
+        Complex.exp (-s * (t : ℂ))) =
+      (C : ℂ) / (s - (θ : ℂ)) - 1 / (s - 1) + (-deriv riemannZeta s / riemannZeta s) / s := by
+  have hkernel (z : ℂ) (hz : 0 < z.re) :
+      IntegrableOn (fun t : ℝ => Complex.exp (-z * (t : ℂ))) (Ici 0) :=
+    integrableOn_Ici_iff_integrableOn_Ioi.mpr
+      (integrableOn_exp_mul_complex_Ioi (a := -z) (by simpa only [Complex.neg_re, neg_lt_zero] using hz) 0)
+  have hθpos : 0 < (s - (θ : ℂ)).re := by
+    simp only [Complex.sub_re, Complex.ofReal_re]
+    linarith
+  have h1pos : 0 < (s - 1).re := by
+    simp only [Complex.sub_re, Complex.one_re]
+    linarith
+  have hC := (hkernel (s - (θ : ℂ)) hθpos).const_mul (C : ℂ)
+  have h1 := hkernel (s - 1) h1pos
+  have hψ := mellin_chebyshevPsi_log_integrable s hs
+  have hshift (r t : ℝ) : (Real.exp (t * r) : ℂ) * Complex.exp (-s * (t : ℂ)) =
+      Complex.exp (-(s - (r : ℂ)) * (t : ℂ)) := by
+    rw [Complex.ofReal_exp, Complex.ofReal_mul, ← Complex.exp_add]
+    congr 1
+    ring
+  have heq (t : ℝ) : ((C * (Real.exp t) ^ θ - primeError (Real.exp t) : ℝ) : ℂ) *
+      Complex.exp (-s * (t : ℂ)) =
+      (C : ℂ) * Complex.exp (-(s - (θ : ℂ)) * (t : ℂ)) -
+        Complex.exp (-(s - 1) * (t : ℂ)) +
+        (chebyshevPsi (Real.exp t) : ℂ) * Complex.exp (-s * (t : ℂ)) := by
+    have hlinear := hshift 1 t
+    simp only [mul_one, Complex.ofReal_one] at hlinear
+    simp only [primeError, Complex.ofReal_sub, Complex.ofReal_mul, ← Real.exp_mul,
+      sub_mul, mul_assoc, hshift, hlinear]
+    abel
+  simp_rw [heq]
+  refine ⟨(hC.sub h1).add hψ, ?_⟩
+  have hadd := integral_add (hC.sub h1) hψ
+  have hsub := integral_sub hC h1
+  simp only [Pi.sub_apply] at hadd hsub
+  rw [hadd, hsub, integral_const_mul,
+    mellin_complex_integral_Ici _ _ hθpos, mellin_complex_integral_Ici _ _ h1pos,
+    mellin_chebyshevPsi_log s hs]
+  simp [div_eq_mul_inv]
+
+#print axioms chebyshevPsi_eq_sum_Icc
+#print axioms chebyshevPsi_bounds
+#print axioms chebyshevPsi_mellin_LSeries
+#print axioms mellin_integral_comp_exp
+#print axioms mellin_chebyshevPsi_log
+#print axioms mellin_chebyshevPsi_log_integrable
+#print axioms mellin_complex_integral_Ici
+#print axioms adjustedPrimeError_mellin
+end RiemannResearch

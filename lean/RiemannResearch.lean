@@ -598,4 +598,98 @@ theorem mellinTail_left_taylor_not_summable (g : ℝ → ℝ) (a s u r σ : ℝ)
 
 #print axioms mellinTail_left_taylor_integrable
 #print axioms mellinTail_left_taylor_not_summable
+
+/-- A nonnegative Mellin tail has no real-analytic continuation through
+its finite abscissa of absolute convergence. -/
+theorem mellinTail_not_analyticAt_abscissa (g : ℝ → ℝ) (a σ : ℝ)
+    (ha : 0 ≤ a) (hg : Measurable g)
+    (hnonneg : ∀ t, a ≤ t → 0 ≤ g (Real.exp t))
+    (hupper : ∀ s > σ, Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)))
+    (hlower : ∀ s : ℝ, Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)) → σ ≤ s) :
+    ¬ ∃ F : ℝ → ℝ, AnalyticAt ℝ F σ ∧ F =ᶠ[nhdsWithin σ (Set.Ioi σ)] mellinTail g a := by
+  rintro ⟨F, ⟨p, R, hp⟩, hagree⟩
+  obtain ⟨δ, hδ, hagree⟩ := Metric.eventually_nhds_iff.mp
+    (eventually_nhdsWithin_iff.mp hagree)
+  obtain ⟨B, _, hB, hBR⟩ := ENNReal.lt_iff_exists_real_btwn.mp hp.r_pos
+  have hBpos : 0 < B := ENNReal.ofReal_pos.mp hB
+  let ε := min δ B / 4
+  have hε : 0 < ε := div_pos (lt_min hδ hBpos) (by norm_num)
+  have hεδ : ε < δ := by
+    have := min_le_left δ B
+    dsimp [ε]
+    linarith
+  have hεB : 3 * ε < B := by
+    have := min_le_right δ B
+    dsimp [ε]
+    linarith
+  have hεR : ENNReal.ofReal (ε + 2 * ε) < R :=
+    ((ENNReal.ofReal_lt_ofReal_iff hBpos).mpr (by linarith)).trans hBR
+  have hshift : (‖ε‖₊ : ENNReal) < R := by
+    change ‖ε‖ₑ < R
+    rw [Real.enorm_eq_ofReal_abs, abs_of_pos hε]
+    exact (ENNReal.ofReal_le_ofReal (by linarith : ε ≤ ε + 2 * ε)).trans_lt hεR
+  have hleft : -(2 * ε) ∈ EMetric.ball (0 : ℝ) (R - ‖ε‖₊) := by
+    rw [mem_emetric_ball_zero_iff, lt_tsub_iff_right]
+    change ‖-(2 * ε)‖ₑ + ‖ε‖ₑ < R
+    rw [Real.enorm_eq_ofReal_abs, Real.enorm_eq_ofReal_abs, abs_neg,
+      abs_of_pos (by linarith : 0 < 2 * ε), abs_of_pos hε, add_comm,
+      ← ENNReal.ofReal_add hε.le (by linarith)]
+    exact hεR
+  let u := σ + ε
+  have hu : σ < u := by dsimp [u]; linarith
+  have huball : u ∈ Metric.ball σ δ := by
+    rw [Metric.mem_ball, Real.dist_eq]
+    have heq : u - σ = ε := by dsimp [u]; ring
+    simpa only [heq, abs_of_pos hε] using hεδ
+  have huagree : F =ᶠ[nhds u] mellinTail g a := by
+    filter_upwards [Metric.isOpen_ball.mem_nhds huball, Ioi_mem_nhds hu] with v hv hvσ
+    exact hagree (Metric.mem_ball.mp hv) hvσ
+  have hseries := hp.changeOrigin hshift
+  have htaylor := hseries.hasFPowerSeriesAt.eq_formalMultilinearSeries
+    hseries.analyticAt.hasFPowerSeriesAt
+  have hsum := (hseries.hasSum hleft).summable
+  rw [htaylor] at hsum
+  refine mellinTail_left_taylor_not_summable g a (σ + ε / 2) u (2 * ε) σ
+    ha (by dsimp [u]; linarith) (by linarith) (by dsimp [u]; linarith)
+    hg (hupper _ (by linarith)) hnonneg hlower ?_
+  convert hsum using 1
+  ext n
+  rw [FormalMultilinearSeries.ofScalars_apply_eq, smul_eq_mul, neg_pow (2 * ε) n]
+  rw [show σ + ε = u from rfl, huagree.iteratedDeriv_eq n]
+  simp only [div_eq_mul_inv]
+  ac_rfl
+
+/-- A complex-analytic continuation of the Mellin integral would give a
+real-analytic continuation along the real axis. Landau's real obstruction
+therefore excludes such a continuation at the abscissa. -/
+theorem mellinTail_not_complex_analyticAt_abscissa (g : ℝ → ℝ) (a σ : ℝ)
+    (ha : 0 ≤ a) (hg : Measurable g)
+    (hnonneg : ∀ t, a ≤ t → 0 ≤ g (Real.exp t))
+    (hupper : ∀ s > σ, Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)))
+    (hlower : ∀ s : ℝ, Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)) → σ ≤ s) :
+    ¬ ∃ F : ℂ → ℂ, AnalyticAt ℂ F (σ : ℂ) ∧
+      (∀ᶠ v : ℝ in nhdsWithin σ (Set.Ioi σ), F (v : ℂ) =
+        ∫ t in Set.Ici a, (g (Real.exp t) : ℂ) * Complex.exp (-(v : ℂ) * (t : ℂ))) := by
+  rintro ⟨F, hF, hagree⟩
+  apply mellinTail_not_analyticAt_abscissa g a σ ha hg hnonneg hupper hlower
+  refine ⟨fun v : ℝ => (F (v : ℂ)).re, ?_, ?_⟩
+  · have hreal : AnalyticAt ℝ F (σ : ℂ) := hF.restrictScalars
+    have haxis : AnalyticAt ℝ (fun v : ℝ => F (v : ℂ)) σ :=
+      hreal.comp (Complex.ofRealCLM.analyticAt σ)
+    exact (Complex.reCLM.analyticAt (F (σ : ℂ))).comp
+      (f := fun v : ℝ => F (v : ℂ)) haxis
+  · filter_upwards [hagree] with v hv
+    have hcast : (∫ t in Set.Ici a, (g (Real.exp t) : ℂ) *
+        Complex.exp (-(v : ℂ) * (t : ℂ))) = (mellinTail g a v : ℂ) := by
+      simp only [mellinTail, ← integral_complex_ofReal, Complex.ofReal_mul,
+        Complex.ofReal_exp, Complex.ofReal_neg]
+    change (F (v : ℂ)).re = mellinTail g a v
+    rw [hv, hcast, Complex.ofReal_re]
+
+#print axioms mellinTail_not_analyticAt_abscissa
+#print axioms mellinTail_not_complex_analyticAt_abscissa
 end RiemannResearch

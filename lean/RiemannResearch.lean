@@ -894,45 +894,67 @@ namespace RiemannResearch
 open Filter Set
 open scoped Topology
 
+/-- The entire factor of zeta after removing its simple pole at one. -/
+noncomputable def regularizedZeta : ℂ → ℂ := by
+  classical
+  exact Function.update (fun z => (z - 1) * riemannZeta z) 1 1
+
+@[simp]
+theorem regularizedZeta_one : regularizedZeta 1 = 1 := by
+  simp [regularizedZeta]
+
+theorem regularizedZeta_eventuallyEq (z : ℂ) (hz : z ≠ 1) :
+    regularizedZeta =ᶠ[𝓝 z] fun w => (w - 1) * riemannZeta w := by
+  filter_upwards [eventually_ne_nhds hz] with w hw
+  exact Function.update_of_ne hw _ _
+
+theorem regularizedZeta_analyticAt (z : ℂ) : AnalyticAt ℂ regularizedZeta z := by
+  have hd (w : ℂ) (hw : w ≠ 1) : DifferentiableAt ℂ regularizedZeta w :=
+    ((differentiableAt_id.sub_const (1 : ℂ)).mul
+      (differentiableAt_riemannZeta hw)).congr_of_eventuallyEq (regularizedZeta_eventuallyEq w hw)
+  by_cases hz : z = 1
+  · subst z
+    apply Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt
+    · filter_upwards [self_mem_nhdsWithin] with w hw
+      exact hd w hw
+    · simpa only [regularizedZeta, continuousAt_update_same] using riemannZeta_residue_one
+  · apply DifferentiableOn.analyticAt _ (isOpen_compl_singleton.mem_nhds
+      (show z ∈ ({1}ᶜ : Set ℂ) from hz))
+    exact fun w hw => (hd w hw).differentiableWithinAt
+
+/-- Off the pole and the zeros, the regularized logarithmic derivative
+agrees with the original pair of Mellin terms. -/
+theorem regularizedZeta_mellin_eq (z : ℂ) (hz0 : z ≠ 0) (hz1 : z ≠ 1)
+    (hζ : riemannZeta z ≠ 0) :
+    -(1 + deriv regularizedZeta z / regularizedZeta z) / z =
+      -1 / (z - 1) + (-deriv riemannZeta z / riemannZeta z) / z := by
+  have heq := regularizedZeta_eventuallyEq z hz1
+  have hsub : HasDerivAt (fun w : ℂ => w - 1) 1 z := (hasDerivAt_id z).sub_const 1
+  have hprod := hsub.mul (differentiableAt_riemannZeta hz1).hasDerivAt
+  have hderiv : deriv regularizedZeta z = riemannZeta z + (z - 1) * deriv riemannZeta z := by
+    rw [heq.deriv_eq, hprod.deriv, one_mul]
+  have hdiff : z - 1 ≠ 0 := sub_ne_zero.mpr hz1
+  rw [hderiv, heq.eq_of_nhds]
+  field_simp
+  ring
+
 /-- The two singular terms in the Mellin formula combine to a holomorphic
 function at one. The equality specifies its values off the center. -/
 theorem riemannZeta_mellin_pole_cancel_one :
     ∃ F : ℂ → ℂ, AnalyticAt ℂ F 1 ∧
       F =ᶠ[𝓝[≠] (1 : ℂ)] fun s =>
         -1 / (s - 1) + (-deriv riemannZeta s / riemannZeta s) / s := by
-  let U : ℂ → ℂ := Function.update (fun s => (s - 1) * riemannZeta s) 1 1
-  have hU1 : U 1 = 1 := Function.update_self _ _ _
-  have hU_ne (s : ℂ) (hs : s ≠ 1) :
-      U =ᶠ[𝓝 s] fun z => (z - 1) * riemannZeta z := by
-    filter_upwards [eventually_ne_nhds hs] with z hz
-    exact Function.update_of_ne hz _ _
-  have hderiv (s : ℂ) (hs : s ≠ 1) :
-      deriv U s = riemannZeta s + (s - 1) * deriv riemannZeta s := by
-    have hsub : HasDerivAt (fun z : ℂ => z - 1) 1 s := (hasDerivAt_id s).sub_const 1
-    have hprod := hsub.mul (differentiableAt_riemannZeta hs).hasDerivAt
-    rw [(hU_ne s hs).deriv_eq, hprod.deriv, one_mul]
-  have hU : AnalyticAt ℂ U 1 := by
-    apply Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt
-    · filter_upwards [self_mem_nhdsWithin] with s hs
-      exact (((differentiableAt_id.sub_const (1 : ℂ)).mul
-        (differentiableAt_riemannZeta hs))).congr_of_eventuallyEq (hU_ne s hs)
-    · simpa only [U, continuousAt_update_same] using riemannZeta_residue_one
-  have hU1_ne : U 1 ≠ 0 := hU1.trans_ne one_ne_zero
-  have hF : AnalyticAt ℂ (fun s => -(1 + deriv U s / U s) / s) 1 :=
-    ((analyticAt_const.add (hU.deriv.div hU hU1_ne)).neg).div analyticAt_id one_ne_zero
+  have hU := regularizedZeta_analyticAt 1
+  have hU1 : regularizedZeta 1 ≠ 0 := by simp
+  have hF : AnalyticAt ℂ (fun s => -(1 + deriv regularizedZeta s / regularizedZeta s) / s) 1 :=
+    ((analyticAt_const.add (hU.deriv.div hU hU1)).neg).div analyticAt_id one_ne_zero
   refine ⟨_, hF, ?_⟩
-  filter_upwards [self_mem_nhdsWithin, (hU.continuousAt.eventually_ne hU1_ne).filter_mono
+  filter_upwards [self_mem_nhdsWithin, (hU.continuousAt.eventually_ne hU1).filter_mono
     nhdsWithin_le_nhds, eventually_ne_nhdsWithin (one_ne_zero : (1 : ℂ) ≠ 0)] with s hs hUs hs0
-  have hs1 : s ≠ 1 := hs
-  have hUval : U s = (s - 1) * riemannZeta s := Function.update_of_ne hs1 _ _
   have hζ : riemannZeta s ≠ 0 := by
     intro hz
-    exact hUs (by simp [hUval, hz])
-  have hsub : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
-  change -(1 + deriv U s / U s) / s = -1 / (s - 1) + (-deriv riemannZeta s / riemannZeta s) / s
-  rw [hUval, hderiv s hs1]
-  field_simp
-  ring
+    exact hUs (by rw [(regularizedZeta_eventuallyEq s hs).eq_of_nhds, hz, mul_zero])
+  exact regularizedZeta_mellin_eq s hs0 hs hζ
 
 /-- The adjusted prime-error Mellin formula admits a holomorphic
 representative at one when the exponent is strictly below one. -/
@@ -1185,4 +1207,110 @@ theorem adjustedPrimeError_mellin_tail_split (θ : ℝ) (hθ : θ ≤ 1) (h : On
 #print axioms complexMellinOn_tail_analyticOnNhd
 #print axioms measurable_adjustedPrimeError
 #print axioms adjustedPrimeError_mellin_tail_split
+end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set
+open scoped Topology
+
+/-- Clearing the denominators lets the Mellin identity propagate across
+the whole convergence half-plane, including at the zeros of the factors. -/
+theorem adjustedPrimeError_mellin_cleared_identity (C θ σ : ℝ) (hθ : θ ≤ 1) (hσ : σ ≤ 1)
+    (F : ℂ → ℂ) (hF : AnalyticOnNhd ℂ F {z : ℂ | σ < z.re})
+    (hinit : ∀ z : ℂ, 1 < z.re →
+      F z = (C : ℂ) / (z - (θ : ℂ)) - 1 / (z - 1) +
+        (-deriv riemannZeta z / riemannZeta z) / z) :
+    EqOn (fun z => z * (z - (θ : ℂ)) * regularizedZeta z * F z)
+      (fun z => (C : ℂ) * z * regularizedZeta z -
+        (z - (θ : ℂ)) * (regularizedZeta z + deriv regularizedZeta z))
+      {z : ℂ | σ < z.re} := by
+  apply AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq (𝕜 := ℂ) (z₀ := (2 : ℂ))
+  · intro z hz
+    exact (((analyticAt_id.mul (analyticAt_id.sub analyticAt_const)).mul
+      (regularizedZeta_analyticAt z)).mul (hF z hz))
+  · intro z _
+    exact ((analyticAt_const.mul analyticAt_id).mul (regularizedZeta_analyticAt z)).sub
+      ((analyticAt_id.sub analyticAt_const).mul
+        ((regularizedZeta_analyticAt z).add (regularizedZeta_analyticAt z).deriv))
+  · exact (convex_halfSpace_re_gt σ).isPreconnected
+  · change σ < (2 : ℂ).re
+    exact hσ.trans_lt (by norm_num)
+  · have hopen : {z : ℂ | 1 < z.re} ∈ 𝓝 (2 : ℂ) :=
+      (isOpen_lt continuous_const Complex.continuous_re).mem_nhds (by norm_num)
+    filter_upwards [hopen] with z hz
+    change 1 < z.re at hz
+    have hz0 : z ≠ 0 := Complex.ne_zero_of_re_pos (zero_lt_one.trans hz)
+    have hz1 : z ≠ 1 := by
+      intro h
+      simp [h] at hz
+    have hzθ : z - (θ : ℂ) ≠ 0 := sub_ne_zero.mpr (by
+      intro h
+      exact (not_lt_of_ge hθ) (by simpa [h] using hz))
+    have hζ := riemannZeta_ne_zero_of_one_le_re hz.le
+    have hU : regularizedZeta z ≠ 0 := by
+      rw [(regularizedZeta_eventuallyEq z hz1).eq_of_nhds]
+      exact mul_ne_zero (sub_ne_zero.mpr hz1) hζ
+    have hinit' : F z = (C : ℂ) / (z - (θ : ℂ)) -
+        (1 + deriv regularizedZeta z / regularizedZeta z) / z := by
+      rw [hinit z hz]
+      linear_combination -(regularizedZeta_mellin_eq z hz0 hz1 hζ)
+    change z * (z - (θ : ℂ)) * regularizedZeta z * F z =
+      (C : ℂ) * z * regularizedZeta z -
+        (z - (θ : ℂ)) * (regularizedZeta z + deriv regularizedZeta z)
+    rw [hinit']
+    field_simp
+    ring
+
+/-- Recover the regularized Mellin formula on the convergence half-plane
+where the recovered expression has nonzero denominators. -/
+theorem adjustedPrimeError_mellin_continuation (C θ σ : ℝ) (hθ : θ ≤ 1) (hσ : σ ≤ 1)
+    (F : ℂ → ℂ) (hF : AnalyticOnNhd ℂ F {z : ℂ | σ < z.re})
+    (hinit : ∀ z : ℂ, 1 < z.re →
+      F z = (C : ℂ) / (z - (θ : ℂ)) - 1 / (z - 1) +
+        (-deriv riemannZeta z / riemannZeta z) / z)
+    (z : ℂ) (hz : σ < z.re) (hz0 : z ≠ 0) (hzθ : z ≠ (θ : ℂ))
+    (hU : regularizedZeta z ≠ 0) :
+    F z = (C : ℂ) / (z - (θ : ℂ)) - (1 + deriv regularizedZeta z / regularizedZeta z) / z := by
+  have hid := adjustedPrimeError_mellin_cleared_identity C θ σ hθ hσ F hF hinit hz
+  have hdθ : z - (θ : ℂ) ≠ 0 := sub_ne_zero.mpr hzθ
+  apply mul_left_cancel₀ (mul_ne_zero (mul_ne_zero hz0 hdθ) hU)
+  change z * (z - (θ : ℂ)) * regularizedZeta z * F z = _ at hid
+  rw [hid]
+  field_simp
+  ring
+
+/-- The regularized identity applies to the sum of the entire prefix and
+the tail on its open half-plane of absolute convergence. -/
+theorem adjustedPrimeError_split_mellin_cleared_identity (C θ a σ : ℝ)
+    (hθ : θ ≤ 1) (hσ : σ ≤ 1) (ha : 0 ≤ a)
+    (hprefix : ∀ z : ℂ, AnalyticAt ℂ (complexMellinOn (adjustedPrimeError C θ) (Ico 0 a)) z)
+    (htail : ∀ s > σ, MeasureTheory.IntegrableOn (fun t : ℝ =>
+      adjustedPrimeError C θ (Real.exp t) * Real.exp (-s * t)) (Ici a))
+    (hinit : ∀ z : ℂ, 1 < z.re →
+      complexMellinOn (adjustedPrimeError C θ) (Ico 0 a) z +
+        complexMellinOn (adjustedPrimeError C θ) (Ici a) z =
+          (C : ℂ) / (z - (θ : ℂ)) - 1 / (z - 1) +
+            (-deriv riemannZeta z / riemannZeta z) / z) :
+    EqOn (fun z => z * (z - (θ : ℂ)) * regularizedZeta z *
+      (complexMellinOn (adjustedPrimeError C θ) (Ico 0 a) z +
+        complexMellinOn (adjustedPrimeError C θ) (Ici a) z))
+      (fun z => (C : ℂ) * z * regularizedZeta z -
+        (z - (θ : ℂ)) * (regularizedZeta z + deriv regularizedZeta z))
+      {z : ℂ | σ < z.re} := by
+  apply adjustedPrimeError_mellin_cleared_identity C θ σ hθ hσ _ _ hinit
+  intro z hz
+  change σ < z.re at hz
+  let v := (σ + z.re) / 2
+  have hσv : σ < v := by dsimp [v]; linarith
+  have hvz : v < z.re := by dsimp [v]; linarith
+  exact (hprefix z).add (complexMellinOn_tail_analyticOnNhd (adjustedPrimeError C θ)
+    a v ha (measurable_adjustedPrimeError C θ) (htail v hσv) z hvz)
+
+#print axioms regularizedZeta_one
+#print axioms regularizedZeta_eventuallyEq
+#print axioms regularizedZeta_analyticAt
+#print axioms regularizedZeta_mellin_eq
+#print axioms adjustedPrimeError_mellin_cleared_identity
+#print axioms adjustedPrimeError_mellin_continuation
+#print axioms adjustedPrimeError_split_mellin_cleared_identity
 end RiemannResearch

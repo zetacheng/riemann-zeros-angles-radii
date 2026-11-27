@@ -1546,3 +1546,88 @@ theorem riemannZeta_ne_zero_of_oneSidedBound (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ :
 #print axioms adjustedPrimeError_tail_converges
 #print axioms riemannZeta_ne_zero_of_oneSidedBound
 end RiemannResearch
+
+namespace RiemannResearch
+
+/-- The functional equation carries any nontrivial zero to the left of the
+critical line to a zero on its right. The cosine factor can vanish only
+at an excluded zero of this form on the left. -/
+theorem riemannZeta_reflect_left_zero (ρ : ℂ) (hρ : ρ.re < 1 / 2)
+    (hz : riemannZeta ρ = 0) (htrivial : ¬ ∃ n : ℕ, ρ = -2 * (n + 1)) :
+    riemannZeta (1 - ρ) = 0 := by
+  let w : ℂ := 1 - ρ
+  have hwpos : 0 < w.re := by
+    simp only [w, Complex.sub_re, Complex.one_re]
+    linarith
+  have hwneg (n : ℕ) : w ≠ -(n : ℂ) := by
+    intro he
+    rw [he, Complex.neg_re, Complex.natCast_re] at hwpos
+    exact (not_lt_of_ge (neg_nonpos.mpr (Nat.cast_nonneg n))) hwpos
+  have hw1 : w ≠ 1 := by
+    intro he
+    have h0 : ρ = 0 := by dsimp [w] at he; linear_combination -he
+    rw [h0, riemannZeta_zero] at hz
+    norm_num at hz
+  have hcos : Complex.cos (Real.pi * w / 2) ≠ 0 := by
+    intro hc
+    obtain ⟨k, hk⟩ := Complex.cos_eq_zero_iff.mp hc
+    have hπ : (Real.pi : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr Real.pi_ne_zero
+    have hwk : w = 2 * (k : ℂ) + 1 := by
+      apply mul_left_cancel₀ hπ
+      linear_combination 2 * hk
+    have hρk : ρ = -2 * (k : ℂ) := by
+      dsimp [w] at hwk
+      linear_combination -hwk
+    have hkr := congrArg Complex.re hwk
+    simp [Complex.mul_re, Complex.add_re] at hkr
+    have hk0 : 0 ≤ k := by
+      by_contra! h
+      have hkneg : (k : ℝ) ≤ -1 := by exact_mod_cast (show k ≤ -1 by omega)
+      linarith
+    lift k to ℕ using hk0 with n
+    cases n with
+    | zero =>
+        rw [show ρ = 0 by simpa using hρk, riemannZeta_zero] at hz
+        norm_num at hz
+    | succ n =>
+        exact htrivial ⟨n, by simpa only [Int.cast_add, Int.cast_one, Int.cast_natCast, Nat.cast_succ] using hρk⟩
+  have hbase : (2 : ℂ) * Real.pi ≠ 0 :=
+    mul_ne_zero (by norm_num) (Complex.ofReal_ne_zero.mpr Real.pi_ne_zero)
+  have hfactor : 2 * (2 * (Real.pi : ℂ)) ^ (-w) * Complex.Gamma w *
+      Complex.cos (Real.pi * w / 2) ≠ 0 :=
+    mul_ne_zero (mul_ne_zero (mul_ne_zero (by norm_num) (Complex.cpow_ne_zero_iff.mpr
+      (Or.inl hbase))) (Complex.Gamma_ne_zero_of_re_pos hwpos)) hcos
+  have hback : 1 - w = ρ := by dsimp [w]; ring
+  have hfunc := riemannZeta_one_sub hwneg hw1
+  rw [hback, hz] at hfunc
+  exact (mul_eq_zero.mp hfunc.symm).resolve_left hfactor
+
+/-- A zero-free right half-plane implies the exact Mathlib proposition
+after reflecting potentially left-hand nontrivial zeros. -/
+theorem riemannHypothesis_of_right_zero_free
+    (hfree : ∀ s : ℂ, 1 / 2 < s.re → riemannZeta s ≠ 0) : RiemannHypothesis := by
+  intro ρ hz htriv _
+  apply le_antisymm
+  · exact le_of_not_gt (fun h => hfree ρ h hz)
+  · by_contra! h
+    have hright : 1 / 2 < (1 - ρ).re := by
+      simp only [Complex.sub_re, Complex.one_re]
+      linarith
+    exact hfree _ hright (riemannZeta_reflect_left_zero ρ h hz htriv)
+
+/-- The family of one-sided prime-error bounds for exponents strictly
+between one half and one implies Mathlib's Riemann hypothesis. -/
+theorem riemannHypothesis_of_oneSidedBounds
+    (h : ∀ θ : ℝ, 1 / 2 < θ → θ < 1 → OneSidedBound θ) : RiemannHypothesis := by
+  apply riemannHypothesis_of_right_zero_free
+  intro z hz
+  obtain ⟨θ, hhalf, hmin⟩ := exists_between
+    (show (1 / 2 : ℝ) < min (1 : ℝ) z.re from lt_min (by norm_num) hz)
+  have hθ1 := hmin.trans_le (min_le_left _ _)
+  exact riemannZeta_ne_zero_of_oneSidedBound θ (by linarith) hθ1
+    (h θ hhalf hθ1) z (hmin.trans_le (min_le_right _ _))
+
+#print axioms riemannZeta_reflect_left_zero
+#print axioms riemannHypothesis_of_right_zero_free
+#print axioms riemannHypothesis_of_oneSidedBounds
+end RiemannResearch

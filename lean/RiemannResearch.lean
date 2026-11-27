@@ -48,9 +48,9 @@ theorem tail_nonneg (theta : ℝ) (h : OneSidedBound theta) :
 /-- Step (iv): a negative pole cannot coexist with a nonnegative tail
 and a bounded initial contribution. This is the algebraic part only. -/
 theorem negative_pole_contradiction (m beta d B R F0 F1 : ℝ)
-    (hm : 0 < m) (hb : 0 < beta) (hd : 0 < d)
+    (hb : 0 < beta) (hd : 0 < d)
     (hsmall : beta * d * (B + B + 1) < m)
-    (hB : 0 ≤ B) (hR : R ≤ -(m / (beta * d)) + B)
+    (hR : R ≤ -(m / (beta * d)) + B)
     (hF0 : -B ≤ F0) (hF1 : 0 ≤ F1)
     (heq : R = F0 + F1) : False := by
   have hp : 0 < beta * d := mul_pos hb hd
@@ -85,5 +85,63 @@ theorem critical_line_of_zero_free (Z : Set ℂ)
 #print axioms tail_nonneg
 #print axioms negative_pole_contradiction
 #print axioms critical_line_of_zero_free
+
+end RiemannResearch
+
+namespace RiemannResearch
+
+open MeasureTheory
+
+/-- Real Mellin tail, after x = exp t. The integral is a totalized
+Lebesgue integral; convergence is a separate obligation. -/
+noncomputable def mellinTail (g : ℝ → ℝ) (a s : ℝ) : ℝ :=
+  ∫ t in Set.Ici a, g (Real.exp t) * Real.exp (-s * t)
+
+/-- Positivity of the actual real Mellin integral. -/
+theorem mellinTail_nonneg (g : ℝ → ℝ) (a s : ℝ)
+    (hg : ∀ t, a ≤ t → 0 ≤ g (Real.exp t)) :
+    0 ≤ mellinTail g a s := by
+  unfold mellinTail
+  apply integral_nonneg_of_ae
+  filter_upwards [ae_restrict_mem measurableSet_Ici] with t ht
+  exact mul_nonneg (hg t ht) (Real.exp_pos _).le
+
+/-- The exponential kernel decreases as the real Mellin parameter grows. -/
+theorem mellin_kernel_le (t s u : ℝ) (ht : 0 ≤ t) (hs : s ≤ u) :
+    Real.exp (-u * t) ≤ Real.exp (-s * t) := by
+  apply Real.exp_le_exp.mpr
+  exact mul_le_mul_of_nonneg_right (neg_le_neg hs) ht
+
+/-- Nonnegative Taylor moments, the input to Landau's Taylor argument. -/
+theorem mellin_moment_nonneg (g : ℝ → ℝ) (a s : ℝ) (k : ℕ)
+    (ha : 0 ≤ a) (hg : ∀ t, a ≤ t → 0 ≤ g (Real.exp t)) :
+    0 ≤ ∫ t in Set.Ici a, g (Real.exp t) * Real.exp (-s * t) * t ^ k := by
+  apply integral_nonneg_of_ae
+  filter_upwards [ae_restrict_mem measurableSet_Ici] with t ht
+  exact mul_nonneg (mul_nonneg (hg t ht) (Real.exp_pos _).le)
+    (pow_nonneg (le_trans ha ht) _)
+
+/-- Finite Taylor lower bound for exp on the positive axis, expressed
+as a recurrence. This does not assert convergence of the infinite series. -/
+theorem landau_partial_sum_nonneg (c : ℕ → ℝ) (r : ℝ) (N : ℕ)
+    (hc : ∀ k, 0 ≤ c k) (hr : 0 ≤ r) :
+    0 ≤ ∑ k ∈ Finset.range N, c k * r ^ k := by
+  exact Finset.sum_nonneg (fun k _ => mul_nonneg (hc k) (pow_nonneg hr _))
+
+/-- Abstract abscissa contradiction: a convergence point strictly to
+the left of a lower bound on all convergence points is impossible.
+The Taylor/monotone-convergence argument producing that point is open. -/
+theorem landau_abscissa_contradiction (converges : ℝ → Prop)
+    (sigma r : ℝ) (hr : 0 < r)
+    (hlower : ∀ s, converges s → sigma ≤ s)
+    (hleft : converges (sigma - r)) : False := by
+  have h := hlower (sigma - r) hleft
+  linarith
+
+#print axioms mellinTail_nonneg
+#print axioms mellin_kernel_le
+#print axioms mellin_moment_nonneg
+#print axioms landau_partial_sum_nonneg
+#print axioms landau_abscissa_contradiction
 
 end RiemannResearch

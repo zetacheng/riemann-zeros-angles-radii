@@ -2091,11 +2091,10 @@ theorem perron_exp_vertical_tendsto_zero_of_neg (u c : ℝ) (hu : u < 0) (hc : 0
     norm_le_zero_iff.mp (ge_of_tendsto hdecay hbound)
   simpa only [f, hz] using hV c L hL
 
-/-- At the jump, the symmetric Perron integral is π before normalization. -/
-theorem perron_exp_vertical_tendsto_at_zero (c : ℝ) (hc : 0 < c) :
-    Tendsto (fun T : ℝ => ∫ t in -T..T,
-      Complex.exp ((0 : ℂ) * ((c : ℂ) + (t : ℂ) * Complex.I)) /
-        ((c : ℂ) + (t : ℂ) * Complex.I)) atTop (𝓝 (Real.pi : ℂ)) := by
+/-- The symmetric kernel at zero frequency has an exact finite-height value. -/
+theorem perronOscillatoryKernel_integral_zero (c T : ℝ) (hc : 0 < c) :
+    (∫ t in -T..T, perronOscillatoryKernel c 0 t) =
+      ((2 * Real.arctan (T / c) : ℝ) : ℂ) := by
   have hcont := continuous_perronOscillatoryKernel c 0 hc
   have hreal (T : ℝ) :
       (∫ t in (0 : ℝ)..T, perronOscillatoryKernel c 0 t).re = Real.arctan (T / c) := by
@@ -2114,20 +2113,24 @@ theorem perron_exp_vertical_tendsto_at_zero (c : ℝ) (hc : 0 < c) :
     simp_rw [hre, intervalIntegral.integral_const_mul]
     rw [intervalIntegral.integral_comp_div (fun t : ℝ => (1 + t ^ 2)⁻¹) hc.ne']
     simp [smul_eq_mul, hc.ne', integral_inv_one_add_sq]
-  have heq (T : ℝ) : (∫ t in -T..T, perronOscillatoryKernel c 0 t) =
-      ((2 * Real.arctan (T / c) : ℝ) : ℂ) := by
-    rw [perronOscillatoryKernel_integral_symm c 0 T hc]
-    apply Complex.ext
-    · simp only [Complex.add_re, Complex.conj_re, hreal, Complex.ofReal_re]
-      ring
-    · simp only [Complex.add_im, Complex.conj_im, Complex.ofReal_im, neg_add_cancel]
+  rw [perronOscillatoryKernel_integral_symm c 0 T hc]
+  apply Complex.ext
+  · simp only [Complex.add_re, Complex.conj_re, hreal, Complex.ofReal_re]
+    ring
+  · simp only [Complex.add_im, Complex.conj_im, Complex.ofReal_im, neg_add_cancel]
+
+/-- At the jump, the symmetric Perron integral is π before normalization. -/
+theorem perron_exp_vertical_tendsto_at_zero (c : ℝ) (hc : 0 < c) :
+    Tendsto (fun T : ℝ => ∫ t in -T..T,
+      Complex.exp ((0 : ℂ) * ((c : ℂ) + (t : ℂ) * Complex.I)) /
+        ((c : ℂ) + (t : ℂ) * Complex.I)) atTop (𝓝 (Real.pi : ℂ)) := by
   have hlim : Tendsto (fun T : ℝ => Real.arctan (T / c)) atTop (𝓝 (Real.pi / 2)) :=
     (tendsto_nhds_of_tendsto_nhdsWithin Real.tendsto_arctan_atTop).comp
       (tendsto_id.atTop_div_const hc)
   simp_rw [zero_mul, Complex.exp_zero]
   have hnorm (t : ℝ) : 1 / ((c : ℂ) + (t : ℂ) * Complex.I) = perronOscillatoryKernel c 0 t := by
     simp [perronOscillatoryKernel]
-  simp_rw [hnorm, heq]
+  simp_rw [hnorm, fun T => perronOscillatoryKernel_integral_zero c T hc]
   have h := Complex.continuous_ofReal.continuousAt.tendsto.comp (hlim.const_mul (2 : ℝ))
   rw [show (2 : ℝ) * (Real.pi / 2) = Real.pi by ring] at h
   exact h
@@ -2255,6 +2258,7 @@ theorem perron_kernel_tendsto_step (x c : ℝ) (hx : 0 < x) (hc : 0 < c) :
 #print axioms perronOscillatoryKernel_integral_symm
 #print axioms perronOscillatoryKernel_limit_bound
 #print axioms perron_exp_vertical_tendsto_zero_of_neg
+#print axioms perronOscillatoryKernel_integral_zero
 #print axioms perron_exp_vertical_tendsto_at_zero
 #print axioms perron_exp_vertical_reflect
 #print axioms perron_exp_vertical_tendsto_of_pos
@@ -2428,4 +2432,238 @@ theorem perronTruncatedKernel_far_right_bound (x c T : ℝ) (n : ℕ)
 #print axioms vonMangoldt_perron_truncated
 #print axioms perronTruncatedKernel_sub_step_bound
 #print axioms perronTruncatedKernel_far_right_bound
+end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Interval Topology
+
+/-- The jump contributes a half weight with a finite-height error at most 2c/T. -/
+theorem perronTruncatedKernel_at_jump_bound (c T : ℝ) (hc : 0 < c) (hT : 0 < T) :
+    ‖perronTruncatedKernel 1 c T - perronStep 1‖ ≤ 2 * c / T := by
+  have heq : perronTruncatedKernel 1 c T = ((2 * Real.arctan (T / c) : ℝ) : ℂ) := by
+    simpa [perronTruncatedKernel, perronOscillatoryKernel] using
+      perronOscillatoryKernel_integral_zero c T hc
+  rw [heq, show perronStep 1 = (Real.pi : ℂ) by simp [perronStep],
+    ← Complex.ofReal_sub, Complex.norm_real, Real.norm_eq_abs]
+  have hpos : 0 < T / c := div_pos hT hc
+  have hi := Real.arctan_inv_of_pos hpos
+  rw [inv_div] at hi
+  have harctan (z : ℝ) (hz : 0 ≤ z) : Real.arctan z ≤ z := by
+    rw [← sub_zero (Real.arctan z), ← Real.arctan_zero, ← integral_inv_one_add_sq]
+    calc
+      (∫ t in (0 : ℝ)..z, (1 + t ^ 2)⁻¹) ≤ ∫ _ in (0 : ℝ)..z, (1 : ℝ) :=
+        intervalIntegral.integral_mono_on hz
+          ((continuous_const.add (continuous_id.pow 2)).inv₀ (fun t => by positivity)
+            |>.intervalIntegrable 0 z)
+          (intervalIntegrable_const) (fun t _ => inv_le_one_of_one_le₀ (by linarith [sq_nonneg t]))
+      _ = z := by simp
+  have hn : 0 ≤ Real.arctan (c / T) := by
+    simpa using Real.arctan_le_arctan (div_nonneg hc.le hT.le)
+  rw [show 2 * Real.arctan (T / c) - Real.pi = -(2 * Real.arctan (c / T)) by linarith,
+    abs_neg, abs_of_nonneg (mul_nonneg (by norm_num) hn)]
+  rw [mul_div_assoc]
+  exact mul_le_mul_of_nonneg_left (harctan _ (div_nonneg hc.le hT.le)) (by norm_num)
+
+/-- The logarithmic separation controls the relative distance on either side of the jump. -/
+theorem div_max_le_abs_log_div (x y : ℝ) (hx : 0 < x) (hy : 0 < y) :
+    |x - y| / max x y ≤ |Real.log (x / y)| := by
+  rcases le_total x y with h | h
+  · have hxy := (div_le_one hy).mpr h
+    have hl := Real.log_le_sub_one_of_pos (div_pos hx hy)
+    rw [max_eq_right h, abs_of_nonpos (sub_nonpos.mpr h),
+      abs_of_nonpos (Real.log_nonpos (div_pos hx hy).le hxy)]
+    rw [neg_sub, sub_div, div_self hy.ne']
+    linarith
+  · have hl := Real.log_le_sub_one_of_pos (div_pos hy hx)
+    rw [Real.log_div hy.ne' hx.ne'] at hl
+    rw [max_eq_left h, abs_of_nonneg (sub_nonneg.mpr h),
+      Real.log_div hx.ne' hy.ne', abs_of_nonneg (sub_nonneg.mpr (Real.log_le_log hy h)),
+      sub_div, div_self hx.ne']
+    linarith
+
+/-- An explicit coefficient of 1/T for the weighted Perron error. The jump,
+the nearby indices, and the infinite right tail have separate bounds. -/
+noncomputable def perronSeriesErrorMajorant (f : ℕ → ℂ) (x c : ℝ) (n : ℕ) : ℝ :=
+  if n = 0 then 0 else
+    if 2 * x ≤ (n : ℝ) then ‖LSeries.term f (c : ℂ) n‖ * (x ^ c * (4 / Real.log 2))
+    else if x = (n : ℝ) then ‖f n‖ * (2 * c)
+    else ‖f n‖ * ((x / (n : ℝ)) ^ c * (4 / (|x - n| / max x n)))
+
+/-- The infinitely many tail coefficients are summable by absolute convergence
+on the original vertical line. -/
+theorem summable_perronSeriesErrorMajorant (f : ℕ → ℂ) (x c : ℝ) (hx : 0 < x)
+    (hf : LSeriesSummable f (c : ℂ)) : Summable (perronSeriesErrorMajorant f x c) := by
+  let N := ⌈2 * x⌉₊
+  have hN : 2 * x ≤ (N : ℝ) := Nat.le_ceil _
+  have hs := (summable_norm_iff.mpr hf).mul_right (x ^ c * (4 / Real.log 2))
+  apply (summable_nat_add_iff N).mp
+  apply ((summable_nat_add_iff N).mpr hs).congr
+  intro k
+  have hfar : 2 * x ≤ ((k + N : ℕ) : ℝ) :=
+    hN.trans (Nat.cast_le.mpr (Nat.le_add_left _ _))
+  have hn : k + N ≠ 0 := by
+    intro h
+    rw [h, Nat.cast_zero] at hfar
+    linarith
+  simp only [perronSeriesErrorMajorant, if_neg hn, if_pos hfar]
+
+/-- The three coefficient bounds apply to every summand, including the jump. -/
+theorem perronSeriesError_le_majorant (f : ℕ → ℂ) (x c T : ℝ) (n : ℕ)
+    (hx : 0 < x) (hc : 0 < c) (hT : 0 < T) :
+    ‖(if n = 0 then 0 else f n *
+      (perronTruncatedKernel (x / (n : ℝ)) c T - perronStep (x / (n : ℝ))))‖ ≤
+      perronSeriesErrorMajorant f x c n / T := by
+  by_cases hn : n = 0
+  · simp [hn, perronSeriesErrorMajorant]
+  have hnpos : 0 < (n : ℝ) := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
+  have hy : 0 < x / (n : ℝ) := div_pos hx hnpos
+  rw [if_neg hn, norm_mul, perronSeriesErrorMajorant, if_neg hn]
+  split_ifs with hfar heq
+  · have hlt : x / (n : ℝ) < 1 := (div_lt_one hnpos).mpr (by linarith)
+    rw [perronStep, if_pos hlt, sub_zero]
+    refine (mul_le_mul_of_nonneg_left
+      (perronTruncatedKernel_far_right_bound x c T n hx hfar hc hT) (norm_nonneg _)).trans_eq ?_
+    rw [LSeries.norm_term_eq, if_neg hn, Complex.ofReal_re, Real.div_rpow hx.le hnpos.le]
+    ring
+  · have hdiv : x / (n : ℝ) = 1 := (div_eq_one_iff_eq hnpos.ne').mpr heq
+    rw [hdiv, mul_div_assoc]
+    exact mul_le_mul_of_nonneg_left (perronTruncatedKernel_at_jump_bound c T hc hT) (norm_nonneg _)
+  · have hdiv : x / (n : ℝ) ≠ 1 := fun h => heq ((div_eq_one_iff_eq hnpos.ne').mp h)
+    have hd : 0 < |x - (n : ℝ)| / max x (n : ℝ) :=
+      div_pos (abs_pos.mpr (sub_ne_zero.mpr heq)) (lt_max_iff.mpr (Or.inl hx))
+    have hgap := div_max_le_abs_log_div x n hx hnpos
+    refine (mul_le_mul_of_nonneg_left (perronTruncatedKernel_sub_step_bound
+      _ c T hy hdiv hc hT) (norm_nonneg _)).trans ?_
+    calc
+      _ ≤ ‖f n‖ * ((x / (n : ℝ)) ^ c * (4 / ((|x - n| / max x n) * T))) :=
+        mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
+          (div_le_div_of_nonneg_left (by norm_num) (mul_pos hd hT)
+            (mul_le_mul_of_nonneg_right hgap hT.le)) (Real.rpow_nonneg hy.le _)) (norm_nonneg _)
+      _ = _ := by ring
+
+/-- The finite-height series differs from its step sum by at most the
+sum of the error coefficients divided by the height. -/
+theorem perronSeries_sub_step_bound (f : ℕ → ℂ) (x c T : ℝ)
+    (hx : 0 < x) (hc : 0 < c) (hT : 0 < T) (hf : LSeriesSummable f (c : ℂ)) :
+    ‖(∑' n : ℕ, if n = 0 then 0 else f n * perronTruncatedKernel (x / (n : ℝ)) c T) -
+      (∑' n : ℕ, if n = 0 then 0 else f n * perronStep (x / (n : ℝ)))‖ ≤
+      (∑' n : ℕ, perronSeriesErrorMajorant f x c n) / T := by
+  let A (n : ℕ) := if n = 0 then 0 else f n * perronTruncatedKernel (x / (n : ℝ)) c T
+  let B (n : ℕ) := if n = 0 then 0 else f n * perronStep (x / (n : ℝ))
+  have hB : Summable B := by
+    apply summable_of_ne_finset_zero (s := Finset.range (⌊x⌋₊ + 1))
+    intro n hn
+    have hcast : ((⌊x⌋₊ + 1 : ℕ) : ℝ) ≤ n :=
+      Nat.cast_le.mpr (Nat.le_of_not_gt (fun h => hn (Finset.mem_range.mpr h)))
+    have hxn : x < (n : ℝ) := (Nat.lt_floor_add_one x).trans_le (by simpa using hcast)
+    have hy : x / (n : ℝ) < 1 := (div_lt_one (hx.trans hxn)).mpr hxn
+    simp [B, perronStep, hy]
+  have hM := (summable_perronSeriesErrorMajorant f x c hx hf).hasSum.div_const T
+  have hAB (n : ℕ) : ‖A n - B n‖ ≤ perronSeriesErrorMajorant f x c n / T := by
+    by_cases hn : n = 0
+    · simpa only [A, B, if_pos hn, sub_zero] using
+        perronSeriesError_le_majorant f x c T n hx hc hT
+    · simpa only [A, B, if_neg hn, ← mul_sub] using
+        perronSeriesError_le_majorant f x c T n hx hc hT
+  have hD := Summable.of_norm_bounded _ hM.summable hAB
+  have hA : Summable A := by simpa only [sub_add_cancel] using hD.add hB
+  change ‖(∑' n, A n) - (∑' n, B n)‖ ≤ _
+  rw [← hA.tsum_sub hB]
+  exact hD.hasSum.norm_le_of_bounded hM hAB
+
+/-- In the Perron step sum, the last von Mangoldt weight is halved exactly
+when the real cutoff is an integer. -/
+theorem vonMangoldt_perron_step (x : ℝ) (hx : 0 < x) :
+    (∑' n : ℕ, (ArithmeticFunction.vonMangoldt n : ℂ) * perronStep (x / (n : ℝ))) =
+      2 * (Real.pi : ℂ) * (chebyshevPsi x : ℂ) -
+        if x = (⌊x⌋₊ : ℝ) then (Real.pi : ℂ) * (ArithmeticFunction.vonMangoldt ⌊x⌋₊ : ℂ)
+        else 0 := by
+  rw [tsum_eq_sum (s := Finset.range (⌊x⌋₊ + 1))]
+  · have hterm (n : ℕ) (hn : n ∈ Finset.range (⌊x⌋₊ + 1)) :
+        (ArithmeticFunction.vonMangoldt n : ℂ) * perronStep (x / (n : ℝ)) =
+          2 * (Real.pi : ℂ) * (ArithmeticFunction.vonMangoldt n : ℂ) -
+            if x = (⌊x⌋₊ : ℝ) ∧ n = ⌊x⌋₊ then
+              (Real.pi : ℂ) * (ArithmeticFunction.vonMangoldt n : ℂ) else 0 := by
+      by_cases hzero : n = 0
+      · subst n
+        simp
+      have hnpos : 0 < (n : ℝ) := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hzero)
+      have hfloor : n ≤ ⌊x⌋₊ := Nat.le_of_lt_succ (Finset.mem_range.mp hn)
+      have hle : (n : ℝ) ≤ x := (Nat.le_floor_iff hx.le).mp hfloor
+      have hnotlt : ¬ x / (n : ℝ) < 1 := not_lt.mpr ((one_le_div hnpos).mpr hle)
+      have hiff : x / (n : ℝ) = 1 ↔ x = (⌊x⌋₊ : ℝ) ∧ n = ⌊x⌋₊ := by
+        rw [div_eq_one_iff_eq hnpos.ne']
+        constructor
+        · intro he
+          have hn' : n = ⌊x⌋₊ := by rw [he, Nat.floor_natCast]
+          exact ⟨by rw [← hn', he], hn'⟩
+        · rintro ⟨he, rfl⟩
+          exact he
+      simp only [perronStep, if_neg hnotlt, hiff]
+      split_ifs <;> ring
+    rw [Finset.sum_congr rfl hterm, Finset.sum_sub_distrib, ← Finset.mul_sum]
+    rw [chebyshevPsi, Complex.ofReal_sum]
+    by_cases he : x = (⌊x⌋₊ : ℝ)
+    · simp only [if_pos he, and_iff_right he, Finset.sum_ite_eq', Finset.mem_range,
+        Nat.lt_succ_self, if_true]
+    · have hn (n : ℕ) : ¬ (x = (⌊x⌋₊ : ℝ) ∧ n = ⌊x⌋₊) := fun h => he h.1
+      simp only [if_neg he, if_neg (hn _), Finset.sum_const_zero, sub_zero]
+  · intro n hn
+    have hcast : ((⌊x⌋₊ + 1 : ℕ) : ℝ) ≤ n :=
+      Nat.cast_le.mpr (Nat.le_of_not_gt (fun h => hn (Finset.mem_range.mpr h)))
+    have hxn : x < (n : ℝ) := (Nat.lt_floor_add_one x).trans_le (by simpa using hcast)
+    have hy : x / (n : ℝ) < 1 := (div_lt_one (hx.trans hxn)).mpr hxn
+    simp [perronStep, hy]
+
+/-- The unnormalized vertical zeta integral used in Perron inversion. -/
+noncomputable def vonMangoldtPerronIntegral (x c T : ℝ) : ℂ :=
+  ∫ t in -T..T, (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) /
+    ((c : ℂ) + (t : ℂ) * Complex.I) *
+    (-deriv riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I) /
+      riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I))
+
+/-- The Chebyshev sum with half of the last weight removed at integers. -/
+noncomputable def halfWeightedChebyshevPsi (x : ℝ) : ℝ :=
+  chebyshevPsi x - if x = (⌊x⌋₊ : ℝ) then ArithmeticFunction.vonMangoldt ⌊x⌋₊ / 2 else 0
+
+/-- For each positive cutoff, the truncated integral recovers the
+half-weighted Chebyshev sum with an explicit error coefficient over T. -/
+theorem vonMangoldtPerronIntegral_sub_psi_bound (x c T : ℝ)
+    (hx : 0 < x) (hc : 1 < c) (hT : 0 < T) :
+    ‖vonMangoldtPerronIntegral x c T - 2 * (Real.pi : ℂ) * (halfWeightedChebyshevPsi x : ℂ)‖ ≤
+      (∑' n : ℕ, perronSeriesErrorMajorant (fun k => (ArithmeticFunction.vonMangoldt k : ℂ))
+        x c n) / T := by
+  have h := perronSeries_sub_step_bound (fun n => (ArithmeticFunction.vonMangoldt n : ℂ))
+    x c T hx (zero_lt_one.trans hc) hT
+    (ArithmeticFunction.LSeriesSummable_vonMangoldt (by simpa))
+  have hzero (n : ℕ) (z : ℂ) :
+      (if n = 0 then 0 else (ArithmeticFunction.vonMangoldt n : ℂ) * z) =
+        (ArithmeticFunction.vonMangoldt n : ℂ) * z := by
+    by_cases hn : n = 0 <;> simp [hn]
+  simp_rw [hzero, ← vonMangoldt_perron_truncated x c T hx hc, vonMangoldt_perron_step x hx] at h
+  unfold vonMangoldtPerronIntegral
+  convert h using 2
+  unfold halfWeightedChebyshevPsi
+  split_ifs <;> push_cast <;> ring
+
+/-- Perron inversion converges to the unnormalized half-weighted Chebyshev sum. -/
+theorem vonMangoldtPerronIntegral_tendsto_psi (x c : ℝ) (hx : 0 < x) (hc : 1 < c) :
+    Tendsto (vonMangoldtPerronIntegral x c) atTop
+      (𝓝 (2 * (Real.pi : ℂ) * (halfWeightedChebyshevPsi x : ℂ))) := by
+  have hbound := (eventually_gt_atTop (0 : ℝ)).mono
+    (fun T hT => vonMangoldtPerronIntegral_sub_psi_bound x c T hx hc hT)
+  have hlim (C : ℝ) : Tendsto (fun T : ℝ => C / T) atTop (𝓝 0) := by
+    simpa only [div_eq_mul_inv, mul_zero] using (tendsto_inv_atTop_zero.const_mul C)
+  exact tendsto_iff_norm_sub_tendsto_zero.mpr (squeeze_zero' (Eventually.of_forall (fun _ =>
+    norm_nonneg _)) hbound (hlim _))
+
+#print axioms perronTruncatedKernel_at_jump_bound
+#print axioms div_max_le_abs_log_div
+#print axioms summable_perronSeriesErrorMajorant
+#print axioms perronSeriesError_le_majorant
+#print axioms perronSeries_sub_step_bound
+#print axioms vonMangoldt_perron_step
+#print axioms vonMangoldtPerronIntegral_sub_psi_bound
+#print axioms vonMangoldtPerronIntegral_tendsto_psi
 end RiemannResearch

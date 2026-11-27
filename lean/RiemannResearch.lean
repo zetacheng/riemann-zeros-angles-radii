@@ -407,7 +407,7 @@ theorem mellin_complex_improper_limit (s : ℂ) (a : ℝ) (hs : 0 < s.re) :
   have h := ((mellin_complex_kernel_decay s hs).div_const (-s)).sub
     (tendsto_const_nhds (x := Complex.exp (-s * (a : ℂ)) / (-s)))
   simpa only [mellin_complex_exp_interval s a _ hn, zero_div, zero_sub,
-    div_neg, neg_neg] using h
+    div_neg, neg_zero, zero_sub, neg_neg] using h
 
 /-- First derivative of the integrated real moment, via the dominated
 differentiation theorem. -/
@@ -440,11 +440,24 @@ theorem mellin_integral_moment_deriv (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
       HasDerivAt (fun w : ℝ => g (Real.exp t) * Real.exp (-w * t) * t ^ k)
         (-(g (Real.exp t) * Real.exp (-z * t) * t ^ (k+1))) z :=
     Filter.Eventually.of_forall (fun t z _ => mellin_moment_kernel_deriv g t z k)
-  have hn : Set.Ioi v ∈ nhds u := Ioi_mem_nhds hvu
-  apply hasDerivAt_integral_of_dominated_loc_of_deriv_le (bound := M) (s := Set.Ioi v)
-  all_goals first | exact hn | exact hM | exact hdom | exact hd |
-    exact hderivmeas | exact mellin_moments_inside g a s u k ha hs hg hi |
-    exact Filter.Eventually.of_forall hmeas | exact hmeas u
+  have he : 0 < u - v := sub_pos.mpr hvu
+  have hball : ∀ z ∈ Metric.ball u (u - v), z ∈ Set.Ioi v := by
+    intro z hz
+    rw [Metric.mem_ball, Real.dist_eq] at hz
+    have hl := (abs_lt.mp hz).1
+    change v < z
+    linarith
+  have hb : ∀ᵐ t ∂(volume.restrict (Set.Ici a)), ∀ z ∈ Metric.ball u (u-v),
+      ‖-(g (Real.exp t) * Real.exp (-z * t) * t ^ (k+1))‖ ≤ M t :=
+    hdom.mono (fun t ht z hz => ht z (hball z hz))
+  have hdb : ∀ᵐ t ∂(volume.restrict (Set.Ici a)), ∀ z ∈ Metric.ball u (u-v),
+      HasDerivAt (fun w : ℝ => g (Real.exp t) * Real.exp (-w * t) * t ^ k)
+        (-(g (Real.exp t) * Real.exp (-z * t) * t ^ (k+1))) z :=
+    hd.mono (fun t ht z hz => ht z (hball z hz))
+  exact (hasDerivAt_integral_of_dominated_loc_of_deriv_le he
+    (Filter.Eventually.of_forall hmeas)
+    (mellin_moments_inside g a s u k ha hs hg hi)
+    hderivmeas hb hM hdb).2
 
 #print axioms mellin_complex_improper_limit
 #print axioms mellin_integral_moment_deriv

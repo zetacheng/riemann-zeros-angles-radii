@@ -2260,3 +2260,172 @@ theorem perron_kernel_tendsto_step (x c : ℝ) (hx : 0 < x) (hc : 0 < c) :
 #print axioms perron_exp_vertical_tendsto_of_pos
 #print axioms perron_kernel_tendsto_step
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Interval Topology
+
+/-- The symmetric finite-height Perron integral, before normalization. -/
+noncomputable def perronTruncatedKernel (x c T : ℝ) : ℂ :=
+  ∫ t in -T..T, (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) /
+    ((c : ℂ) + (t : ℂ) * Complex.I)
+
+/-- The unnormalized Perron step, taking its half value at the jump. -/
+noncomputable def perronStep (x : ℝ) : ℂ :=
+  if x < 1 then 0 else if x = 1 then (Real.pi : ℂ) else 2 * (Real.pi : ℂ)
+
+/-- For an absolutely convergent Dirichlet series, the finite-height
+integral can be taken term by term. The term of index zero is omitted. -/
+theorem LSeries_perron_truncated (f : ℕ → ℂ) (x c T : ℝ)
+    (hx : 0 < x) (hc : 0 < c) (hf : LSeriesSummable f (c : ℂ)) :
+    (∫ t in -T..T, (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) /
+      ((c : ℂ) + (t : ℂ) * Complex.I) * LSeries f ((c : ℂ) + (t : ℂ) * Complex.I)) =
+    ∑' n : ℕ, if n = 0 then 0 else f n * perronTruncatedKernel (x / (n : ℝ)) c T := by
+  let z (t : ℝ) : ℂ := (c : ℂ) + (t : ℂ) * Complex.I
+  let K (y t : ℝ) : ℂ := (y : ℂ) ^ z t / z t
+  have hzre (t : ℝ) : (z t).re = c := by simp [z, Complex.mul_re]
+  have hKn (t : ℝ) : ‖K x t‖ ≤ x ^ c / c := by
+    have hb : c ≤ ‖z t‖ := hzre t ▸ Complex.re_le_norm (z t)
+    dsimp only [K]
+    rw [norm_div, Complex.norm_cpow_eq_rpow_re_of_pos hx, hzre]
+    exact div_le_div_of_nonneg_left (Real.rpow_nonneg hx.le _) hc hb
+  have hKc (y : ℝ) (hy : 0 < y) : Continuous (K y) := by
+    simp_rw [K, z, perron_kernel_eq_factor y c _ hy]
+    exact continuous_const.mul (continuous_perronOscillatoryKernel c (Real.log y) hc)
+  let F (n : ℕ) : C(ℝ, ℂ) :=
+    ⟨fun t => if n = 0 then 0 else f n * K (x / (n : ℝ)) t, by
+      split_ifs with hn
+      · exact continuous_const
+      · exact continuous_const.mul (hKc _ (div_pos hx (Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn))))⟩
+  have hcpow (n : ℕ) (hn : n ≠ 0) (t : ℝ) :
+      ((x / (n : ℝ) : ℝ) : ℂ) ^ z t * (n : ℂ) ^ z t = (x : ℂ) ^ z t := by
+    have hn' : 0 < (n : ℝ) := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
+    rw [← Complex.ofReal_natCast, ← Complex.mul_cpow_ofReal_nonneg
+      (div_nonneg hx.le hn'.le) hn'.le, ← Complex.ofReal_mul, div_mul_cancel₀ _ hn'.ne']
+  have hF (n : ℕ) (t : ℝ) : F n t = K x t * LSeries.term f (z t) n := by
+    by_cases hn : n = 0
+    · simp [F, hn]
+    · have hnc : (n : ℂ) ^ z t ≠ 0 := Complex.cpow_ne_zero_iff.mpr (Or.inl (Nat.cast_ne_zero.mpr hn))
+      have he := (eq_div_iff hnc).mpr (hcpow n hn t)
+      change (if n = 0 then 0 else f n * K (x / (n : ℝ)) t) = _
+      rw [if_neg hn, LSeries.term_of_ne_zero hn]
+      dsimp only [K]
+      rw [he]
+      ring
+  let I : TopologicalSpace.Compacts ℝ := ⟨uIcc (-T) T, isCompact_uIcc⟩
+  have hmajor : Summable (fun n => ‖LSeries.term f (c : ℂ) n‖ * (x ^ c / c)) :=
+    (summable_norm_iff.mpr hf).mul_right _
+  have hsum : Summable (fun n => ‖(F n).restrict I‖) := by
+    refine hmajor.of_nonneg_of_le (fun _ => norm_nonneg _) fun n => ?_
+    apply (ContinuousMap.norm_le ((F n).restrict I) (mul_nonneg (norm_nonneg _)
+      (div_nonneg (Real.rpow_nonneg hx.le _) hc.le))).mpr
+    intro t
+    change ‖F n t‖ ≤ _
+    rw [hF, norm_mul, mul_comm ‖K x t‖]
+    have hn : ‖LSeries.term f (z t) n‖ = ‖LSeries.term f (c : ℂ) n‖ := by
+      rw [LSeries.norm_term_eq, LSeries.norm_term_eq, hzre, Complex.ofReal_re]
+    rw [hn]
+    exact mul_le_mul_of_nonneg_left (hKn t) (norm_nonneg _)
+  have hswap := intervalIntegral.tsum_intervalIntegral_eq_of_summable_norm
+    (a := -T) (b := T) (f := F) hsum
+  change (∫ t in -T..T, K x t * LSeries f (z t)) = _
+  calc
+    _ = ∫ t in -T..T, ∑' n : ℕ, F n t := by
+      simp_rw [hF, tsum_mul_left, LSeries]
+    _ = ∑' n : ℕ, ∫ t in -T..T, F n t := hswap.symm
+    _ = _ := by
+      apply tsum_congr
+      intro n
+      by_cases hn : n = 0
+      · simp [F, hn]
+      · simp [F, hn, K, z, perronTruncatedKernel, intervalIntegral.integral_const_mul]
+
+/-- The truncated Perron integral of the negative logarithmic derivative
+of zeta is the sum of the von Mangoldt weights times their kernels. -/
+theorem vonMangoldt_perron_truncated (x c T : ℝ) (hx : 0 < x) (hc : 1 < c) :
+    (∫ t in -T..T, (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) /
+      ((c : ℂ) + (t : ℂ) * Complex.I) *
+      (-deriv riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I) /
+        riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I))) =
+    ∑' n : ℕ, (ArithmeticFunction.vonMangoldt n : ℂ) * perronTruncatedKernel (x / (n : ℝ)) c T := by
+  have h := LSeries_perron_truncated (fun n => (ArithmeticFunction.vonMangoldt n : ℂ))
+    x c T hx (zero_lt_one.trans hc) (ArithmeticFunction.LSeriesSummable_vonMangoldt (by simpa))
+  have hL (t : ℝ) : LSeries (fun n => (ArithmeticFunction.vonMangoldt n : ℂ))
+      ((c : ℂ) + (t : ℂ) * Complex.I) =
+        -deriv riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I) /
+          riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I) :=
+    ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div (by simpa [Complex.mul_re] using hc)
+  simp_rw [hL] at h
+  rw [h]
+  apply tsum_congr
+  intro n
+  by_cases hn : n = 0 <;> simp [hn]
+
+/-- The symmetric Perron truncation differs from the step by at most
+twice the positive-height tail bound, away from the jump. -/
+theorem perronTruncatedKernel_sub_step_bound (x c T : ℝ)
+    (hx : 0 < x) (hx1 : x ≠ 1) (hc : 0 < c) (hT : 0 < T) :
+    ‖perronTruncatedKernel x c T - perronStep x‖ ≤ (x ^ c : ℝ) * (4 / (|Real.log x| * T)) := by
+  let u := Real.log x
+  let P : ℝ → ℂ := fun b => ∫ t in (0 : ℝ)..b, perronOscillatoryKernel c u t
+  have hu : u ≠ 0 := by
+    intro he
+    exact hx1 ((Real.exp_log hx).symm.trans (by simp [u, he]))
+  have hscale (b : ℝ) : perronTruncatedKernel x c b =
+      (x ^ c : ℝ) * ((starRingEnd ℂ) (P b) + P b) := by
+    simp_rw [perronTruncatedKernel, perron_kernel_eq_factor x c _ hx, intervalIntegral.integral_const_mul]
+    rw [perronOscillatoryKernel_integral_symm c u b hc]
+  have hcont := continuous_perronOscillatoryKernel c u hc
+  have hdiff (b : ℝ) (hb : T ≤ b) :
+      ‖perronTruncatedKernel x c b - perronTruncatedKernel x c T‖ ≤
+        (x ^ c : ℝ) * (4 / (|u| * T)) := by
+    have hP : P b - P T = ∫ t in T..b, perronOscillatoryKernel c u t := by
+      dsimp [P]
+      rw [← intervalIntegral.integral_add_adjacent_intervals (hcont.intervalIntegrable 0 T)
+        (hcont.intervalIntegrable T b), add_sub_cancel_left]
+    have heq : (starRingEnd ℂ) (P b) + P b - ((starRingEnd ℂ) (P T) + P T) =
+        (starRingEnd ℂ) (P b - P T) + (P b - P T) := by
+      rw [map_sub]
+      ring
+    rw [hscale, hscale, ← mul_sub, heq, norm_mul, Complex.norm_real,
+      Real.norm_of_nonneg (Real.rpow_nonneg hx.le _)]
+    apply mul_le_mul_of_nonneg_left _ (Real.rpow_nonneg hx.le _)
+    have hBd : ‖P b - P T‖ ≤ 2 / (|u| * T) := by
+      rw [hP]
+      exact perronOscillatoryKernel_tail_bound c u T b hc hu hT hb
+    refine (norm_add_le _ _).trans ?_
+    rw [RCLike.norm_conj]
+    exact (add_le_add hBd hBd).trans_eq (by rw [← add_div]; norm_num)
+  have hlim : Tendsto (perronTruncatedKernel x c) atTop (𝓝 (perronStep x)) :=
+    perron_kernel_tendsto_step x c hx hc
+  rw [norm_sub_rev]
+  exact le_of_tendsto (hlim.sub tendsto_const_nhds).norm
+    ((eventually_ge_atTop T).mono hdiff)
+
+/-- When the Dirichlet index is at least twice the cutoff, the Perron
+kernel obeys a bound with a fixed logarithmic denominator. -/
+theorem perronTruncatedKernel_far_right_bound (x c T : ℝ) (n : ℕ)
+    (hx : 0 < x) (hn : 2 * x ≤ (n : ℝ)) (hc : 0 < c) (hT : 0 < T) :
+    ‖perronTruncatedKernel (x / (n : ℝ)) c T‖ ≤
+      ((x / (n : ℝ)) ^ c : ℝ) * (4 / (Real.log 2 * T)) := by
+  have hnpos : 0 < (n : ℝ) := by linarith
+  let y := x / (n : ℝ)
+  have hy : 0 < y := div_pos hx hnpos
+  have hyhalf : y ≤ 1 / 2 := (div_le_iff₀ hnpos).mpr (by linarith)
+  have hy1 : y < 1 := hyhalf.trans_lt (by norm_num)
+  have hlog : Real.log 2 ≤ |Real.log y| := by
+    have h := Real.log_le_log hy hyhalf
+    rw [one_div, Real.log_inv] at h
+    rw [abs_of_neg (Real.log_neg hy hy1)]
+    linarith
+  have hbound := perronTruncatedKernel_sub_step_bound y c T hy hy1.ne hc hT
+  simp only [perronStep, if_pos hy1, sub_zero] at hbound
+  exact hbound.trans (mul_le_mul_of_nonneg_left
+    (div_le_div_of_nonneg_left (by norm_num) (mul_pos (Real.log_pos (by norm_num)) hT)
+      (mul_le_mul_of_nonneg_right hlog hT.le)) (Real.rpow_nonneg hy.le _))
+
+#print axioms LSeries_perron_truncated
+#print axioms vonMangoldt_perron_truncated
+#print axioms perronTruncatedKernel_sub_step_bound
+#print axioms perronTruncatedKernel_far_right_bound
+end RiemannResearch

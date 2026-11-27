@@ -1314,3 +1314,235 @@ theorem adjustedPrimeError_split_mellin_cleared_identity (C θ a σ : ℝ)
 #print axioms adjustedPrimeError_mellin_continuation
 #print axioms adjustedPrimeError_split_mellin_cleared_identity
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Topology
+
+/-- The entire zeta factor has isolated zeros, since it is one at one. -/
+theorem regularizedZeta_eventually_ne_zero (z : ℂ) :
+    ∀ᶠ w in 𝓝[≠] z, regularizedZeta w ≠ 0 := by
+  rcases (regularizedZeta_analyticAt z).eventually_eq_zero_or_eventually_ne_zero with h | h
+  · have han : AnalyticOnNhd ℂ regularizedZeta (univ : Set ℂ) :=
+      fun w _ => regularizedZeta_analyticAt w
+    have hEq : regularizedZeta =ᶠ[𝓝 z] (0 : ℂ → ℂ) := h
+    have hz := han.eqOn_zero_of_preconnected_of_eventuallyEq_zero
+      isPreconnected_univ (mem_univ z) hEq (mem_univ (1 : ℂ))
+    simp at hz
+  · exact h
+
+/-- Negative real residue gives divergence to minus infinity from the right,
+even after adding a term continuous at the pole. -/
+theorem negative_real_pole_tendsto_atBot (σ c : ℝ) (hc : c < 0) (G : ℝ → ℝ)
+    (hG : ContinuousAt G σ) :
+    Tendsto (fun t => c / (t - σ) + G t) (𝓝[>] σ) atBot := by
+  have hsub : Tendsto (fun t : ℝ => t - σ) (𝓝[>] σ) (𝓝[>] (0 : ℝ)) := by
+    apply tendsto_nhdsWithin_iff.mpr
+    refine ⟨?_, ?_⟩
+    · simpa using ((continuous_id.sub continuous_const).continuousAt :
+        ContinuousAt (fun t : ℝ => t - σ) σ).tendsto.mono_left nhdsWithin_le_nhds
+    · filter_upwards [self_mem_nhdsWithin] with t ht
+      exact show t - σ ∈ Ioi 0 from sub_pos.mpr (show σ < t from ht)
+  have hsing := (tendsto_inv_nhdsGT_zero.comp hsub).const_mul_atTop_of_neg hc
+  simpa only [div_eq_mul_inv, Function.comp_apply] using
+    hsing.atBot_add (hG.tendsto.mono_left nhdsWithin_le_nhds)
+
+/-- For a finite convergence abscissa, the Landau obstruction and the sign of
+the residue force the abscissa to lie at or to the left of the exponent. -/
+theorem adjustedPrimeError_abscissa_le (C θ a σ : ℝ)
+    (hθ0 : 0 ≤ θ) (hθ : θ < 1) (hσ : σ ≤ 1) (ha : 0 ≤ a)
+    (hnonneg : ∀ t ≥ a, 0 ≤ adjustedPrimeError C θ (Real.exp t))
+    (hprefix : ∀ z : ℂ, AnalyticAt ℂ (complexMellinOn (adjustedPrimeError C θ) (Ico 0 a)) z)
+    (hupper : ∀ s > σ, IntegrableOn (fun t : ℝ =>
+      adjustedPrimeError C θ (Real.exp t) * Real.exp (-s * t)) (Ici a))
+    (hlower : ∀ s : ℝ, IntegrableOn (fun t : ℝ =>
+      adjustedPrimeError C θ (Real.exp t) * Real.exp (-s * t)) (Ici a) → σ ≤ s)
+    (hinit : ∀ z : ℂ, 1 < z.re →
+      complexMellinOn (adjustedPrimeError C θ) (Ico 0 a) z +
+        complexMellinOn (adjustedPrimeError C θ) (Ici a) z =
+        (C : ℂ) / (z - (θ : ℂ)) - 1 / (z - 1) +
+          (-deriv riemannZeta z / riemannZeta z) / z) :
+    σ ≤ θ := by
+  by_contra! hθσ
+  let g := adjustedPrimeError C θ
+  let P := complexMellinOn g (Ico 0 a)
+  let T := complexMellinOn g (Ici a)
+  let F := fun z => P z + T z
+  let R := fun z : ℂ => (C : ℂ) / (z - (θ : ℂ)) -
+    (1 + deriv regularizedZeta z / regularizedZeta z) / z
+  have hg := measurable_adjustedPrimeError C θ
+  have hF : AnalyticOnNhd ℂ F {z : ℂ | σ < z.re} := by
+    intro z hz
+    change σ < z.re at hz
+    let v := (σ + z.re) / 2
+    have hsv : σ < v := by dsimp [v]; linarith
+    have hvz : v < z.re := by dsimp [v]; linarith
+    exact (hprefix z).add (complexMellinOn_tail_analyticOnNhd g a v ha hg (hupper v hsv) z hvz)
+  have hσpos : 0 < σ := hθ0.trans_lt hθσ
+  have hσ0 : (σ : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hσpos.ne'
+  have hσθ : (σ : ℂ) ≠ (θ : ℂ) := fun h => hθσ.ne' (Complex.ofReal_injective h)
+  have haxis : Tendsto (fun v : ℝ => (v : ℂ)) (𝓝[>] σ) (𝓝[≠] (σ : ℂ)) := by
+    apply tendsto_nhdsWithin_iff.mpr
+    refine ⟨Complex.continuous_ofReal.continuousAt.tendsto.mono_left nhdsWithin_le_nhds, ?_⟩
+    filter_upwards [self_mem_nhdsWithin] with v hv
+    exact fun heq => (show σ < v from hv).ne' (Complex.ofReal_injective heq)
+  have hFR : ∀ᶠ v : ℝ in 𝓝[>] σ, F (v : ℂ) = R (v : ℂ) := by
+    filter_upwards [self_mem_nhdsWithin, haxis.eventually (regularizedZeta_eventually_ne_zero (σ : ℂ))]
+      with v hv hUv
+    have hv' : σ < v := hv
+    exact adjustedPrimeError_mellin_continuation C θ σ hθ.le hσ F hF hinit _
+      (by simpa using hv') (Complex.ofReal_ne_zero.mpr (hσpos.trans hv').ne')
+      (fun h => (hθσ.trans hv').ne' (Complex.ofReal_injective h)) hUv
+  by_cases hUσ : regularizedZeta (σ : ℂ) = 0
+  · have hσ1 : (σ : ℂ) ≠ 1 := fun h => by rw [h, regularizedZeta_one] at hUσ; exact one_ne_zero hUσ
+    have hζσ : riemannZeta (σ : ℂ) = 0 := by
+      rw [(regularizedZeta_eventuallyEq (σ : ℂ) hσ1).eq_of_nhds] at hUσ
+      exact (mul_eq_zero.mp hUσ).resolve_left (sub_ne_zero.mpr hσ1)
+    obtain ⟨m, H, hm, hH, hlocal⟩ :=
+      adjustedPrimeError_mellin_at_zeta_zero C θ (σ : ℂ) hζσ hσ0 hσ1 hσθ
+    have hTlocal : ∀ᶠ v : ℝ in 𝓝[>] σ,
+        (T (v : ℂ)).re = -(m : ℝ) / σ / (v - σ) + (H (v : ℂ) - P (v : ℂ)).re := by
+      filter_upwards [hFR, haxis.eventually hlocal, haxis.eventually
+        (eventually_ne_nhdsWithin hσ1), self_mem_nhdsWithin, haxis.eventually
+        (regularizedZeta_eventually_ne_zero (σ : ℂ))] with v hvR hvH hv1 hv hUv
+      have hv' : σ < v := hv
+      have hv0 := Complex.ofReal_ne_zero.mpr (hσpos.trans hv').ne'
+      have hvζ : riemannZeta (v : ℂ) ≠ 0 := by
+        intro h
+        exact hUv (by rw [(regularizedZeta_eventuallyEq _ hv1).eq_of_nhds, h, mul_zero])
+      have he : R (v : ℂ) = (C : ℂ) / ((v : ℂ) - (θ : ℂ)) - 1 / ((v : ℂ) - 1) +
+          (-deriv riemannZeta (v : ℂ) / riemannZeta (v : ℂ)) / (v : ℂ) := by
+        dsimp [R]
+        linear_combination regularizedZeta_mellin_eq (v : ℂ) hv0 hv1 hvζ
+      have hre := congrArg Complex.re (hvR.trans (he.trans hvH))
+      have hrealPole : ((-(m : ℂ) / (σ : ℂ)) / ((v : ℂ) - (σ : ℂ))).re =
+          -(m : ℝ) / σ / (v - σ) := by
+        exact_mod_cast (Complex.ofReal_re (-(m : ℝ) / σ / (v - σ)))
+      change (P (v : ℂ) + T (v : ℂ)).re = _ at hre
+      simp only [Complex.add_re, hrealPole] at hre
+      rw [Complex.sub_re]
+      linarith
+    have hcont : ContinuousAt (fun v : ℝ => (H (v : ℂ) - P (v : ℂ)).re) σ :=
+      Complex.continuous_re.continuousAt.comp
+        ((hH.continuousAt.sub (hprefix (σ : ℂ)).continuousAt).comp Complex.continuous_ofReal.continuousAt)
+    have hneg : -(m : ℝ) / σ < 0 := div_neg_of_neg_of_pos (neg_lt_zero.mpr (by exact_mod_cast hm)) hσpos
+    have hlim := (negative_real_pole_tendsto_atBot σ _ hneg _ hcont).congr' (hTlocal.mono fun _ h => h.symm)
+    have hTpos : ∀ᶠ v : ℝ in 𝓝[>] σ, 0 ≤ (T (v : ℂ)).re := by
+      apply Eventually.of_forall
+      intro v
+      have heq : T (v : ℂ) = (mellinTail g a v : ℂ) := by
+        simp only [T, complexMellinOn, mellinTail, ← integral_complex_ofReal, Complex.ofReal_mul,
+          Complex.ofReal_exp, Complex.ofReal_neg]
+      rw [heq, Complex.ofReal_re]
+      exact mellinTail_nonneg g a v hnonneg
+    obtain ⟨v, hv₁, hv₂⟩ := ((tendsto_atBot.mp hlim (-1)).and hTpos).exists
+    linarith
+  · have hRa : AnalyticAt ℂ R (σ : ℂ) := by
+      have hU := regularizedZeta_analyticAt (σ : ℂ)
+      exact (analyticAt_const.div (analyticAt_id.sub analyticAt_const) (sub_ne_zero.mpr hσθ)).sub
+        ((analyticAt_const.add (hU.deriv.div hU hUσ)).div analyticAt_id hσ0)
+    apply mellinTail_not_complex_analyticAt_abscissa g a σ ha hg hnonneg hupper hlower
+    refine ⟨fun z => R z - P z, hRa.sub (hprefix (σ : ℂ)), ?_⟩
+    filter_upwards [hFR] with v hv
+    change R (v : ℂ) - P (v : ℂ) = T (v : ℂ)
+    exact sub_eq_iff_eq_add.mpr (hv.symm.trans (add_comm _ _))
+
+/-- A one-sided bound gives absolute convergence of the adjusted Mellin
+tail throughout the open half-plane to the right of the bound's exponent.
+The witnesses retain their nonnegative tail and the Mellin identity. -/
+theorem adjustedPrimeError_tail_converges (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ : θ < 1)
+    (h : OneSidedBound θ) :
+    ∃ C a : ℝ, 0 ≤ a ∧
+      (∀ t ≥ a, 0 ≤ adjustedPrimeError C θ (Real.exp t)) ∧
+      (∀ z : ℂ, AnalyticAt ℂ (complexMellinOn (adjustedPrimeError C θ) (Ico 0 a)) z) ∧
+      (∀ s > θ, IntegrableOn (fun t : ℝ => adjustedPrimeError C θ (Real.exp t) *
+        Real.exp (-s * t)) (Ici a)) ∧
+      ∀ z : ℂ, 1 < z.re →
+        complexMellinOn (adjustedPrimeError C θ) (Ico 0 a) z +
+          complexMellinOn (adjustedPrimeError C θ) (Ici a) z =
+          (C : ℂ) / (z - (θ : ℂ)) - 1 / (z - 1) +
+            (-deriv riemannZeta z / riemannZeta z) / z := by
+  obtain ⟨C, a, ha, hnonneg, hprefix, hinit⟩ := adjustedPrimeError_mellin_tail_split θ hθ.le h
+  have hformula (z : ℂ) (hz : 1 < z.re) := (hinit z hz).2
+  refine ⟨C, a, ha, hnonneg, hprefix, ?_, hformula⟩
+  intro v hv
+  by_contra hnot
+  let A : Set ℝ := {s | IntegrableOn (fun t : ℝ => adjustedPrimeError C θ (Real.exp t) *
+    Real.exp (-s * t)) (Ici a)}
+  have hmem (s : ℝ) (hs : 1 < s) : s ∈ A := by
+    simpa only [Complex.ofReal_re] using (hinit (s : ℂ) (by simpa only [Complex.ofReal_re])).1
+  have hA : A.Nonempty := ⟨2, hmem 2 (by norm_num)⟩
+  have hb (s : ℝ) (hs : s ∈ A) : v ≤ s := by
+    by_contra! hlt
+    exact hnot (mellin_integrable_right (adjustedPrimeError C θ) a s v ha hlt.le
+      (measurable_adjustedPrimeError C θ) hs)
+  have hbdd : BddBelow A := ⟨v, fun s hs => hb s hs⟩
+  let σ := sInf A
+  have hvσ : v ≤ σ := le_csInf hA (fun s hs => hb s hs)
+  have hσ : σ ≤ 1 := by
+    by_contra! hlt
+    let w := (1 + σ) / 2
+    have hw₁ : 1 < w := by dsimp [w]; linarith
+    have hw₂ : w < σ := by dsimp [w]; linarith
+    exact (not_le_of_gt hw₂) (csInf_le hbdd (hmem w hw₁))
+  have hupper (s : ℝ) (hs : σ < s) : s ∈ A := by
+    obtain ⟨r, hr, hrs⟩ := exists_lt_of_csInf_lt hA hs
+    exact mellin_integrable_right (adjustedPrimeError C θ) a r s ha hrs.le
+      (measurable_adjustedPrimeError C θ) hr
+  have hσθ := adjustedPrimeError_abscissa_le C θ a σ hθ0 hθ hσ ha hnonneg hprefix
+    hupper (fun s hs => csInf_le hbdd hs) hformula
+  exact (not_le_of_gt (hv.trans_le hvσ)) hσθ
+
+/-- The forward direction of the v16 one-sided criterion at q = 1:
+a one-sided bound at exponent θ excludes every zeta zero to its right. -/
+theorem riemannZeta_ne_zero_of_oneSidedBound (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ : θ < 1)
+    (h : OneSidedBound θ) (ρ : ℂ) (hρ : θ < ρ.re) : riemannZeta ρ ≠ 0 := by
+  intro hzero
+  obtain ⟨C, a, ha, _, hprefix, htail, hinit⟩ := adjustedPrimeError_tail_converges θ hθ0 hθ h
+  let P := complexMellinOn (adjustedPrimeError C θ) (Ico 0 a)
+  let T := complexMellinOn (adjustedPrimeError C θ) (Ici a)
+  let F := fun z => P z + T z
+  have hF : AnalyticOnNhd ℂ F {z : ℂ | θ < z.re} := by
+    intro z hz
+    change θ < z.re at hz
+    let v := (θ + z.re) / 2
+    have hθv : θ < v := by dsimp [v]; linarith
+    have hvz : v < z.re := by dsimp [v]; linarith
+    exact (hprefix z).add (complexMellinOn_tail_analyticOnNhd (adjustedPrimeError C θ)
+      a v ha (measurable_adjustedPrimeError C θ) (htail v hθv) z hvz)
+  have hρ0 : ρ ≠ 0 := Complex.ne_zero_of_re_pos (hθ0.trans_lt hρ)
+  have hρ1 : ρ ≠ 1 := fun he => riemannZeta_ne_zero_of_one_le_re (by simp [he]) hzero
+  have hρθ : ρ ≠ (θ : ℂ) := fun he => by simp [he] at hρ
+  obtain ⟨m, H, hm, hH, hlocal⟩ :=
+    adjustedPrimeError_mellin_at_zeta_zero C θ ρ hzero hρ0 hρ1 hρθ
+  have hnear : ∀ᶠ z in 𝓝 ρ, θ < z.re :=
+    (isOpen_lt continuous_const Complex.continuous_re).mem_nhds hρ
+  have hprod : (fun z => (z - ρ) * (F z - H z)) =ᶠ[𝓝[≠] ρ] fun _ => -(m : ℂ) / ρ := by
+    filter_upwards [hnear.filter_mono nhdsWithin_le_nhds, hlocal, regularizedZeta_eventually_ne_zero ρ,
+      eventually_ne_nhdsWithin hρ1, self_mem_nhdsWithin] with z hz hHl hUz hz1 hzρ
+    have hz0 : z ≠ 0 := Complex.ne_zero_of_re_pos (hθ0.trans_lt hz)
+    have hzθ : z ≠ (θ : ℂ) := fun he => by simp [he] at hz
+    have hzζ : riemannZeta z ≠ 0 := by
+      intro he
+      exact hUz (by rw [(regularizedZeta_eventuallyEq z hz1).eq_of_nhds, he, mul_zero])
+    have he := adjustedPrimeError_mellin_continuation C θ θ hθ.le hθ.le F hF hinit z hz hz0 hzθ hUz
+    have he' : F z = -(m : ℂ) / ρ / (z - ρ) + H z := by
+      rw [← hHl, he]
+      linear_combination regularizedZeta_mellin_eq z hz0 hz1 hzζ
+    have hd : z - ρ ≠ 0 := sub_ne_zero.mpr hzρ
+    change (z - ρ) * (F z - H z) = -(m : ℂ) / ρ
+    rw [he', add_sub_cancel_right, mul_comm, div_mul_cancel₀ _ hd]
+  have hlim : Tendsto (fun z => (z - ρ) * (F z - H z)) (𝓝[≠] ρ) (𝓝 (0 : ℂ)) := by
+    have hc : ContinuousAt (fun z => (z - ρ) * (F z - H z)) ρ :=
+      (continuous_id.sub continuous_const).continuousAt.mul
+        ((hF ρ hρ).continuousAt.sub hH.continuousAt)
+    simpa only [sub_self, zero_mul] using hc.tendsto.mono_left nhdsWithin_le_nhds
+  have hh := tendsto_nhds_unique (hlim.congr' hprod) tendsto_const_nhds
+  exact (div_ne_zero (neg_ne_zero.mpr (by exact_mod_cast hm.ne')) hρ0) hh.symm
+
+#print axioms regularizedZeta_eventually_ne_zero
+#print axioms negative_real_pole_tendsto_atBot
+#print axioms adjustedPrimeError_abscissa_le
+#print axioms adjustedPrimeError_tail_converges
+#print axioms riemannZeta_ne_zero_of_oneSidedBound
+end RiemannResearch

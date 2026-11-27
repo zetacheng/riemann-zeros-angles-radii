@@ -347,6 +347,7 @@ theorem mellin_complex_integrable (s : ℂ) (a : ℝ)
   apply hi.mono (Complex.continuous_exp.comp
     (continuous_const.mul Complex.continuous_ofReal)).aestronglyMeasurable
   filter_upwards [] with t
+  change ‖Complex.exp (-s * (t : ℂ))‖ ≤ ‖Real.exp (-s.re * t)‖
   rw [mellin_complex_kernel_norm, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
 
 #print axioms mellin_moment_kernel_deriv

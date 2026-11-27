@@ -190,3 +190,64 @@ theorem landau_shift_finite (f : ℕ → ℝ → ENNReal)
 #print axioms landau_tonelli
 #print axioms landau_shift_finite
 end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory
+
+/-- Polynomial moments are integrable at s whenever the original
+integrand is integrable at a smaller parameter and the polynomial
+is dominated by the intervening exponential. -/
+theorem mellin_moment_integrable (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
+    (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)))
+    (hdom : ∀ t : ℝ, a ≤ t →
+      |t ^ k| * Real.exp (-u * t) ≤ Real.exp (-s * t)) :
+    Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-u * t) * t ^ k)
+      (volume.restrict (Set.Ici a)) := by
+  apply hi.mono (((hg.comp Real.continuous_exp.measurable).mul
+    (Real.continuous_exp.comp (continuous_const.mul continuous_id)).measurable).mul
+    (continuous_id.pow k).measurable).aestronglyMeasurable
+  filter_upwards [ae_restrict_mem measurableSet_Ici] with t ht
+  change ‖g (Real.exp t) * Real.exp (-u * t) * t ^ k‖ ≤
+    ‖g (Real.exp t) * Real.exp (-s * t)‖
+  simp only [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
+  calc
+    |g (Real.exp t)| * Real.exp (-u * t) * |t ^ k| =
+        |g (Real.exp t)| * (|t ^ k| * Real.exp (-u * t)) := by ring
+    _ ≤ _ := mul_le_mul_of_nonneg_left (hdom t ht) (abs_nonneg _)
+
+/-- Exponential domination of each polynomial moment, with an explicit
+factorial constant. This is the quantitative bound needed for
+differentiation under the integral. -/
+theorem mellin_polynomial_bound (t d : ℝ) (k : ℕ)
+    (hd : 0 < d)
+    (hexp : (d * t) ^ k / (k.factorial : ℝ) ≤ Real.exp (d * t)) :
+    t ^ k ≤ ((k.factorial : ℝ) / d ^ k) * Real.exp (d * t) := by
+  have hf : 0 < (k.factorial : ℝ) := by exact_mod_cast Nat.factorial_pos k
+  have hp : 0 < d ^ k := pow_pos hd _
+  have h := (div_le_iff₀ hf).mp hexp
+  rw [mul_pow] at h
+  calc
+    t ^ k ≤ Real.exp (d * t) * (k.factorial : ℝ) / d ^ k := by
+      apply (le_div_iff₀ hp).2
+      simpa [mul_comm] using h
+    _ = _ := by ring
+
+/-- Mellin transform of a single exponential on a finite interval,
+via the fundamental theorem of calculus. -/
+theorem mellin_exp_interval (s a b : ℝ) (hs : s ≠ 0) :
+    (∫ t in a..b, Real.exp (-s * t)) =
+      Real.exp (-s * b) / (-s) - Real.exp (-s * a) / (-s) := by
+  have hn : -s ≠ 0 := neg_ne_zero.mpr hs
+  apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+  · intro t _
+    have h := ((hasDerivAt_id t).const_mul (-s)).exp.div_const (-s)
+    convert h using 1
+    field_simp [hn]
+  · exact (Real.continuous_exp.comp (continuous_const.mul continuous_id)).intervalIntegrable a b
+
+#print axioms mellin_moment_integrable
+#print axioms mellin_polynomial_bound
+#print axioms mellin_exp_interval
+end RiemannResearch

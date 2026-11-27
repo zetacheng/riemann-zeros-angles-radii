@@ -354,3 +354,40 @@ theorem mellin_complex_integrable (s : ℂ) (a : ℝ)
 #print axioms mellin_complex_kernel_norm
 #print axioms mellin_complex_integrable
 end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory
+
+/-- Uniform integrable derivative majorant on the parameter half-line
+v ≤ u, with v strictly inside the convergence region. -/
+theorem mellin_derivative_majorant (g : ℝ → ℝ) (a s v : ℝ) (k : ℕ)
+    (ha : 0 ≤ a) (hsv : s < v) (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a))) :
+    ∃ M : ℝ → ℝ, Integrable M (volume.restrict (Set.Ici a)) ∧
+      ∀ t u : ℝ, a ≤ t → v ≤ u →
+        ‖-(g (Real.exp t) * Real.exp (-u * t) * t ^ (k+1))‖ ≤ M t := by
+  let M : ℝ → ℝ := fun t => ‖g (Real.exp t) * Real.exp (-v * t) * t ^ (k+1)‖
+  refine ⟨M, (mellin_moments_inside g a s v (k+1) ha hsv hg hi).norm, ?_⟩
+  intro t u ht hu
+  have ht0 : 0 ≤ t := le_trans ha ht
+  dsimp [M]
+  simp only [norm_neg, Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
+  exact mul_le_mul_of_nonneg_right
+    (mul_le_mul_of_nonneg_left (mellin_kernel_le t v u ht0 hu) (abs_nonneg _))
+    (abs_nonneg _)
+
+/-- The complex kernel tends to zero at positive infinity in its
+right half-plane. -/
+theorem mellin_complex_kernel_decay (s : ℂ) (hs : 0 < s.re) :
+    Filter.Tendsto (fun t : ℝ => Complex.exp (-s * (t : ℂ)))
+      Filter.atTop (nhds 0) := by
+  apply tendsto_zero_iff_norm_tendsto_zero.mpr
+  simp only [mellin_complex_kernel_norm]
+  have h : Filter.Tendsto (fun t : ℝ => -s.re * t) Filter.atTop Filter.atBot :=
+    Filter.Tendsto.const_mul_atTop_of_neg (neg_lt_zero.mpr hs) Filter.tendsto_id
+  exact Real.tendsto_exp_atBot.comp h
+
+#print axioms mellin_derivative_majorant
+#print axioms mellin_complex_kernel_decay
+end RiemannResearch

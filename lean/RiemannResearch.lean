@@ -310,7 +310,7 @@ theorem mellin_complex_exp_interval (s : ℂ) (a b : ℝ) (hs : s ≠ 0) :
   apply intervalIntegral.integral_eq_sub_of_hasDerivAt
   · intro t _
     have h := ((Complex.ofRealCLM.hasDerivAt (x := t)).const_mul (-s)).cexp.div_const (-s)
-    convert h using 1 <;> simp [hn]
+    convert h using 1 <;> simp [hn, hs] <;> field_simp [hs]
   · exact (Complex.continuous_exp.comp
       (continuous_const.mul Complex.continuous_ofReal)).intervalIntegrable a b
 

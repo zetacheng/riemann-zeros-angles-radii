@@ -251,3 +251,66 @@ theorem mellin_exp_interval (s a b : ℝ) (hs : s ≠ 0) :
 #print axioms mellin_polynomial_bound
 #print axioms mellin_exp_interval
 end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory
+
+/-- Unconditional polynomial domination on the nonnegative axis. -/
+theorem mellin_polynomial_bound_pos (t d : ℝ) (k : ℕ)
+    (ht : 0 ≤ t) (hd : 0 < d) :
+    t ^ k ≤ ((k.factorial : ℝ) / d ^ k) * Real.exp (d * t) := by
+  apply mellin_polynomial_bound t d k hd
+  exact Real.pow_div_factorial_le_exp (mul_nonneg hd.le ht) k
+
+/-- All polynomial moments are integrable strictly inside the real
+half-line of absolute convergence. -/
+theorem mellin_moments_inside (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
+    (ha : 0 ≤ a) (hs : s < u) (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a))) :
+    Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-u * t) * t ^ k)
+      (volume.restrict (Set.Ici a)) := by
+  let C : ℝ := (k.factorial : ℝ) / (u - s) ^ k
+  have hC : 0 ≤ C := by
+    dsimp [C]
+    positivity
+  apply (hi.const_mul C).mono
+    (((hg.comp Real.continuous_exp.measurable).mul
+    (Real.continuous_exp.comp (continuous_const.mul continuous_id)).measurable).mul
+    (continuous_id.pow k).measurable).aestronglyMeasurable
+  filter_upwards [ae_restrict_mem measurableSet_Ici] with t ht
+  have ht0 : 0 ≤ t := le_trans ha ht
+  have hp := mellin_polynomial_bound_pos t (u - s) k ht0 (sub_pos.mpr hs)
+  change t ^ k ≤ C * Real.exp ((u - s) * t) at hp
+  change ‖g (Real.exp t) * Real.exp (-u * t) * t ^ k‖ ≤
+    ‖C * (g (Real.exp t) * Real.exp (-s * t))‖
+  simp only [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _),
+    abs_of_nonneg hC, abs_of_nonneg (pow_nonneg ht0 k)]
+  calc
+    |g (Real.exp t)| * Real.exp (-u * t) * t ^ k ≤
+        |g (Real.exp t)| * Real.exp (-u * t) *
+          (C * Real.exp ((u - s) * t)) :=
+      mul_le_mul_of_nonneg_left hp (mul_nonneg (abs_nonneg _) (Real.exp_pos _).le)
+    _ = C * (|g (Real.exp t)| * Real.exp (-s * t)) := by
+      rw [show (u - s) * t = u * t - s * t by ring, Real.exp_sub]
+      rw [show -u * t = -(u * t) by ring, Real.exp_neg]
+      field_simp [ne_of_gt (Real.exp_pos (u * t))]
+      <;> ring
+
+/-- Complex exponential Mellin kernel on finite real intervals. -/
+theorem mellin_complex_exp_interval (s : ℂ) (a b : ℝ) (hs : s ≠ 0) :
+    (∫ t in a..b, Complex.exp (-s * (t : ℂ))) =
+      Complex.exp (-s * (b : ℂ)) / (-s) -
+      Complex.exp (-s * (a : ℂ)) / (-s) := by
+  have hn : -s ≠ 0 := neg_ne_zero.mpr hs
+  apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+  · intro t _
+    have h := ((Complex.ofRealCLM.hasDerivAt).const_mul (-s)).cexp.div_const (-s)
+    convert h using 1 <;> simp [hn]
+  · exact (Complex.continuous_exp.comp
+      (continuous_const.mul Complex.continuous_ofReal)).intervalIntegrable a b
+
+#print axioms mellin_polynomial_bound_pos
+#print axioms mellin_moments_inside
+#print axioms mellin_complex_exp_interval
+end RiemannResearch

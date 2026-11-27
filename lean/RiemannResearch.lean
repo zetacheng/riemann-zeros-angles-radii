@@ -261,7 +261,7 @@ theorem mellin_polynomial_bound_pos (t d : ℝ) (k : ℕ)
     t ^ k ≤ ((k.factorial : ℝ) / d ^ k) * Real.exp (d * t) := by
   apply mellin_polynomial_bound t d k hd
   apply Real.pow_div_factorial_le_exp
-  all_goals first | exact mul_nonneg hd.le ht | exact k
+  exact mul_nonneg hd.le ht
 
 /-- All polynomial moments are integrable strictly inside the real
 half-line of absolute convergence. -/
@@ -310,11 +310,46 @@ theorem mellin_complex_exp_interval (s : ℂ) (a b : ℝ) (hs : s ≠ 0) :
   apply intervalIntegral.integral_eq_sub_of_hasDerivAt
   · intro t _
     have h := ((Complex.ofRealCLM.hasDerivAt (x := t)).const_mul (-s)).cexp.div_const (-s)
-    convert h using 1 <;> simp [hn, hs] <;> field_simp [hs]
+    convert h using 1 <;> simp [hn, hs]
   · exact (Complex.continuous_exp.comp
       (continuous_const.mul Complex.continuous_ofReal)).intervalIntegrable a b
 
 #print axioms mellin_polynomial_bound_pos
 #print axioms mellin_moments_inside
 #print axioms mellin_complex_exp_interval
+end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory
+
+/-- Pointwise derivative of the real Mellin moment kernel. -/
+theorem mellin_moment_kernel_deriv (g : ℝ → ℝ) (t s : ℝ) (k : ℕ) :
+    HasDerivAt (fun u : ℝ => g (Real.exp t) * Real.exp (-u * t) * t ^ k)
+      (-(g (Real.exp t) * Real.exp (-s * t) * t ^ (k+1))) s := by
+  have h := (((hasDerivAt_id s).neg.mul_const t).exp.const_mul
+    (g (Real.exp t))).mul_const (t ^ k)
+  convert h using 1 <;> simp [pow_succ] <;> ring
+
+/-- Exact absolute value of the complex exponential kernel. -/
+theorem mellin_complex_kernel_norm (s : ℂ) (t : ℝ) :
+    ‖Complex.exp (-s * (t : ℂ))‖ = Real.exp (-s.re * t) := by
+  rw [Complex.norm_exp]
+  congr 1
+  simp [Complex.mul_re]
+
+/-- The complex kernel is absolutely integrable whenever its real
+majorant is integrable on the tail. -/
+theorem mellin_complex_integrable (s : ℂ) (a : ℝ)
+    (hi : Integrable (fun t : ℝ => Real.exp (-s.re * t))
+      (volume.restrict (Set.Ici a))) :
+    Integrable (fun t : ℝ => Complex.exp (-s * (t : ℂ)))
+      (volume.restrict (Set.Ici a)) := by
+  apply hi.mono (Complex.continuous_exp.comp
+    (continuous_const.mul Complex.continuous_ofReal)).aestronglyMeasurable
+  filter_upwards [] with t
+  rw [mellin_complex_kernel_norm, Real.norm_eq_abs, abs_of_pos (Real.exp_pos _)]
+
+#print axioms mellin_moment_kernel_deriv
+#print axioms mellin_complex_kernel_norm
+#print axioms mellin_complex_integrable
 end RiemannResearch

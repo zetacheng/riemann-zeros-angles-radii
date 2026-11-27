@@ -1493,23 +1493,16 @@ theorem adjustedPrimeError_tail_converges (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ : θ
     hupper (fun s hs => csInf_le hbdd hs) hformula
   exact (not_le_of_gt (hv.trans_le hvσ)) hσθ
 
-/-- The forward direction of the v16 one-sided criterion at q = 1:
-a one-sided bound at exponent θ excludes every zeta zero to its right. -/
-theorem riemannZeta_ne_zero_of_oneSidedBound (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ : θ < 1)
-    (h : OneSidedBound θ) (ρ : ℂ) (hρ : θ < ρ.re) : riemannZeta ρ ≠ 0 := by
+/-- A holomorphic representative of the Mellin formula rules out poles
+from zeta zeros throughout its right half-plane. -/
+theorem riemannZeta_ne_zero_of_analytic_mellin_formula (C θ : ℝ)
+    (hθ0 : 0 ≤ θ) (hθ : θ ≤ 1)
+    (F : ℂ → ℂ) (hF : AnalyticOnNhd ℂ F {z : ℂ | θ < z.re})
+    (hinit : ∀ z : ℂ, 1 < z.re →
+      F z = (C : ℂ) / (z - (θ : ℂ)) - 1 / (z - 1) +
+        (-deriv riemannZeta z / riemannZeta z) / z)
+    (ρ : ℂ) (hρ : θ < ρ.re) : riemannZeta ρ ≠ 0 := by
   intro hzero
-  obtain ⟨C, a, ha, _, hprefix, htail, hinit⟩ := adjustedPrimeError_tail_converges θ hθ0 hθ h
-  let P := complexMellinOn (adjustedPrimeError C θ) (Ico 0 a)
-  let T := complexMellinOn (adjustedPrimeError C θ) (Ici a)
-  let F := fun z => P z + T z
-  have hF : AnalyticOnNhd ℂ F {z : ℂ | θ < z.re} := by
-    intro z hz
-    change θ < z.re at hz
-    let v := (θ + z.re) / 2
-    have hθv : θ < v := by dsimp [v]; linarith
-    have hvz : v < z.re := by dsimp [v]; linarith
-    exact (hprefix z).add (complexMellinOn_tail_analyticOnNhd (adjustedPrimeError C θ)
-      a v ha (measurable_adjustedPrimeError C θ) (htail v hθv) z hvz)
   have hρ0 : ρ ≠ 0 := Complex.ne_zero_of_re_pos (hθ0.trans_lt hρ)
   have hρ1 : ρ ≠ 1 := fun he => riemannZeta_ne_zero_of_one_le_re (by simp [he]) hzero
   have hρθ : ρ ≠ (θ : ℂ) := fun he => by simp [he] at hρ
@@ -1525,7 +1518,7 @@ theorem riemannZeta_ne_zero_of_oneSidedBound (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ :
     have hzζ : riemannZeta z ≠ 0 := by
       intro he
       exact hUz (by rw [(regularizedZeta_eventuallyEq z hz1).eq_of_nhds, he, mul_zero])
-    have he := adjustedPrimeError_mellin_continuation C θ θ hθ.le hθ.le F hF hinit z hz hz0 hzθ hUz
+    have he := adjustedPrimeError_mellin_continuation C θ θ hθ hθ F hF hinit z hz hz0 hzθ hUz
     have he' : F z = -(m : ℂ) / ρ / (z - ρ) + H z := by
       rw [← hHl, he]
       linear_combination regularizedZeta_mellin_eq z hz0 hz1 hzζ
@@ -1539,6 +1532,24 @@ theorem riemannZeta_ne_zero_of_oneSidedBound (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ :
     simpa only [sub_self, zero_mul] using hc.tendsto.mono_left nhdsWithin_le_nhds
   have hh := tendsto_nhds_unique (hlim.congr' hprod) tendsto_const_nhds
   exact (div_ne_zero (neg_ne_zero.mpr (by exact_mod_cast hm.ne')) hρ0) hh.symm
+
+/-- The forward direction of the v16 one-sided criterion at q = 1:
+a one-sided bound at exponent θ excludes every zeta zero to its right. -/
+theorem riemannZeta_ne_zero_of_oneSidedBound (θ : ℝ) (hθ0 : 0 ≤ θ) (hθ : θ < 1)
+    (h : OneSidedBound θ) (ρ : ℂ) (hρ : θ < ρ.re) : riemannZeta ρ ≠ 0 := by
+  obtain ⟨C, a, ha, _, hprefix, htail, hinit⟩ := adjustedPrimeError_tail_converges θ hθ0 hθ h
+  let P := complexMellinOn (adjustedPrimeError C θ) (Ico 0 a)
+  let T := complexMellinOn (adjustedPrimeError C θ) (Ici a)
+  let F := fun z => P z + T z
+  have hF : AnalyticOnNhd ℂ F {z : ℂ | θ < z.re} := by
+    intro z hz
+    change θ < z.re at hz
+    let v := (θ + z.re) / 2
+    have hθv : θ < v := by dsimp [v]; linarith
+    have hvz : v < z.re := by dsimp [v]; linarith
+    exact (hprefix z).add (complexMellinOn_tail_analyticOnNhd (adjustedPrimeError C θ)
+      a v ha (measurable_adjustedPrimeError C θ) (htail v hθv) z hvz)
+  exact riemannZeta_ne_zero_of_analytic_mellin_formula C θ hθ0 hθ.le F hF hinit ρ hρ
 
 #print axioms regularizedZeta_eventually_ne_zero
 #print axioms negative_real_pole_tendsto_atBot
@@ -1630,4 +1641,103 @@ theorem riemannHypothesis_of_oneSidedBounds
 #print axioms riemannZeta_reflect_left_zero
 #print axioms riemannHypothesis_of_right_zero_free
 #print axioms riemannHypothesis_of_oneSidedBounds
+end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory Filter Set Asymptotics
+
+/-- The unadjusted prime-error transform on its initial half-plane. -/
+theorem primeError_mellin_eq_zeta (z : ℂ) (hz : 1 < z.re) :
+    complexMellinOn primeError (Ici 0) z =
+      1 / (z - 1) + (deriv riemannZeta z / riemannZeta z) / z := by
+  have h := (adjustedPrimeError_mellin 0 0 z zero_le_one hz).2
+  simp only [zero_mul, zero_sub, Complex.ofReal_neg, neg_mul, integral_neg,
+    Complex.ofReal_zero, zero_div] at h
+  unfold complexMellinOn
+  simp only [neg_mul]
+  linear_combination -h
+
+/-- Mathlib's RH excludes every zero strictly to the right of the critical line. -/
+theorem riemannZeta_ne_zero_right_of_riemannHypothesis (h : RiemannHypothesis)
+    (z : ℂ) (hz : 1 / 2 < z.re) : riemannZeta z ≠ 0 := by
+  intro hzero
+  have hz1 : z ≠ 1 := fun h => riemannZeta_ne_zero_of_one_le_re (by simp [h]) hzero
+  have hn : ¬ ∃ n : ℕ, z = -2 * (n + 1) := by
+    rintro ⟨n, rfl⟩
+    norm_num [Complex.mul_re, Complex.add_re] at hz
+    linarith [Nat.cast_nonneg (α := ℝ) n]
+  exact hz.ne' (h z hzero hn hz1)
+
+/-- RH is equivalent to the existence of a holomorphic continuation of the
+prime-error Mellin transform to Re z > 1/2. This concerns analytic
+continuation of the transform. -/
+theorem riemannHypothesis_iff_primeError_mellin_continuation :
+    RiemannHypothesis ↔ ∃ F : ℂ → ℂ, AnalyticOnNhd ℂ F {z : ℂ | 1 / 2 < z.re} ∧
+      ∀ z : ℂ, 1 < z.re → F z = complexMellinOn primeError (Ici 0) z := by
+  constructor
+  · intro h
+    let F := fun z : ℂ => (1 + deriv regularizedZeta z / regularizedZeta z) / z
+    refine ⟨F, ?_, ?_⟩
+    · intro z hz
+      have hz' : (1 / 2 : ℝ) < z.re := hz
+      have hz0 := Complex.ne_zero_of_re_pos ((by norm_num : 0 < (1 / 2 : ℝ)).trans hz')
+      have hU0 : regularizedZeta z ≠ 0 := by
+        by_cases hz1 : z = 1
+        · simp [hz1]
+        · rw [(regularizedZeta_eventuallyEq z hz1).eq_of_nhds]
+          exact mul_ne_zero (sub_ne_zero.mpr hz1)
+            (riemannZeta_ne_zero_right_of_riemannHypothesis h z hz')
+      have hU := regularizedZeta_analyticAt z
+      exact (analyticAt_const.add (hU.deriv.div hU hU0)).div analyticAt_id hz0
+    · intro z hz
+      have hz0 := Complex.ne_zero_of_re_pos (zero_lt_one.trans hz)
+      have hz1 : z ≠ 1 := fun he => by simp [he] at hz
+      have hζ := riemannZeta_ne_zero_of_one_le_re hz.le
+      have he := regularizedZeta_mellin_eq z hz0 hz1 hζ
+      rw [primeError_mellin_eq_zeta z hz]
+      dsimp [F]
+      linear_combination -he
+  · rintro ⟨F, hF, hinit⟩
+    apply riemannHypothesis_of_right_zero_free
+    intro z hz
+    apply riemannZeta_ne_zero_of_analytic_mellin_formula 0 (1 / 2) (by norm_num) (by norm_num)
+      (fun w => -F w) (fun w hw => (hF w hw).neg) _ z hz
+    intro w hw
+    change -F w = _
+    rw [hinit w hw, primeError_mellin_eq_zeta w hw]
+    simp only [Complex.ofReal_zero, zero_div]
+    ring
+
+/-- The von Koch error estimate suffices for every exponent strictly
+greater than one half in the one-sided criterion. -/
+theorem oneSidedBound_of_vonKoch_estimate (θ : ℝ) (hθ : 1 / 2 < θ)
+    (h : primeError =O[atTop] fun x => x ^ (1 / 2 : ℝ) * Real.log x ^ 2) :
+    OneSidedBound θ := by
+  let ε := (θ - 1 / 2) / 2
+  have hε : 0 < ε := by dsimp [ε]; linarith
+  have hlog := (isLittleO_log_rpow_atTop hε).isBigO
+  have hlog₂ : (fun x : ℝ => Real.log x ^ 2) =O[atTop] fun x => (x ^ ε) * (x ^ ε) := by
+    simpa only [pow_two] using hlog.mul hlog
+  have hweight : (fun x : ℝ => x ^ (1 / 2 : ℝ) * Real.log x ^ 2) =O[atTop] fun x => x ^ θ := by
+    refine ((isBigO_refl (fun x : ℝ => x ^ (1 / 2 : ℝ)) atTop).mul hlog₂).congr'
+      EventuallyEq.rfl ?_
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with x hx
+    rw [← Real.rpow_add hx, ← Real.rpow_add hx]
+    congr 1
+    dsimp [ε]
+    ring
+  obtain ⟨C, hCpos, hC⟩ := (h.trans hweight).exists_pos
+  obtain ⟨x₀, hx₀⟩ := eventually_atTop.mp hC.bound
+  refine ⟨C, max 1 x₀, hCpos.le, le_max_left _ _, ?_⟩
+  intro x hx
+  have hx₁ : 1 ≤ x := (le_max_left 1 x₀).trans hx
+  have hh := hx₀ x ((le_max_right 1 x₀).trans hx)
+  rw [Real.norm_of_nonneg (Real.rpow_nonneg (zero_le_one.trans hx₁) _)] at hh
+  exact (Real.le_norm_self _).trans hh
+
+#print axioms riemannZeta_ne_zero_of_analytic_mellin_formula
+#print axioms primeError_mellin_eq_zeta
+#print axioms riemannZeta_ne_zero_right_of_riemannHypothesis
+#print axioms riemannHypothesis_iff_primeError_mellin_continuation
+#print axioms oneSidedBound_of_vonKoch_estimate
 end RiemannResearch

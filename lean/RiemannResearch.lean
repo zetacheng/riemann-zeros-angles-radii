@@ -462,4 +462,43 @@ theorem mellin_integral_moment_deriv (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
 
 #print axioms mellin_complex_improper_limit
 #print axioms mellin_integral_moment_deriv
+
+/-- Inside the domain of convergence, every real derivative of the Mellin tail
+is the corresponding integral moment with its alternating sign. -/
+theorem mellinTail_iteratedDeriv (g : ℝ → ℝ) (a s : ℝ) (k : ℕ)
+    (ha : 0 ≤ a) (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a))) :
+    ∀ u > s, iteratedDeriv k (mellinTail g a) u =
+      (-1 : ℝ) ^ k * ∫ t in Set.Ici a, g (Real.exp t) * Real.exp (-u * t) * t ^ k := by
+  induction k with
+  | zero =>
+    intro u _
+    simp [mellinTail]
+  | succ k ih =>
+    intro u hu
+    have hlocal : iteratedDeriv k (mellinTail g a) =ᶠ[nhds u]
+        (fun z : ℝ => (-1 : ℝ) ^ k *
+          ∫ t in Set.Ici a, g (Real.exp t) * Real.exp (-z * t) * t ^ k) := by
+      filter_upwards [Ioi_mem_nhds hu] with z hz
+      exact ih z hz
+    have hnext := (mellin_integral_moment_deriv g a s u k ha hu hg hi).const_mul
+      ((-1 : ℝ) ^ k)
+    rw [iteratedDeriv_succ, hlocal.deriv_eq, hnext.deriv, integral_neg, pow_succ]
+    ring
+
+/-- The Taylor coefficients for a leftward shift are nonnegative when the
+Mellin tail has a nonnegative integrand. -/
+theorem mellinTail_left_taylor_coeff_nonneg (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
+    (ha : 0 ≤ a) (hu : s < u) (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a)))
+    (hnonneg : ∀ t, a ≤ t → 0 ≤ g (Real.exp t)) :
+    0 ≤ ((-1 : ℝ) ^ k * iteratedDeriv k (mellinTail g a) u) / (k.factorial : ℝ) := by
+  rw [mellinTail_iteratedDeriv g a s k ha hg hi u hu, ← mul_assoc]
+  exact div_nonneg (mul_nonneg (by rw [← mul_pow]; norm_num)
+    (mellin_moment_nonneg g a u k ha hnonneg)) (Nat.cast_nonneg _)
+
+#print axioms mellinTail_iteratedDeriv
+#print axioms mellinTail_left_taylor_coeff_nonneg
 end RiemannResearch

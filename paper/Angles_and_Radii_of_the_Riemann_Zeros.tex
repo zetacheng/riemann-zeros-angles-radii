@@ -6,7 +6,7 @@
 
 \usepackage{enumitem}
 \usepackage{fancyhdr}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 20}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 21}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}\newtheorem{definition}[proposition]{Definition}
@@ -15,7 +15,7 @@
 
 \title{Angles and Radii of the Riemann Zeros:\\ the Circle as the Answer, and the Routes to It}
 \author{Zeta Hoi-Ho Cheng}
-\date{Version 20 --- 26 November 2026}
+\date{Version 21 --- 26 November 2026}
 
 \begin{document}
 \maketitle
@@ -34,6 +34,7 @@ Part~VI explores phase encoding of M\"obius weights and relative regularized det
 Part~VII develops prime Fourier epicycles, a conditional positive energy criterion for RH, and exact higher-moment bounds from unique factorization. Finite-window near-resonance control remains open.
 The dual-metric formulation and stationary-kernel proposal isolate the missing common spectral realization; they do not prove RH.
 Part~VIII develops the completed positive-real response criterion, its conditional Gram kernel, the full multiplicative phase symmetry, and local Cayley passivity. The infinite composition and normalization preserving global passivity remain open.
+Part~IX establishes positive multiplicative martingales, cyclic arithmetic fluctuation weights, a reflection-paired relative energy, and a conditional spectral projection construction. No identification of the auxiliary finite-energy space with the zeta zero spectrum is established.
 \end{abstract}
 
 \section{Introduction}
@@ -999,6 +1000,70 @@ C_p-1-2p^{-s}=\frac{2p^{-2s}}{1-p^{-s}},
 whose sum converges locally normally for $\sigma>1/2$, but whose real part likewise need not be nonnegative. For example a purely imaginary nonzero $r_p$ makes the real part of the latter expression negative. The first-order term is precisely the obstruction already identified in Part VI.
 
 A possible next step is a scattering composition of the local contractive amplitudes, with an independently justified normalization and a completed response equal to $H$ (or a transform with the same zero poles). Such a composition must preserve passivity, have a well-defined infinite limit, and establish the exact arithmetic-to-spectral identity. None of these joint requirements has been established here. In particular local Cayley passivity does not imply passivity of the completed zeta response. The remaining question is whether the full multiplicative phase symmetry can supply this missing positive realization.
+
+\part{Positive multiplicative measures and relative radial energy}
+
+\section{Scattering dilation and positive multiplicative measures}
+For $r=p^{-s}$ with $\mathrm{Re}\,s>0$, the matrix
+\[
+S_p=\begin{pmatrix}r&\sqrt{1-|r|^2}\\
+\sqrt{1-|r|^2}&-\bar r\end{pmatrix}
+\]
+is unitary pointwise. It is not holomorphic in $s$. For two scalar two-port systems the Redheffer composition has transmission $t_{12}=t_2t_1/(1-r'_1r_2)$ when the denominator is nonzero. This is not an identification of the Euler product with a coherent cascade. In an independent-channel model the product of transmission probabilities is $\prod_p(1-p^{-2\sigma})=1/\zeta(2\sigma)$ for $\sigma>1/2$, and is zero for $0<\sigma\le1/2$.
+
+On the product Haar probability space of Part VIII put $r_p=p^{-\sigma}$ and
+\[
+W_p(\theta)=\frac{1-r_p^2}{|1-r_pe^{i\theta}|^2},\qquad
+W_N=\prod_{p\le N}W_p(\theta_p).
+\]
+The Poisson kernel has mean one and second moment $(1+r_p^2)/(1-r_p^2)$ by Fourier orthogonality. Independence therefore makes $W_N$ a positive mean-one martingale, with
+\[
+\mathbb E W_N^2=\prod_{p\le N}\frac{1+p^{-2\sigma}}{1-p^{-2\sigma}}.
+\]
+For $\sigma>1/2$ it converges in $L^2$ and almost surely to a nonnegative mean-one limit with second moment $\zeta(2\sigma)^2/\zeta(4\sigma)$. For $0<\sigma\le1/2$ the second moments diverge. This is a statement on the product probability space, not on the distinguished dense one-parameter orbit.
+
+For fixed positive integer $m$, the normalized factors $W_p^m/\mathbb E W_p^m$ also define a mean-one martingale. Their second moments are $1+2m^2r_p^2+O_m(r_p^4)$, by expanding the Poisson kernel and integrating. Thus the same $L^2$ threshold holds. The expansion $(1-r)^{-m}=\sum_{k\ge0}\binom{m+k-1}{k}r^k$ counts distributions of $k$ excitations among $m$ labelled channels; no canonical arithmetic channel multiplicity is asserted.
+
+\section{Cyclic weights and arithmetic fluctuation energy}
+With $L_p=\log p$, the identity
+\[
+-\frac{d}{ds}\log(1-e^{-sL_p})^{-1}
+=\sum_{k\ge1}\frac{kL_p}{k}e^{-skL_p}
+\]
+explains the cancellation of the logarithmic repetition weight $1/k$ against the repeated length $kL_p$. Summing for $\mathrm{Re}\,s>1$ gives $-\zeta'/\zeta$. The closed-orbit interpretation is an analogy.
+Haar orthogonality of the distinct characters $e^{ik\theta_p}$ yields the squared norm
+\[
+\mathcal E(\sigma)=\sum_p\frac{(\log p)^2}{p^{2\sigma}-1}
+=\sum_{n\ge2}\Lambda(n)^2n^{-2\sigma}.
+\]
+It is finite exactly for $\sigma>1/2$. Writing $u=2\sigma$, one has
+\[
+\mathcal E(u/2)=(\log\zeta)''(u)
+-\sum_p\sum_{k\ge2}(k-1)(\log p)^2p^{-ku}.
+\]
+The correction is holomorphic for $\mathrm{Re}\,u>1/2$. The Laurent expansion at $u=1$ gives $\mathcal E(u/2)=(u-1)^{-2}+O(1)$ as $u\downarrow1$, and subtraction of this pole gives a local holomorphic extension. The subtracted quantity has no established positivity.
+
+\section{Oscillator analogy and reflection-paired relative energy}
+An auxiliary oscillator with levels $(k+1/2)L_p$ has partition function $[2\sinh(sL_p/2)]^{-1}$ for $\mathrm{Re}\,s>0$. Its negative logarithmic derivative is $(L_p/2)\coth(sL_p/2)$, odd and positive-real in the right half-plane. Its reflection centre is zero, not $1/2$. The vacuum sum $\tfrac12\sum_p L_p$ diverges; its regulator $\tfrac12\sum_p L_pp^{-\varepsilon}=-P'(\varepsilon)/2$ is defined for $\varepsilon>1$. This auxiliary model does not derive a physical vacuum from arithmetic.
+
+Independently, set $s=1/2+z$, $a=\mathrm{Re}\,z$ and define $r_{p,\pm}=p^{-1/2\mp z}$. Their product is $1/p$. The sum of squared moduli is $2p^{-1}\cosh(2aL_p)$, minimized uniquely at $a=0$. Subtracting this minimum gives
+\[
+V_N(a)=4\sum_{p\le N}p^{-1}\sinh^2(aL_p)\ge0.
+\]
+For fixed $a\ne0$ the summands are asymptotic to $p^{-1+2|a|}$, so the limit is infinite; for $a=0$ it is zero. The curvature is
+\[
+V_N''(0)=8\sum_{p\le N}\frac{(\log p)^2}{p}
+\sim4(\log N)^2
+\]
+by partial summation and the prime number theorem. This is a rigorous stiffness statement for the chosen auxiliary energy, not a statement about the energy of zeta zeros.
+
+\section{The constraint projection and its limitation}
+For any self-adjoint operator $A$ on a Hilbert space, bounded spectral calculus defines $e^{-\tau V_N(A)}$ for $\tau>0$. Pointwise convergence of the multipliers and dominated convergence against each vector's spectral measure give
+\[
+\mathrm{s}\!-\!\lim_{N\to\infty}e^{-\tau V_N(A)}
+=\mathbf 1_{\{0\}}(A).
+\]
+This is the orthogonal projection onto $\ker A$. It is zero if zero is not an eigenvalue, including multiplication by the radial coordinate on ordinary Lebesgue $L^2$. A nontrivial constrained space and its exact correspondence with all completed zeta zeros must be independently constructed. Requiring every zero to have finite $V_\infty$ is already equivalent to RH and cannot serve as an independent premise. Quantum uncertainty, measurement collapse, and gauge constraints are possible analogies only; computation does not alter the locations of zeros.
 
 \section{Conclusion}\label{sec:conclusion}
 The experiments separate two objects that are often identified. \emph{The helix} (the critical line with its heights) carries the arithmetic: the explicit formula ties the zeros to the prime powers through an exact identity (Table~\ref{tab:heights}), Landau's formula imprints each prime on the angles (Table~\ref{tab:filling}), and the zeros repel like eigenvalues along it (Tables~\ref{tab:spacing} and~\ref{tab:wrap}). \emph{The circle} carries the shape: the projected angles become equidistributed for any base and lose the arithmetic, and what survives is the radius. The Riemann Hypothesis is the statement that the closure of the picture consists of the circle together with the known impurities of Section~\ref{sec:impurities}. This division is a geometric interpretation, not a separation theorem: the explicit formula depends on both coordinates of every zero.

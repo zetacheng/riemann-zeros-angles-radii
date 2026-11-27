@@ -6,7 +6,7 @@
 
 \usepackage{enumitem}
 \usepackage{fancyhdr}
-\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 21}\fancyfoot[C]{\thepage}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{Angles and Radii of the Riemann Zeros}\fancyhead[R]{Version 22}\fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \newtheorem{proposition}{Proposition}[section]
 \theoremstyle{definition}\newtheorem{definition}[proposition]{Definition}
@@ -15,7 +15,7 @@
 
 \title{Angles and Radii of the Riemann Zeros:\\ the Circle as the Answer, and the Routes to It}
 \author{Zeta Hoi-Ho Cheng}
-\date{Version 21 --- 26 November 2026}
+\date{Version 22 --- 26 November 2026}
 
 \begin{document}
 \maketitle
@@ -35,6 +35,7 @@ Part~VII develops prime Fourier epicycles, a conditional positive energy criteri
 The dual-metric formulation and stationary-kernel proposal isolate the missing common spectral realization; they do not prove RH.
 Part~VIII develops the completed positive-real response criterion, its conditional Gram kernel, the full multiplicative phase symmetry, and local Cayley passivity. The infinite composition and normalization preserving global passivity remain open.
 Part~IX establishes positive multiplicative martingales, cyclic arithmetic fluctuation weights, a reflection-paired relative energy, and a conditional spectral projection construction. No identification of the auxiliary finite-energy space with the zeta zero spectrum is established.
+Part~X derives arithmetic uncertainty relations, a single-channel conservation obstruction, and paired-channel states with exact cancellation of logarithmic fluctuations. Their correspondence with the completed zeta zero spectrum remains unproved.
 \end{abstract}
 
 \section{Introduction}
@@ -1064,6 +1065,71 @@ For any self-adjoint operator $A$ on a Hilbert space, bounded spectral calculus 
 =\mathbf 1_{\{0\}}(A).
 \]
 This is the orthogonal projection onto $\ker A$. It is zero if zero is not an eigenvalue, including multiplication by the radial coordinate on ordinary Lebesgue $L^2$. A nontrivial constrained space and its exact correspondence with all completed zeta zeros must be independently constructed. Requiring every zero to have finite $V_\infty$ is already equivalent to RH and cannot serve as an independent premise. Quantum uncertainty, measurement collapse, and gauge constraints are possible analogies only; computation does not alter the locations of zeros.
+
+\part{Arithmetic uncertainty and paired-channel constraints}
+
+\section{Prime shifts and arithmetic uncertainty}
+On $\ell^2(\mathbb N)$ let $D|n\rangle=(\log n)|n\rangle$ and $S_p|n\rangle=|pn\rangle$. On the finite-support core, and by extension on the domain of $D$,
+\[
+[D,S_p]=(\log p)S_p,\qquad
+[D,S_p^\dagger]=-(\log p)S_p^\dagger.
+\]
+The bounded self-adjoint quadratures $X_p=(S_p+S_p^\dagger)/2$ and $Y_p=(S_p-S_p^\dagger)/(2i)$ satisfy
+\[
+[D,X_p]=i(\log p)Y_p,\qquad [D,Y_p]=-i(\log p)X_p.
+\]
+Robertson's inequality for normalized vectors in the domain of $D$ therefore implies
+\[
+(\Delta D)^2((\Delta X_p)^2+(\Delta Y_p)^2)
+\ge\frac{(\log p)^2}{4}|\langle S_p\rangle|^2.
+\]
+Since $S_p^\dagger S_p=I$ and $S_p S_p^\dagger=I-Q_p$, where $Q_p$ projects onto integers not divisible by $p$, one also has $[X_p,Y_p]=-iQ_p/2$. In the arithmetic vacuum $\Omega=|1\rangle$, both quadratures have zero mean and variance $1/4$, saturating their Robertson bound.
+
+For $X_N(\sigma)=\sum_{p\le N}p^{-\sigma}X_p$ and the analogous $Y_N$, orthogonality of the vectors $|p\rangle$ gives
+\[
+\operatorname{Var}_\Omega X_N(\sigma)=\operatorname{Var}_\Omega Y_N(\sigma)
+=\tfrac14\sum_{p\le N}p^{-2\sigma}.
+\]
+The vacuum variance is bounded in the cutoff exactly for $\sigma>1/2$. This does not assert convergence of the operators on the entire Hilbert space. The relative energy of Part IX satisfies the exact identity
+\[
+V_N(a)=4\bigl(\operatorname{Var}_\Omega X_N(1/2+a)
++\operatorname{Var}_\Omega X_N(1/2-a)
+-2\operatorname{Var}_\Omega X_N(1/2)\bigr).
+\]
+Thus the auxiliary radial energy is a difference of vacuum variances, not the variance of a zero's real part. Distinct prime shifts and their adjoints commute; these relations alone do not establish chaotic dynamics.
+
+\section{A single-channel conservation obstruction}
+Let $N_p|n\rangle=v_p(n)|n\rangle$. Then $D=\sum_p(\log p)N_p$ on its natural domain. Unique factorization implies that equality of total logarithmic scales implies equality of every prime occupation. In particular $D$ has simple point spectrum, and every bounded operator commuting with its spectral projections is diagonal in the integer basis. A coupling conserving $D$ exactly cannot transfer occupation between distinct integer states in this representation.
+
+\section{Paired channels and exact cancellation of fluctuations}
+On $\ell^2(\mathbb N)\otimes\ell^2(\mathbb N)$ define the diagonal self-adjoint operators $D_+=D\otimes I$, $D_-=I\otimes D$, $Q=D_+-D_-$ and $E=D_++D_-$ by their joint spectral calculus. Then
+\[
+Q|m,n\rangle=\log(m/n)|m,n\rangle,\qquad
+\ker Q=\overline{\operatorname{span}}\{|n,n\rangle:n\ge1\}.
+\]
+The paired shifts $B_p=S_p\otimes S_p$ preserve every spectral subspace of $Q$ and satisfy $[E,B_p]=2(\log p)B_p$ on the finite-support core. Consequently the bounded self-adjoint finite sum $H_N=\sum_{p\le N}g_p(B_p+B_p^\dagger)$ for real $g_p$ generates a unitary group preserving $\ker Q$.
+
+For real $\sigma>1/2$, the normalized vector
+\[
+\Psi_\sigma=\zeta(2\sigma)^{-1/2}\sum_{n\ge1}n^{-\sigma}|n,n\rangle
+\]
+belongs to the domains of both logarithmic operators and satisfies $Q\Psi_\sigma=0$. Differentiating the absolutely convergent Dirichlet series shows
+\[
+\operatorname{Var}_{\Psi_\sigma}(D_+)
+=\operatorname{Var}_{\Psi_\sigma}(D_-)
+=\operatorname{Cov}_{\Psi_\sigma}(D_+,D_-)
+=(\log\zeta)''(2\sigma).
+\]
+Hence $\operatorname{Var}_{\Psi_\sigma}(Q)=0$ identically, while the individual variances diverge as $(2\sigma-1)^{-2}$ when $\sigma\downarrow1/2$. The cancellation uses positive covariance in a difference observable. It is exact at every admissible parameter, not a subtraction of undefined infinite quantities. The formal critical vector is not normalizable; indeed $\Psi_\sigma$ converges weakly to zero by coordinatewise convergence and bounded norms, so no normalized strong limit exists.
+
+\section{Constraint-preserving interactions and the missing spectral identity}
+For a finite prime set and real coefficients $J_{pq}$, the bounded self-adjoint interaction
+\[
+H_{\rm int}=\sum_{p<q}J_{pq}(B_p^\dagger B_q+B_q^\dagger B_p)
+\]
+commutes with all spectral projections of $Q$. It allows transfers between paired occupations while preserving the difference constraint, but does not in general conserve $E$. Neither chaos nor GUE statistics follow from this construction. The coefficients and doubled representation are auxiliary choices, not derived from the functional equation.
+
+The nontrivial kernel of $Q$ supplies an example of a constrained Hilbert space with nonzero local fluctuations and exact global balance. It does not identify $Q$ with the radial displacement of a zeta zero. In particular the diagonal pairing is imposed by construction, not forced on all spectral modes of $\xi$. An independent arithmetic spectral realization, with completeness and multiplicities and an exact correspondence between the constraint and the real parts of all zeros, remains necessary. No measurement-induced change of zero locations or proof of RH is claimed.
 
 \section{Conclusion}\label{sec:conclusion}
 The experiments separate two objects that are often identified. \emph{The helix} (the critical line with its heights) carries the arithmetic: the explicit formula ties the zeros to the prime powers through an exact identity (Table~\ref{tab:heights}), Landau's formula imprints each prime on the angles (Table~\ref{tab:filling}), and the zeros repel like eigenvalues along it (Tables~\ref{tab:spacing} and~\ref{tab:wrap}). \emph{The circle} carries the shape: the projected angles become equidistributed for any base and lose the arithmetic, and what survives is the radius. The Riemann Hypothesis is the statement that the closure of the picture consists of the circle together with the known impurities of Section~\ref{sec:impurities}. This division is a geometric interpretation, not a separation theorem: the explicit formula depends on both coordinates of every zero.

@@ -157,16 +157,16 @@ theorem mellin_integrable_right (g : ℝ → ℝ) (a s u : ℝ)
       (volume.restrict (Set.Ici a))) :
     Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-u * t))
       (volume.restrict (Set.Ici a)) := by
-  apply hi.mono' ((hg.comp Real.continuous_exp.measurable).mul
+  apply hi.mono ((hg.comp Real.continuous_exp.measurable).mul
     (Real.continuous_exp.comp (continuous_const.mul continuous_id)).measurable).aestronglyMeasurable
   filter_upwards [ae_restrict_mem measurableSet_Ici] with t ht
-  rw [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
-  rw [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
+  change ‖g (Real.exp t) * Real.exp (-u * t)‖ ≤ ‖g (Real.exp t) * Real.exp (-s * t)‖
+  simp only [Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
   exact mul_le_mul_of_nonneg_left (mellin_kernel_le t s u (le_trans ha ht) hs) (abs_nonneg _)
 
 /-- Nonnegative integration commutes with countable summation.
 This is the Tonelli step in Landau's proof, not the analytic continuation step. -/
-theorem landau_tonelli (f : ℕ → ℝ → ℝ≥0∞) (a : ℝ)
+theorem landau_tonelli (f : ℕ → ℝ → ENNReal) (a : ℝ)
     (hf : ∀ n, Measurable (f n)) :
     (∫⁻ t in Set.Ici a, ∑' n, f n t) =
       ∑' n, ∫⁻ t in Set.Ici a, f n t := by
@@ -176,8 +176,8 @@ theorem landau_tonelli (f : ℕ → ℝ → ℝ≥0∞) (a : ℝ)
 integrated coefficients have finite sum, the shifted integral is finite.
 The pointwise exponential expansion and coefficient identification
 are explicit hypotheses, not new axioms. -/
-theorem landau_shift_finite (f : ℕ → ℝ → ℝ≥0∞)
-    (G : ℝ → ℝ≥0∞) (a : ℝ)
+theorem landau_shift_finite (f : ℕ → ℝ → ENNReal)
+    (G : ℝ → ENNReal) (a : ℝ)
     (hf : ∀ n, Measurable (f n))
     (hseries : ∀ t, G t = ∑' n, f n t)
     (hfinite : (∑' n, ∫⁻ t in Set.Ici a, f n t) < ⊤) :

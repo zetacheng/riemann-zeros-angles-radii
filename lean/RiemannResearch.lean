@@ -411,6 +411,7 @@ theorem mellin_complex_improper_limit (s : ℂ) (a : ℝ) (hs : 0 < s.re) :
 
 /-- First derivative of the integrated real moment, via the dominated
 differentiation theorem. -/
+set_option maxHeartbeats 2000000 in
 theorem mellin_integral_moment_deriv (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
     (ha : 0 ≤ a) (hs : s < u) (hg : Measurable g)
     (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))

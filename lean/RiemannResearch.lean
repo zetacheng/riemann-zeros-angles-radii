@@ -372,7 +372,7 @@ theorem mellin_derivative_majorant (g : ℝ → ℝ) (a s v : ℝ) (k : ℕ)
   intro t u ht hu
   have ht0 : 0 ≤ t := le_trans ha ht
   dsimp [M]
-  simp only [norm_neg, Real.norm_eq_abs, abs_mul, abs_of_pos (Real.exp_pos _)]
+  simp only [norm_neg, Real.norm_eq_abs, abs_neg, abs_mul, abs_of_pos (Real.exp_pos _)]
   exact mul_le_mul_of_nonneg_right
     (mul_le_mul_of_nonneg_left (mellin_kernel_le t v u ht0 hu) (abs_nonneg _))
     (abs_nonneg _)

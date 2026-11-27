@@ -391,3 +391,61 @@ theorem mellin_complex_kernel_decay (s : ℂ) (hs : 0 < s.re) :
 #print axioms mellin_derivative_majorant
 #print axioms mellin_complex_kernel_decay
 end RiemannResearch
+
+namespace RiemannResearch
+open MeasureTheory Filter
+
+/-- Evaluation of the improper complex exponential integral as a
+limit of finite interval integrals. -/
+theorem mellin_complex_improper_limit (s : ℂ) (a : ℝ) (hs : 0 < s.re) :
+    Tendsto (fun b : ℝ => ∫ t in a..b, Complex.exp (-s * (t : ℂ)))
+      atTop (nhds (Complex.exp (-s * (a : ℂ)) / s)) := by
+  have hn : s ≠ 0 := by
+    intro h
+    rw [h, Complex.zero_re] at hs
+    exact (lt_irrefl 0) hs
+  have h := ((mellin_complex_kernel_decay s hs).div_const (-s)).sub
+    (tendsto_const_nhds (x := Complex.exp (-s * (a : ℂ)) / (-s)))
+  simpa only [mellin_complex_exp_interval s a _ hn, zero_div, zero_sub,
+    div_neg, neg_neg] using h
+
+/-- First derivative of the integrated real moment, via the dominated
+differentiation theorem. -/
+theorem mellin_integral_moment_deriv (g : ℝ → ℝ) (a s u : ℝ) (k : ℕ)
+    (ha : 0 ≤ a) (hs : s < u) (hg : Measurable g)
+    (hi : Integrable (fun t : ℝ => g (Real.exp t) * Real.exp (-s * t))
+      (volume.restrict (Set.Ici a))) :
+    HasDerivAt
+      (fun z : ℝ => ∫ t in Set.Ici a, g (Real.exp t) * Real.exp (-z * t) * t ^ k)
+      (∫ t in Set.Ici a, -(g (Real.exp t) * Real.exp (-u * t) * t ^ (k+1))) u := by
+  let v := (s + u) / 2
+  have hsv : s < v := by dsimp [v]; linarith
+  have hvu : v < u := by dsimp [v]; linarith
+  obtain ⟨M, hM, hbound⟩ := mellin_derivative_majorant g a s v k ha hsv hg hi
+  have hmeas : ∀ z : ℝ, AEStronglyMeasurable
+      (fun t : ℝ => g (Real.exp t) * Real.exp (-z * t) * t ^ k)
+      (volume.restrict (Set.Ici a)) := fun z =>
+    (((hg.comp Real.continuous_exp.measurable).mul
+      (Real.continuous_exp.comp (continuous_const.mul continuous_id)).measurable).mul
+      (continuous_id.pow k).measurable).aestronglyMeasurable
+  have hderivmeas : AEStronglyMeasurable
+      (fun t : ℝ => -(g (Real.exp t) * Real.exp (-u * t) * t ^ (k+1)))
+      (volume.restrict (Set.Ici a)) :=
+    (mellin_moments_inside g a s u (k+1) ha hs hg hi).neg.aestronglyMeasurable
+  have hdom : ∀ᵐ t ∂(volume.restrict (Set.Ici a)), ∀ z ∈ Set.Ioi v,
+      ‖-(g (Real.exp t) * Real.exp (-z * t) * t ^ (k+1))‖ ≤ M t := by
+    filter_upwards [ae_restrict_mem measurableSet_Ici] with t ht z hz
+    exact hbound t z ht (le_of_lt hz)
+  have hd : ∀ᵐ t ∂(volume.restrict (Set.Ici a)), ∀ z ∈ Set.Ioi v,
+      HasDerivAt (fun w : ℝ => g (Real.exp t) * Real.exp (-w * t) * t ^ k)
+        (-(g (Real.exp t) * Real.exp (-z * t) * t ^ (k+1))) z :=
+    Filter.Eventually.of_forall (fun t z _ => mellin_moment_kernel_deriv g t z k)
+  have hn : Set.Ioi v ∈ nhds u := Ioi_mem_nhds hvu
+  apply hasDerivAt_integral_of_dominated_loc_of_deriv_le (bound := M) (s := Set.Ioi v)
+  all_goals first | exact hn | exact hM | exact hdom | exact hd |
+    exact hderivmeas | exact mellin_moments_inside g a s u k ha hs hg hi |
+    exact Filter.Eventually.of_forall hmeas | exact hmeas u
+
+#print axioms mellin_complex_improper_limit
+#print axioms mellin_integral_moment_deriv
+end RiemannResearch

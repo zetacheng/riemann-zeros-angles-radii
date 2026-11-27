@@ -889,3 +889,126 @@ theorem adjustedPrimeError_mellin (C θ : ℝ) (s : ℂ) (hθ : θ ≤ 1) (hs : 
 #print axioms mellin_complex_integral_Ici
 #print axioms adjustedPrimeError_mellin
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set
+open scoped Topology
+
+/-- The two singular terms in the Mellin formula combine to a holomorphic
+function at one. The equality specifies its values off the center. -/
+theorem riemannZeta_mellin_pole_cancel_one :
+    ∃ F : ℂ → ℂ, AnalyticAt ℂ F 1 ∧
+      F =ᶠ[𝓝[≠] (1 : ℂ)] fun s =>
+        -1 / (s - 1) + (-deriv riemannZeta s / riemannZeta s) / s := by
+  let U : ℂ → ℂ := Function.update (fun s => (s - 1) * riemannZeta s) 1 1
+  have hU1 : U 1 = 1 := Function.update_self _ _ _
+  have hU_ne (s : ℂ) (hs : s ≠ 1) :
+      U =ᶠ[𝓝 s] fun z => (z - 1) * riemannZeta z := by
+    filter_upwards [eventually_ne_nhds hs] with z hz
+    exact Function.update_of_ne hz _ _
+  have hderiv (s : ℂ) (hs : s ≠ 1) :
+      deriv U s = riemannZeta s + (s - 1) * deriv riemannZeta s := by
+    have hsub : HasDerivAt (fun z : ℂ => z - 1) 1 s := (hasDerivAt_id s).sub_const 1
+    have hprod := hsub.mul (differentiableAt_riemannZeta hs).hasDerivAt
+    rw [(hU_ne s hs).deriv_eq, hprod.deriv, one_mul]
+  have hU : AnalyticAt ℂ U 1 := by
+    apply Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt
+    · filter_upwards [self_mem_nhdsWithin] with s hs
+      exact (((differentiableAt_id.sub_const (1 : ℂ)).mul
+        (differentiableAt_riemannZeta hs))).congr_of_eventuallyEq (hU_ne s hs)
+    · simpa only [U, continuousAt_update_same] using riemannZeta_residue_one
+  have hU1_ne : U 1 ≠ 0 := hU1.trans_ne one_ne_zero
+  have hF : AnalyticAt ℂ (fun s => -(1 + deriv U s / U s) / s) 1 :=
+    ((analyticAt_const.add (hU.deriv.div hU hU1_ne)).neg).div analyticAt_id one_ne_zero
+  refine ⟨_, hF, ?_⟩
+  filter_upwards [self_mem_nhdsWithin, (hU.continuousAt.eventually_ne hU1_ne).filter_mono
+    nhdsWithin_le_nhds, eventually_ne_nhdsWithin (one_ne_zero : (1 : ℂ) ≠ 0)] with s hs hUs hs0
+  have hs1 : s ≠ 1 := hs
+  have hUval : U s = (s - 1) * riemannZeta s := Function.update_of_ne hs1 _ _
+  have hζ : riemannZeta s ≠ 0 := by
+    intro hz
+    exact hUs (by simp [hUval, hz])
+  have hsub : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
+  change -(1 + deriv U s / U s) / s = -1 / (s - 1) + (-deriv riemannZeta s / riemannZeta s) / s
+  rw [hUval, hderiv s hs1]
+  field_simp
+  ring
+
+/-- The adjusted prime-error Mellin formula admits a holomorphic
+representative at one when the exponent is strictly below one. -/
+theorem adjustedPrimeError_mellin_removable_one (C θ : ℝ) (hθ : θ < 1) :
+    ∃ F : ℂ → ℂ, AnalyticAt ℂ F 1 ∧
+      F =ᶠ[𝓝[≠] (1 : ℂ)] fun s =>
+        (C : ℂ) / (s - (θ : ℂ)) - 1 / (s - 1) + (-deriv riemannZeta s / riemannZeta s) / s := by
+  obtain ⟨G, hG, hG_eq⟩ := riemannZeta_mellin_pole_cancel_one
+  have hθc : (1 : ℂ) ≠ (θ : ℂ) := by
+    intro h
+    exact hθ.ne' (by simpa only [Complex.one_re, Complex.ofReal_re] using congrArg Complex.re h)
+  refine ⟨fun s => (C : ℂ) / (s - (θ : ℂ)) + G s, ?_, ?_⟩
+  · exact (analyticAt_const.div (analyticAt_id.sub analyticAt_const) (sub_ne_zero.mpr hθc)).add hG
+  · filter_upwards [hG_eq] with s hs
+    rw [hs]
+    ring
+
+/-- At a zeta zero away from the other denominators, the Mellin expression
+is a simple pole plus an analytic function. Its residue is minus the
+positive multiplicity of the zero divided by the zero's location. -/
+theorem adjustedPrimeError_mellin_at_zeta_zero (C θ : ℝ) (ρ : ℂ)
+    (hρ : riemannZeta ρ = 0) (hρ0 : ρ ≠ 0) (hρ1 : ρ ≠ 1) (hρθ : ρ ≠ (θ : ℂ)) :
+    ∃ (m : ℕ) (H : ℂ → ℂ), 0 < m ∧ AnalyticAt ℂ H ρ ∧
+      (∀ᶠ s in 𝓝[≠] ρ, (C : ℂ) / (s - (θ : ℂ)) - 1 / (s - 1) +
+        (-deriv riemannZeta s / riemannZeta s) / s =
+          (-(m : ℂ) / ρ) / (s - ρ) + H s) := by
+  have hζa : AnalyticOnNhd ℂ riemannZeta ({1}ᶜ : Set ℂ) := by
+    intro z hz
+    apply DifferentiableOn.analyticAt _ (isOpen_compl_singleton.mem_nhds hz)
+    intro w hw
+    exact (differentiableAt_riemannZeta hw).differentiableWithinAt
+  have hρmem : ρ ∈ ({1}ᶜ : Set ℂ) := hρ1
+  have hζloc : ¬ riemannZeta =ᶠ[𝓝 ρ] (0 : ℂ → ℂ) := by
+    intro hzero
+    have hc : IsPreconnected ({1}ᶜ : Set ℂ) :=
+      (isConnected_compl_singleton_of_one_lt_rank (by simp) (1 : ℂ)).isPreconnected
+    have hz2 := hζa.eqOn_zero_of_preconnected_of_eventuallyEq_zero hc hρmem hzero
+      (show (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) by norm_num)
+    exact riemannZeta_ne_zero_of_one_le_re (by norm_num : 1 ≤ (2 : ℂ).re) hz2
+  obtain ⟨m, G, hG, hG0, heq⟩ :=
+    (hζa ρ hρmem).exists_eventuallyEq_pow_smul_nonzero_iff.mpr hζloc
+  simp only [smul_eq_mul] at heq
+  change riemannZeta =ᶠ[𝓝 ρ] (fun z => (z - ρ) ^ m * G z) at heq
+  have hm : m ≠ 0 := by
+    intro hm
+    have h := heq.eq_of_nhds
+    simp [hρ, hm] at h
+    exact hG0 h.symm
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm
+  let H : ℂ → ℂ := fun s => (C : ℂ) / (s - (θ : ℂ)) - 1 / (s - 1) +
+    (-(deriv G s / G s)) / s + ((k + 1 : ℕ) : ℂ) / (s * ρ)
+  have hH : AnalyticAt ℂ H ρ := by
+    exact (((analyticAt_const.div (analyticAt_id.sub analyticAt_const) (sub_ne_zero.mpr hρθ)).sub
+      (analyticAt_const.div (analyticAt_id.sub analyticAt_const) (sub_ne_zero.mpr hρ1))).add
+      ((hG.deriv.div hG hG0).neg.div analyticAt_id hρ0)).add
+      (analyticAt_const.div (analyticAt_id.mul analyticAt_const) (mul_ne_zero hρ0 hρ0))
+  refine ⟨k + 1, H, Nat.succ_pos k, hH, ?_⟩
+  filter_upwards [self_mem_nhdsWithin, heq.eventuallyEq_nhds.filter_mono nhdsWithin_le_nhds,
+    (hG.continuousAt.eventually_ne hG0).filter_mono nhdsWithin_le_nhds,
+    (hG.eventually_analyticAt).filter_mono nhdsWithin_le_nhds,
+    eventually_ne_nhdsWithin hρ0] with s hs hseq hGs hGa hs0
+  have hdiff : s - ρ ≠ 0 := sub_ne_zero.mpr hs
+  have hsub : HasDerivAt (fun z : ℂ => z - ρ) 1 s := (hasDerivAt_id s).sub_const ρ
+  have hprod := (hsub.pow (k + 1)).mul hGa.differentiableAt.hasDerivAt
+  have hlog : -deriv riemannZeta s / riemannZeta s =
+      -((k + 1 : ℕ) : ℂ) / (s - ρ) - deriv G s / G s := by
+    rw [hseq.deriv_eq, hprod.deriv, hseq.eq_of_nhds]
+    simp only [Nat.add_sub_cancel, mul_one, pow_succ]
+    field_simp
+    ring
+  dsimp only [H]
+  rw [hlog]
+  field_simp
+  ring
+
+#print axioms riemannZeta_mellin_pole_cancel_one
+#print axioms adjustedPrimeError_mellin_removable_one
+#print axioms adjustedPrimeError_mellin_at_zeta_zero
+end RiemannResearch

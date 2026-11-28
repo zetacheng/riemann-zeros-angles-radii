@@ -972,6 +972,61 @@ theorem adjustedPrimeError_mellin_removable_one (C θ : ℝ) (hθ : θ < 1) :
     rw [hs]
     ring
 
+/-- The Riemann zeta function is analytic away from its pole. -/
+theorem riemannZeta_analyticAt_of_ne_one {z : ℂ} (hz : z ≠ 1) : AnalyticAt ℂ riemannZeta z := by
+  apply DifferentiableOn.analyticAt _ (isOpen_compl_singleton.mem_nhds
+    (show z ∈ ({1}ᶜ : Set ℂ) from hz))
+  exact fun w hw => (differentiableAt_riemannZeta hw).differentiableWithinAt
+
+/-- The multiplicity used for a zero of zeta in a contour sum. -/
+noncomputable def riemannZetaZeroOrder (ρ : ℂ) : ℕ :=
+  if h : ρ ≠ 1 then (riemannZeta_analyticAt_of_ne_one h).order.toNat else 0
+
+/-- Locally at a zero, the negative logarithmic derivative is a simple
+pole with residue equal to minus the vanishing order. -/
+theorem neg_logDeriv_riemannZeta_at_zero (ρ : ℂ) (hρ : riemannZeta ρ = 0) (hρ1 : ρ ≠ 1) :
+    0 < riemannZetaZeroOrder ρ ∧
+      ∃ H : ℂ → ℂ, AnalyticAt ℂ H ρ ∧
+        ∀ᶠ s in 𝓝[≠] ρ, -deriv riemannZeta s / riemannZeta s =
+          -(riemannZetaZeroOrder ρ : ℂ) / (s - ρ) + H s := by
+  have hζa : AnalyticOnNhd ℂ riemannZeta ({1}ᶜ : Set ℂ) :=
+    fun _ hz => riemannZeta_analyticAt_of_ne_one hz
+  have hζloc : ¬ riemannZeta =ᶠ[𝓝 ρ] (0 : ℂ → ℂ) := by
+    intro hzero
+    have hc : IsPreconnected ({1}ᶜ : Set ℂ) :=
+      (isConnected_compl_singleton_of_one_lt_rank (by simp) (1 : ℂ)).isPreconnected
+    have hz2 := hζa.eqOn_zero_of_preconnected_of_eventuallyEq_zero hc hρ1 hzero
+      (show (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) by norm_num)
+    exact riemannZeta_ne_zero_of_one_le_re (by norm_num : 1 ≤ (2 : ℂ).re) hz2
+  let hAnalytic := riemannZeta_analyticAt_of_ne_one hρ1
+  obtain ⟨m, G, hG, hG0, heq⟩ := hAnalytic.exists_eventuallyEq_pow_smul_nonzero_iff.mpr hζloc
+  have horder : riemannZetaZeroOrder ρ = m := by
+    have h := hAnalytic.order_eq_nat_iff.mpr ⟨G, hG, hG0, heq⟩
+    simp only [riemannZetaZeroOrder, dif_pos hρ1]
+    change hAnalytic.order.toNat = m
+    rw [h]
+    rfl
+  change riemannZeta =ᶠ[𝓝 ρ] (fun z => (z - ρ) ^ m • G z) at heq
+  rw [horder]
+  have hm : m ≠ 0 := by
+    intro hm
+    have h := heq.eq_of_nhds
+    simp [hρ, hm] at h
+    exact hG0 h.symm
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm
+  refine ⟨Nat.succ_pos k, fun s => -(deriv G s / G s), (hG.deriv.div hG hG0).neg, ?_⟩
+  simp only [smul_eq_mul] at heq
+  filter_upwards [self_mem_nhdsWithin, heq.eventuallyEq_nhds.filter_mono nhdsWithin_le_nhds,
+    (hG.continuousAt.eventually_ne hG0).filter_mono nhdsWithin_le_nhds,
+    hG.eventually_analyticAt.filter_mono nhdsWithin_le_nhds] with s hs hseq hGs hGa
+  have hdiff : s - ρ ≠ 0 := sub_ne_zero.mpr hs
+  have hsub : HasDerivAt (fun z : ℂ => z - ρ) 1 s := (hasDerivAt_id s).sub_const ρ
+  have hprod := (hsub.pow (k + 1)).mul hGa.differentiableAt.hasDerivAt
+  rw [hseq.deriv_eq, hprod.deriv, hseq.eq_of_nhds]
+  simp only [Nat.add_sub_cancel, mul_one, pow_succ]
+  field_simp
+  ring
+
 /-- At a zeta zero away from the other denominators, the Mellin expression
 is a simple pole plus an analytic function. Its residue is minus the
 positive multiplicity of the zero divided by the zero's location. -/
@@ -981,57 +1036,25 @@ theorem adjustedPrimeError_mellin_at_zeta_zero (C θ : ℝ) (ρ : ℂ)
       (∀ᶠ s in 𝓝[≠] ρ, (C : ℂ) / (s - (θ : ℂ)) - 1 / (s - 1) +
         (-deriv riemannZeta s / riemannZeta s) / s =
           (-(m : ℂ) / ρ) / (s - ρ) + H s) := by
-  have hζa : AnalyticOnNhd ℂ riemannZeta ({1}ᶜ : Set ℂ) := by
-    intro z hz
-    apply DifferentiableOn.analyticAt _ (isOpen_compl_singleton.mem_nhds hz)
-    intro w hw
-    exact (differentiableAt_riemannZeta hw).differentiableWithinAt
-  have hρmem : ρ ∈ ({1}ᶜ : Set ℂ) := hρ1
-  have hζloc : ¬ riemannZeta =ᶠ[𝓝 ρ] (0 : ℂ → ℂ) := by
-    intro hzero
-    have hc : IsPreconnected ({1}ᶜ : Set ℂ) :=
-      (isConnected_compl_singleton_of_one_lt_rank (by simp) (1 : ℂ)).isPreconnected
-    have hz2 := hζa.eqOn_zero_of_preconnected_of_eventuallyEq_zero hc hρmem hzero
-      (show (2 : ℂ) ∈ ({1}ᶜ : Set ℂ) by norm_num)
-    exact riemannZeta_ne_zero_of_one_le_re (by norm_num : 1 ≤ (2 : ℂ).re) hz2
-  obtain ⟨m, G, hG, hG0, heq⟩ :=
-    (hζa ρ hρmem).exists_eventuallyEq_pow_smul_nonzero_iff.mpr hζloc
-  simp only [smul_eq_mul] at heq
-  change riemannZeta =ᶠ[𝓝 ρ] (fun z => (z - ρ) ^ m * G z) at heq
-  have hm : m ≠ 0 := by
-    intro hm
-    have h := heq.eq_of_nhds
-    simp [hρ, hm] at h
-    exact hG0 h.symm
-  obtain ⟨k, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hm
-  let H : ℂ → ℂ := fun s => (C : ℂ) / (s - (θ : ℂ)) - 1 / (s - 1) +
-    (-(deriv G s / G s)) / s + ((k + 1 : ℕ) : ℂ) / (s * ρ)
-  have hH : AnalyticAt ℂ H ρ := by
+  obtain ⟨hm, H, hH, hlog⟩ := neg_logDeriv_riemannZeta_at_zero ρ hρ hρ1
+  let m : ℕ := riemannZetaZeroOrder ρ
+  let G (s : ℂ) := (C : ℂ) / (s - (θ : ℂ)) - 1 / (s - 1) + H s / s + (m : ℂ) / (s * ρ)
+  have hG : AnalyticAt ℂ G ρ := by
     exact (((analyticAt_const.div (analyticAt_id.sub analyticAt_const) (sub_ne_zero.mpr hρθ)).sub
       (analyticAt_const.div (analyticAt_id.sub analyticAt_const) (sub_ne_zero.mpr hρ1))).add
-      ((hG.deriv.div hG hG0).neg.div analyticAt_id hρ0)).add
+      (hH.div analyticAt_id hρ0)).add
       (analyticAt_const.div (analyticAt_id.mul analyticAt_const) (mul_ne_zero hρ0 hρ0))
-  refine ⟨k + 1, H, Nat.succ_pos k, hH, ?_⟩
-  filter_upwards [self_mem_nhdsWithin, heq.eventuallyEq_nhds.filter_mono nhdsWithin_le_nhds,
-    (hG.continuousAt.eventually_ne hG0).filter_mono nhdsWithin_le_nhds,
-    (hG.eventually_analyticAt).filter_mono nhdsWithin_le_nhds,
-    eventually_ne_nhdsWithin hρ0] with s hs hseq hGs hGa hs0
-  have hdiff : s - ρ ≠ 0 := sub_ne_zero.mpr hs
-  have hsub : HasDerivAt (fun z : ℂ => z - ρ) 1 s := (hasDerivAt_id s).sub_const ρ
-  have hprod := (hsub.pow (k + 1)).mul hGa.differentiableAt.hasDerivAt
-  have hlog : -deriv riemannZeta s / riemannZeta s =
-      -((k + 1 : ℕ) : ℂ) / (s - ρ) - deriv G s / G s := by
-    rw [hseq.deriv_eq, hprod.deriv, hseq.eq_of_nhds]
-    simp only [Nat.add_sub_cancel, mul_one, pow_succ]
-    field_simp
-    ring
-  dsimp only [H]
-  rw [hlog]
-  field_simp
+  refine ⟨m, G, hm, hG, ?_⟩
+  filter_upwards [hlog, self_mem_nhdsWithin, eventually_ne_nhdsWithin hρ0] with s hs hne hs0
+  rw [hs]
+  dsimp only [G, m]
+  field_simp [sub_ne_zero.mpr hne, hs0, hρ0]
   ring
 
 #print axioms riemannZeta_mellin_pole_cancel_one
 #print axioms adjustedPrimeError_mellin_removable_one
+#print axioms riemannZeta_analyticAt_of_ne_one
+#print axioms neg_logDeriv_riemannZeta_at_zero
 #print axioms adjustedPrimeError_mellin_at_zeta_zero
 end RiemannResearch
 
@@ -4467,4 +4490,159 @@ theorem primeError_isBigO_sqrt_log_four_of_RH (hRH : RiemannHypothesis) :
 #print axioms riemannHypothesis_iff_oneSidedBounds
 #print axioms chebyshevPsi_halfInteger_sqrt_log_four_of_RH
 #print axioms primeError_isBigO_sqrt_log_four_of_RH
+end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Topology Interval
+
+/-- The signed contribution of a zero in Perron's explicit formula. -/
+noncomputable def zetaPerronZeroResidue (x : ℝ) (ρ : ℂ) : ℂ :=
+  -(riemannZetaZeroOrder ρ : ℂ) * ((x : ℂ) ^ ρ / ρ)
+
+/-- Multiplying the logarithmic derivative by the Perron kernel
+leaves the principal part with the kernel evaluated at the zero. -/
+theorem zetaPerronIntegrand_at_zero (x : ℝ) (hx : 0 < x) (ρ : ℂ)
+    (hρ : riemannZeta ρ = 0) (hρ0 : ρ ≠ 0) (hρ1 : ρ ≠ 1) :
+    ∃ G : ℂ → ℂ, AnalyticAt ℂ G ρ ∧ ∀ᶠ s in 𝓝[≠] ρ,
+      zetaPerronIntegrand x s = zetaPerronZeroResidue x ρ / (s - ρ) + G s := by
+  obtain ⟨_, H, hH, hlog⟩ := neg_logDeriv_riemannZeta_at_zero ρ hρ hρ1
+  let P (s : ℂ) := (x : ℂ) ^ s / s
+  have hP : AnalyticAt ℂ P ρ := by
+    have he : ∀ s : ℂ, (x : ℂ) ^ s = Complex.exp (Complex.log (x : ℂ) * s) := fun s =>
+      Complex.cpow_def_of_ne_zero (Complex.ofReal_ne_zero.mpr hx.ne') s
+    dsimp only [P]
+    simp_rw [he]
+    exact ((analyticAt_const.mul analyticAt_id).cexp).div analyticAt_id hρ0
+  have hDs : AnalyticAt ℂ (dslope P ρ) ρ := by
+    apply Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt
+    · filter_upwards [self_mem_nhdsWithin, hP.eventually_analyticAt.filter_mono nhdsWithin_le_nhds] with z hz hzP
+      exact (differentiableAt_dslope_of_ne hz).mpr hzP.differentiableAt
+    · exact continuousAt_dslope_same.mpr hP.differentiableAt
+  let m : ℂ := riemannZetaZeroOrder ρ
+  refine ⟨fun s => P s * H s - m * dslope P ρ s, (hP.mul hH).sub (analyticAt_const.mul hDs), ?_⟩
+  filter_upwards [hlog, self_mem_nhdsWithin] with s hs hne
+  change P s * (-deriv riemannZeta s / riemannZeta s) = (-m * P ρ) / (s - ρ) + _
+  rw [hs, dslope_of_ne P hne, slope_def_field]
+  field_simp [sub_ne_zero.mpr hne]
+  ring
+
+/-- The principal coefficient is the punctured limit of the integrand
+multiplied by the distance in the complex variable. -/
+theorem zetaPerronIntegrand_residue_tendsto (x : ℝ) (hx : 0 < x) (ρ : ℂ)
+    (hρ : riemannZeta ρ = 0) (hρ0 : ρ ≠ 0) (hρ1 : ρ ≠ 1) :
+    Tendsto (fun s => (s - ρ) * zetaPerronIntegrand x s) (𝓝[≠] ρ)
+      (𝓝 (zetaPerronZeroResidue x ρ)) := by
+  obtain ⟨G, hG, h⟩ := zetaPerronIntegrand_at_zero x hx ρ hρ hρ0 hρ1
+  have ht : Tendsto (fun s : ℂ => s - ρ) (𝓝[≠] ρ) (𝓝 0) := by
+    have hc : Continuous (fun s : ℂ => s - ρ) := by fun_prop
+    have h : Tendsto (fun s : ℂ => s - ρ) (𝓝[≠] ρ) (𝓝 (ρ - ρ)) :=
+      (hc.continuousAt (x := ρ)).tendsto.mono_left nhdsWithin_le_nhds
+    rwa [sub_self] at h
+  have htG := ht.mul (hG.continuousAt.continuousWithinAt (s := ({ρ}ᶜ : Set ℂ)))
+  have hsum := htG.const_add (zetaPerronZeroResidue x ρ)
+  rw [zero_mul, add_zero] at hsum
+  apply hsum.congr'
+  filter_upwards [h, self_mem_nhdsWithin] with s hs hne
+  rw [hs]
+  field_simp [sub_ne_zero.mpr hne]
+  ring
+
+/-- Under RH each strip zero contributes the square-root numerator
+times its multiplicity divided by the modulus of the zero. -/
+theorem norm_zetaPerronZeroResidue_of_RH (hRH : RiemannHypothesis) (x : ℝ) (hx : 0 < x)
+    (ρ : ℂ) (hρ : riemannZeta ρ = 0) (hre : 0 < ρ.re) (hρ1 : ρ ≠ 1) :
+    ‖zetaPerronZeroResidue x ρ‖ = Real.sqrt x * (riemannZetaZeroOrder ρ : ℝ) / ‖ρ‖ := by
+  have hn : ¬ ∃ n : ℕ, ρ = -2 * (n + 1) := by
+    rintro ⟨n, rfl⟩
+    norm_num [Complex.mul_re, Complex.add_re] at hre
+    linarith [Nat.cast_nonneg (α := ℝ) n]
+  have hhalf := hRH ρ hρ hn hρ1
+  rw [zetaPerronZeroResidue, norm_mul, norm_neg, Complex.norm_natCast, norm_div,
+    Complex.norm_cpow_eq_rpow_re_of_pos hx, hhalf, Real.sqrt_eq_rpow]
+  ring
+
+/-- Integrating around a sufficiently small positively oriented circle picks
+up exactly the Perron residue of the zero. -/
+theorem zetaPerronIntegrand_circleIntegral_at_zero (x : ℝ) (hx : 0 < x) (ρ : ℂ)
+    (hρ : riemannZeta ρ = 0) (hρ0 : ρ ≠ 0) (hρ1 : ρ ≠ 1) :
+    ∀ᶠ r in 𝓝[>] (0 : ℝ),
+      (∮ s in C(ρ, r), zetaPerronIntegrand x s) =
+        2 * (Real.pi : ℂ) * Complex.I * zetaPerronZeroResidue x ρ := by
+  obtain ⟨G, hG, heq⟩ := zetaPerronIntegrand_at_zero x hx ρ hρ hρ0 hρ1
+  let R := zetaPerronZeroResidue x ρ
+  let F (s : ℂ) := R + (s - ρ) * G s
+  let U : Set ℂ := {s | AnalyticAt ℂ G s ∧
+    (s ≠ ρ → zetaPerronIntegrand x s = R / (s - ρ) + G s)}
+  have hU : U ∈ 𝓝 ρ := hG.eventually_analyticAt.and (eventually_nhdsWithin_iff.mp heq)
+  have hsmall := (eventually_closedBall_subset hU).filter_mono
+    (nhdsWithin_le_nhds : 𝓝[>] (0 : ℝ) ≤ 𝓝 0)
+  filter_upwards [hsmall, self_mem_nhdsWithin] with r hr hrpos
+  have hpos : 0 < r := hrpos
+  have hd : DifferentiableOn ℂ F (Metric.closedBall ρ r) := by
+    intro s hs
+    exact (analyticAt_const.add ((analyticAt_id.sub analyticAt_const).mul (hr hs).1)).differentiableAt
+      |>.differentiableWithinAt
+  have hC := hd.circleIntegral_sub_inv_smul (Metric.mem_ball_self hpos)
+  have hfρ : F ρ = R := by simp [F]
+  rw [hfρ, smul_eq_mul] at hC
+  apply Eq.trans _ hC
+  apply circleIntegral.integral_congr hpos.le
+  intro s hs
+  have hne : s ≠ ρ := fun he => by
+    subst s
+    have hd := Metric.mem_sphere.mp hs
+    rw [dist_self] at hd
+    exact hpos.ne' hd.symm
+  change zetaPerronIntegrand x s = (s - ρ)⁻¹ • F s
+  rw [(hr (Metric.sphere_subset_closedBall hs)).2 hne, smul_eq_mul]
+  dsimp only [F]
+  field_simp [sub_ne_zero.mpr hne]
+  ring
+
+/-- Zeros of the entire regularized zeta are finite in every compact set. -/
+theorem finite_regularizedZeta_zeros_of_isCompact (K : Set ℂ) (hK : IsCompact K) :
+    (K ∩ {z | regularizedZeta z = 0}).Finite := by
+  let S := K ∩ {z | regularizedZeta z = 0}
+  have hcont : Continuous regularizedZeta :=
+    continuous_iff_continuousAt.mpr fun z => (regularizedZeta_analyticAt z).continuousAt
+  have hS : IsCompact S := hK.inter_right (isClosed_eq hcont continuous_const)
+  by_contra hfin
+  obtain ⟨z, _, hne⟩ := exists_nhds_ne_inf_principal_neBot hS hfin
+  letI := hne
+  have hmem : ∀ᶠ w in 𝓝[≠] z ⊓ 𝓟 S, w ∈ S := mem_inf_of_right (mem_principal_self S)
+  have hzero : ∀ᶠ w in 𝓝[≠] z ⊓ 𝓟 S, regularizedZeta w = 0 :=
+    hmem.mono (fun _ hw => hw.2)
+  have hnonzero := (regularizedZeta_eventually_ne_zero z).filter_mono
+    (inf_le_left : 𝓝[≠] z ⊓ 𝓟 S ≤ 𝓝[≠] z)
+  exact (hzero.and hnonzero).exists.elim fun _ hw => hw.2 hw.1
+
+/-- Zeta zeros away from the pole are finite in any compact region. -/
+theorem finite_riemannZeta_zeros_of_isCompact (K : Set ℂ) (hK : IsCompact K) :
+    (K ∩ {z | z ≠ 1 ∧ riemannZeta z = 0}).Finite := by
+  apply (finite_regularizedZeta_zeros_of_isCompact K hK).subset
+  rintro z ⟨hz, h1, hzero⟩
+  refine ⟨hz, ?_⟩
+  change regularizedZeta z = 0
+  rw [(regularizedZeta_eventuallyEq z h1).eq_of_nhds, hzero, mul_zero]
+
+/-- A finite residue sum under RH is bounded by the square root of x
+times the sum of the reciprocal moduli, counted with multiplicity. -/
+theorem norm_sum_zetaPerronZeroResidue_of_RH (hRH : RiemannHypothesis) (x : ℝ) (hx : 0 < x)
+    (S : Finset ℂ) (hS : ∀ ρ ∈ S, riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ ≠ 1) :
+    ‖∑ ρ ∈ S, zetaPerronZeroResidue x ρ‖ ≤
+      Real.sqrt x * ∑ ρ ∈ S, (riemannZetaZeroOrder ρ : ℝ) / ‖ρ‖ := by
+  refine (norm_sum_le _ _).trans ?_
+  rw [Finset.mul_sum]
+  apply Finset.sum_le_sum
+  intro ρ hρ
+  obtain ⟨hz, hRe, h1⟩ := hS ρ hρ
+  rw [norm_zetaPerronZeroResidue_of_RH hRH x hx ρ hz hRe h1, mul_div_assoc]
+#print axioms zetaPerronIntegrand_at_zero
+#print axioms zetaPerronIntegrand_residue_tendsto
+#print axioms norm_zetaPerronZeroResidue_of_RH
+#print axioms zetaPerronIntegrand_circleIntegral_at_zero
+#print axioms finite_regularizedZeta_zeros_of_isCompact
+#print axioms finite_riemannZeta_zeros_of_isCompact
+#print axioms norm_sum_zetaPerronZeroResidue_of_RH
 end RiemannResearch

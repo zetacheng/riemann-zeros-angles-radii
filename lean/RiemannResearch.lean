@@ -3342,3 +3342,276 @@ theorem chebyshevPsi_halfInteger_bound_of_RH (hRH : RiemannHypothesis) :
 #print axioms vonMangoldtPerronIntegral_shift_of_RH
 #print axioms chebyshevPsi_halfInteger_bound_of_RH
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Interval Topology
+
+/-- An even reciprocal envelope for the vertical Perron kernel. -/
+theorem integral_inv_add_abs (a T : ℝ) (ha : 0 < a) (hT : 0 ≤ T) :
+    (∫ t in -T..T, (a + |t|)⁻¹) = 2 * Real.log (1 + T / a) := by
+  let F (t : ℝ) := (a + |t|)⁻¹
+  have hc : Continuous F :=
+    (continuous_const.add continuous_abs).inv₀ (fun t =>
+      (add_pos_of_pos_of_nonneg ha (abs_nonneg t)).ne')
+  have hsym : (∫ t in -T..(0 : ℝ), F t) = ∫ t in (0 : ℝ)..T, F t := by
+    have h := intervalIntegral.integral_comp_neg (a := (0 : ℝ)) (b := T) (f := F)
+    simpa only [F, abs_neg, neg_zero] using h.symm
+  have hpos : (∫ t in (0 : ℝ)..T, F t) = Real.log (1 + T / a) := by
+    calc
+      _ = ∫ t in (0 : ℝ)..T, (t + a)⁻¹ := by
+        apply intervalIntegral.integral_congr
+        intro t ht
+        rw [uIcc_of_le hT] at ht
+        rw [show F t = (a + t)⁻¹ by simp [F, abs_of_nonneg ht.1], add_comm]
+      _ = ∫ t in a..(T + a), t⁻¹ := by
+        simpa only [zero_add] using
+          (intervalIntegral.integral_comp_add_right (a := (0 : ℝ)) (b := T)
+            (fun t : ℝ => t⁻¹) a)
+      _ = _ := by
+        rw [integral_inv_of_pos ha (by linarith), add_div, div_self ha.ne', add_comm]
+  change (∫ t in -T..T, F t) = _
+  rw [← intervalIntegral.integral_add_adjacent_intervals (hc.intervalIntegrable (-T) 0)
+    (hc.intervalIntegrable 0 T), hsym, hpos, two_mul]
+
+/-- A uniform pointwise bound on the logarithmic derivative gives a
+logarithmic bound for the left vertical edge. -/
+theorem vonMangoldtPerronIntegral_le_of_logDeriv_bound (x a T M : ℝ)
+    (hx : 0 < x) (ha : 0 < a) (hT : 0 ≤ T)
+    (hζ : ∀ t ∈ Icc (-T) T, riemannZeta ((a : ℂ) + (t : ℂ) * Complex.I) ≠ 0)
+    (ha1 : a ≠ 1)
+    (hM : ∀ t ∈ Icc (-T) T,
+      ‖deriv riemannZeta ((a : ℂ) + (t : ℂ) * Complex.I) /
+        riemannZeta ((a : ℂ) + (t : ℂ) * Complex.I)‖ ≤ M) :
+    ‖vonMangoldtPerronIntegral x a T‖ ≤ 4 * x ^ a * M * Real.log (1 + T / a) := by
+  let z (t : ℝ) : ℂ := (a : ℂ) + (t : ℂ) * Complex.I
+  have hzre (t : ℝ) : (z t).re = a := by simp [z, Complex.mul_re]
+  have hzim (t : ℝ) : (z t).im = t := by simp [z, Complex.mul_im]
+  have hnorm (t : ℝ) : 0 < ‖z t‖ :=
+    ha.trans_le (hzre t ▸ Complex.re_le_norm (z t))
+  have hFM : 0 ≤ M := (norm_nonneg _).trans (hM 0 ⟨by linarith, hT⟩)
+  let F (t : ℝ) := zetaPerronIntegrand x (z t)
+  let G (t : ℝ) := (2 * x ^ a * M) * (a + |t|)⁻¹
+  have hG : Continuous G := continuous_const.mul
+    ((continuous_const.add continuous_abs).inv₀ (fun t =>
+      (add_pos_of_pos_of_nonneg ha (abs_nonneg t)).ne'))
+  have hF : ContinuousOn F (Icc (-T) T) := by
+    intro t ht
+    have h1 : z t ≠ 1 := fun he => ha1 (by simpa [he] using (hzre t).symm)
+    have h0 : z t ≠ 0 := norm_pos_iff.mp (hnorm t)
+    have hD : AnalyticAt ℂ riemannZeta (z t) := by
+      apply DifferentiableOn.analyticAt _ (isOpen_compl_singleton.mem_nhds h1)
+      intro w hw
+      exact (differentiableAt_riemannZeta hw).differentiableWithinAt
+    have hp : ContinuousAt (fun w : ℂ => (x : ℂ) ^ w / w) (z t) :=
+      (continuousAt_const_cpow (Complex.ofReal_ne_zero.mpr hx.ne')).div continuousAt_id h0
+    have hd : ContinuousAt (zetaPerronIntegrand x) (z t) :=
+      hp.mul (hD.deriv.continuousAt.neg.div hD.continuousAt (hζ t ht))
+    exact hd.comp_continuousWithinAt (show Continuous z by dsimp [z]; fun_prop).continuousWithinAt
+  have hpt (t : ℝ) (ht : t ∈ Icc (-T) T) : ‖F t‖ ≤ G t := by
+    have hden : a + |t| ≤ 2 * ‖z t‖ := by
+      have hr := Complex.re_le_norm (z t)
+      have hi := Complex.abs_im_le_norm (z t)
+      rw [hzre] at hr
+      rw [hzim] at hi
+      linarith
+    have hr : (‖z t‖)⁻¹ ≤ 2 * (a + |t|)⁻¹ := by
+      rw [← div_eq_mul_inv, inv_eq_one_div]
+      exact (div_le_div_iff₀ (hnorm t) (add_pos_of_pos_of_nonneg ha (abs_nonneg t))).mpr (by
+        simpa only [one_mul] using hden)
+    change ‖(x : ℂ) ^ z t / z t * (-deriv riemannZeta (z t) / riemannZeta (z t))‖ ≤ G t
+    rw [norm_mul, norm_div ((x : ℂ) ^ z t), neg_div, norm_neg,
+      Complex.norm_cpow_eq_rpow_re_of_pos hx, hzre, div_eq_mul_inv]
+    calc
+      _ ≤ (x ^ a * (2 * (a + |t|)⁻¹)) * M := by
+        exact mul_le_mul (mul_le_mul_of_nonneg_left hr (Real.rpow_nonneg hx.le _)) (hM t ht)
+          (norm_nonneg _) (by positivity)
+      _ = G t := by dsimp [G]; ring
+  have hle : -T ≤ T := by linarith
+  have hFU : ContinuousOn (fun t => ‖F t‖) [[-T, T]] := by
+    rw [uIcc_of_le hle]
+    exact hF.norm
+  change ‖∫ t in -T..T, F t‖ ≤ _
+  calc
+    _ ≤ ∫ t in -T..T, ‖F t‖ := intervalIntegral.norm_integral_le_integral_norm hle
+    _ ≤ ∫ t in -T..T, G t :=
+      intervalIntegral.integral_mono_on hle hFU.intervalIntegrable (hG.intervalIntegrable (-T) T) hpt
+    _ = _ := by
+      dsimp [G]
+      rw [intervalIntegral.integral_const_mul, integral_inv_add_abs a T ha hT]
+      ring
+
+/-- The horizontal edge gains one inverse power of its height. -/
+theorem perronHorizontal_le_of_logDeriv_bound (x a b h M : ℝ)
+    (hx : 1 ≤ x) (hab : a ≤ b) (hh : h ≠ 0)
+    (hM : ∀ t ∈ Icc a b,
+      ‖deriv riemannZeta ((t : ℂ) + (h : ℂ) * Complex.I) /
+        riemannZeta ((t : ℂ) + (h : ℂ) * Complex.I)‖ ≤ M) :
+    ‖perronHorizontal (zetaPerronIntegrand x) a b h‖ ≤ (x ^ b * M / |h|) * (b - a) := by
+  rw [← abs_of_nonneg (sub_nonneg.mpr hab)]
+  apply intervalIntegral.norm_integral_le_of_norm_le_const
+  intro t ht
+  have ht' : t ∈ Icc a b := by simpa only [uIcc_of_le hab] using uIoc_subset_uIcc ht
+  let z : ℂ := (t : ℂ) + (h : ℂ) * Complex.I
+  have hzre : z.re = t := by simp [z, Complex.mul_re]
+  have habs : |h| ≤ ‖z‖ := by simpa [z, Complex.mul_im] using Complex.abs_im_le_norm z
+  have hn : 0 < |h| := abs_pos.mpr hh
+  have hm : 0 ≤ M := (norm_nonneg _).trans (hM t ht')
+  change ‖(x : ℂ) ^ z / z * (-deriv riemannZeta z / riemannZeta z)‖ ≤ x ^ b * M / |h|
+  rw [norm_mul, norm_div ((x : ℂ) ^ z), neg_div, norm_neg,
+    Complex.norm_cpow_eq_rpow_re_of_pos (zero_lt_one.trans_le hx), hzre]
+  calc
+    _ ≤ (x ^ b / |h|) * M := by
+      refine mul_le_mul ?_ (hM t ht') (norm_nonneg _) (by positivity)
+      exact (div_le_div_of_nonneg_right (Real.rpow_le_rpow_of_exponent_le hx ht'.2)
+        (hn.trans_le habs).le).trans
+        (div_le_div_of_nonneg_left (Real.rpow_nonneg (zero_le_one.trans hx) _) hn habs)
+    _ = _ := by ring
+
+/-- The edge bounds turn a pointwise strip estimate into an explicit
+Chebyshev error estimate at each admissible Perron height. -/
+theorem chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_bound (hRH : RiemannHypothesis) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (m : ℕ) (a T M : ℝ), 1 / 2 < a → a < 1 → 0 < T →
+      let x : ℝ := (m : ℝ) + 1 / 2
+      let b := 1 + (Real.log x)⁻¹
+      1 ≤ Real.log x →
+      (∀ z : ℂ, z.re ∈ Icc a b → |z.im| ≤ T → (z.re = a ∨ |z.im| = T) →
+        ‖deriv riemannZeta z / riemannZeta z‖ ≤ M) →
+      ‖2 * (Real.pi : ℂ) * ((chebyshevPsi x : ℂ) - (x : ℂ))‖ ≤
+        C * x * (1 + Real.log (2 * x)) ^ 2 / T +
+          (4 * x ^ a * M * Real.log (1 + T / a) + 2 * (x ^ b * M / T) * (b - a)) := by
+  obtain ⟨C, hC, hbound⟩ := chebyshevPsi_halfInteger_bound_of_RH hRH
+  refine ⟨C, hC, fun m a T M ha ha1 hT => ?_⟩
+  let x : ℝ := (m : ℝ) + 1 / 2
+  let b : ℝ := 1 + (Real.log x)⁻¹
+  change 1 ≤ Real.log x → _
+  intro hxlog hM
+  change ∀ z : ℂ, z.re ∈ Icc a b → |z.im| ≤ T → (z.re = a ∨ |z.im| = T) →
+    ‖deriv riemannZeta z / riemannZeta z‖ ≤ M at hM
+  have hx0 : 0 < x := by dsimp [x]; positivity
+  have hx : 1 ≤ x := Real.log_nonneg_iff hx0 |>.mp (by linarith)
+  have ha0 : 0 < a := (by norm_num : (0 : ℝ) < 1 / 2).trans ha
+  have hab : a ≤ b := ha1.le.trans (le_add_of_nonneg_right (by
+    exact inv_nonneg.mpr (by linarith)))
+  have hv t (ht : t ∈ Icc (-T) T) :
+      ‖deriv riemannZeta ((a : ℂ) + (t : ℂ) * Complex.I) /
+        riemannZeta ((a : ℂ) + (t : ℂ) * Complex.I)‖ ≤ M := by
+    apply hM
+    · simpa [Complex.mul_re] using (show a ∈ Icc a b from ⟨le_rfl, hab⟩)
+    · simpa [Complex.mul_im] using abs_le.mpr ht
+    · left
+      simp [Complex.mul_re]
+  have hV := vonMangoldtPerronIntegral_le_of_logDeriv_bound x a T M hx0 ha0 hT.le
+    (fun t _ => riemannZeta_ne_zero_right_of_riemannHypothesis hRH _ (by simpa [Complex.mul_re] using ha))
+    ha1.ne hv
+  have hH (h : ℝ) (hh : |h| = T) :
+      ‖perronHorizontal (zetaPerronIntegrand x) a b h‖ ≤ (x ^ b * M / T) * (b - a) := by
+    have hh0 : h ≠ 0 := by
+      intro he
+      exact hT.ne' (by simpa [he] using hh.symm)
+    rw [← hh]
+    apply perronHorizontal_le_of_logDeriv_bound x a b h M hx hab hh0
+    intro t ht
+    exact hM _ (by simpa [Complex.mul_re] using ht)
+      (by simp [Complex.mul_im, hh]) (Or.inr (by simp [Complex.mul_im, hh]))
+  have hU := hH T (abs_of_pos hT)
+  have hL := hH (-T) (by rw [abs_neg, abs_of_pos hT])
+  refine (hbound m a T ha ha1 hT hxlog).trans (add_le_add_left ?_ _)
+  convert add_le_add (add_le_add hV hU) hL using 1
+  ring
+
+/-- A logarithmic pointwise estimate on a fixed right-of-critical strip
+gives the expected power and logarithms from the contour with height x. -/
+theorem chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
+    (hRH : RiemannHypothesis) (a K : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) (hK : 0 ≤ K)
+    (hD : ∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
+      ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * (1 + Real.log (1 + |z.im|))) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ,
+      let x : ℝ := (m : ℝ) + 1 / 2
+      1 ≤ Real.log x →
+      |chebyshevPsi x - x| ≤ C * x ^ a * (1 + Real.log (2 * x)) ^ 2 := by
+  obtain ⟨C, hC, h⟩ := chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_bound hRH
+  have hp : 0 < 2 * Real.pi := by positivity
+  let E := Real.exp 1
+  have hE : 0 < E := Real.exp_pos _
+  let D := C + 8 * K + 4 * E * K
+  have hD0 : 0 ≤ D := by dsimp [D]; positivity
+  refine ⟨D / (2 * Real.pi), div_nonneg hD0 hp.le, fun m => ?_⟩
+  let x : ℝ := (m : ℝ) + 1 / 2
+  let L := 1 + Real.log (2 * x)
+  let b := 1 + (Real.log x)⁻¹
+  change 1 ≤ Real.log x → |chebyshevPsi x - x| ≤ (D / (2 * Real.pi)) * x ^ a * L ^ 2
+  intro hxlog
+  have hx0 : 0 < x := by dsimp [x]; positivity
+  have hlog : 0 < Real.log x := zero_lt_one.trans_le hxlog
+  have hx : 1 ≤ x := (Real.log_nonneg_iff hx0).mp hlog.le
+  have hL : 1 ≤ L := le_add_of_nonneg_right (Real.log_nonneg (by linarith))
+  have ha0 : 0 < a := (show (0 : ℝ) < 1 / 2 by norm_num).trans ha
+  have hxa : 1 ≤ x ^ a := Real.one_le_rpow hx ha0.le
+  have hb2 : b ≤ 2 := by
+    dsimp [b]
+    linarith [inv_le_one_of_one_le₀ hxlog]
+  have hxb : x ^ b = x * E := by
+    dsimp only [b, E]
+    rw [Real.rpow_add hx0, Real.rpow_one, Real.rpow_def_of_pos hx0, mul_inv_cancel₀ hlog.ne']
+  have hM (z : ℂ) (hz : z.re ∈ Icc a b) (ht : |z.im| ≤ x)
+      (he : z.re = a ∨ |z.im| = x) : ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * L := by
+    have hHz : z.re = a ∨ 1 ≤ |z.im| := by
+      rcases he with he | he
+      · exact Or.inl he
+      · exact Or.inr (he.symm ▸ hx)
+    have hlogz := Real.log_le_log (show 0 < 1 + |z.im| by positivity) (show 1 + |z.im| ≤ 2 * x by linarith)
+    exact (hD z ⟨hz.1, hz.2.trans hb2⟩ hHz).trans
+      (mul_le_mul_of_nonneg_left (add_le_add_left hlogz 1) hK)
+  have hbase := h m a x (K * L) ha ha1 hx0 hxlog hM
+  change ‖2 * (Real.pi : ℂ) * ((chebyshevPsi x : ℂ) - (x : ℂ))‖ ≤
+    C * x * L ^ 2 / x + (4 * x ^ a * (K * L) * Real.log (1 + x / a) +
+      2 * (x ^ b * (K * L) / x) * (b - a)) at hbase
+  have hlogB : Real.log (1 + x / a) ≤ 2 * L := by
+    have ht : x / a ≤ 2 * x := (div_le_iff₀ ha0).mpr (by nlinarith [mul_nonneg hx0.le (sub_nonneg.mpr ha.le)])
+    have h' : 1 + x / a ≤ (2 * x) ^ 2 :=
+      (add_le_add_left ht 1).trans (by nlinarith only [hx, sq_nonneg (x - 1)])
+    calc
+      _ ≤ Real.log ((2 * x) ^ 2) := Real.log_le_log (by positivity) h'
+      _ = 2 * Real.log (2 * x) := by rw [Real.log_pow]; norm_num
+      _ ≤ _ := by dsimp only [L]; linarith
+  have htr : C * x * L ^ 2 / x ≤ C * x ^ a * L ^ 2 := by
+    rw [show C * x * L ^ 2 / x = C * L ^ 2 by field_simp; ring]
+    exact mul_le_mul_of_nonneg_right (le_mul_of_one_le_right hC hxa) (sq_nonneg L)
+  have hv : 4 * x ^ a * (K * L) * Real.log (1 + x / a) ≤ (8 * K) * x ^ a * L ^ 2 := by
+    calc
+      _ ≤ 4 * x ^ a * (K * L) * (2 * L) := mul_le_mul_of_nonneg_left hlogB (by positivity)
+      _ = _ := by ring
+  have hh : 2 * (x ^ b * (K * L) / x) * (b - a) ≤ (4 * E * K) * x ^ a * L ^ 2 := by
+    have hfac : 2 * (x ^ b * (K * L) / x) = 2 * E * K * L := by
+      rw [hxb]
+      field_simp
+      ring
+    rw [hfac]
+    calc
+      _ ≤ (2 * E * K * L) * 2 := mul_le_mul_of_nonneg_left (by linarith) (by positivity)
+      _ = (4 * E * K) * (1 * L) := by ring
+      _ ≤ (4 * E * K) * (x ^ a * L ^ 2) := by
+        apply mul_le_mul_of_nonneg_left _ (by positivity)
+        rw [pow_two, ← mul_assoc]
+        have hmul : (1 : ℝ) ≤ x ^ a * L :=
+          hxa.trans (le_mul_of_one_le_right (by positivity) hL)
+        exact mul_le_mul_of_nonneg_right hmul (by linarith)
+      _ = _ := by ring
+  have hh' := hbase.trans (add_le_add htr (add_le_add hv hh))
+  have hS : ‖2 * (Real.pi : ℂ) * ((chebyshevPsi x : ℂ) - (x : ℂ))‖ =
+      (2 * Real.pi) * |chebyshevPsi x - x| := by
+    rw [← Complex.ofReal_sub, norm_mul, ← Complex.ofReal_ofNat, ← Complex.ofReal_mul,
+      Complex.norm_real, Complex.norm_real, Real.norm_of_nonneg hp.le, Real.norm_eq_abs]
+  rw [hS] at hh'
+  rw [show D / (2 * Real.pi) * x ^ a * L ^ 2 = (D * x ^ a * L ^ 2) / (2 * Real.pi) by ring]
+  apply (le_div_iff₀ hp).mpr
+  rw [mul_comm]
+  exact hh'.trans_eq (by dsimp only [D]; ring)
+
+#print axioms integral_inv_add_abs
+#print axioms vonMangoldtPerronIntegral_le_of_logDeriv_bound
+#print axioms perronHorizontal_le_of_logDeriv_bound
+#print axioms chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_bound
+#print axioms chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
+end RiemannResearch

@@ -2667,3 +2667,341 @@ theorem vonMangoldtPerronIntegral_tendsto_psi (x c : ℝ) (hx : 0 < x) (hc : 1 <
 #print axioms vonMangoldtPerronIntegral_sub_psi_bound
 #print axioms vonMangoldtPerronIntegral_tendsto_psi
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set
+open scoped Topology
+
+/-- On the two sides of a half-integer the reciprocal distances run
+through the same list, and each is bounded by twice a harmonic summand. -/
+theorem halfInteger_reciprocal_distances_le (m : ℕ) :
+    (∑ n ∈ Finset.range (2 * (m + 1)), |(m : ℝ) + 1 / 2 - n|⁻¹) ≤
+      4 * (1 + Real.log ((m : ℝ) + 1)) := by
+  let f (n : ℕ) := |(m : ℝ) + 1 / 2 - n|⁻¹
+  have hleft : (∑ n ∈ Finset.range (m + 1), f n) =
+      ∑ j ∈ Finset.range (m + 1), ((j : ℝ) + 1 / 2)⁻¹ := by
+    rw [← Finset.sum_range_reflect f (m + 1)]
+    apply Finset.sum_congr rfl
+    intro j hj
+    have hle : j ≤ m := Nat.le_of_lt_succ (Finset.mem_range.mp hj)
+    have hd : (m : ℝ) + 1 / 2 - ((m + 1 - 1 - j : ℕ) : ℝ) = (j : ℝ) + 1 / 2 := by
+      rw [Nat.add_sub_cancel, Nat.cast_sub hle]
+      ring
+    simp only [f, hd, abs_of_nonneg (show 0 ≤ (j : ℝ) + 1 / 2 by positivity)]
+  have hright : (∑ n ∈ Finset.range (m + 1), f (m + 1 + n)) =
+      ∑ j ∈ Finset.range (m + 1), ((j : ℝ) + 1 / 2)⁻¹ := by
+    apply Finset.sum_congr rfl
+    intro j _
+    have hd : (m : ℝ) + 1 / 2 - ((m + 1 + j : ℕ) : ℝ) = -((j : ℝ) + 1 / 2) := by
+      push_cast
+      ring
+    simp only [f, hd, abs_neg, abs_of_nonneg (show 0 ≤ (j : ℝ) + 1 / 2 by positivity)]
+  have hsum : (∑ j ∈ Finset.range (m + 1), ((j : ℝ) + 1 / 2)⁻¹) ≤
+      2 * (1 + Real.log ((m : ℝ) + 1)) := by
+    calc
+      _ ≤ ∑ j ∈ Finset.range (m + 1), 2 * ((j : ℝ) + 1)⁻¹ := by
+        apply Finset.sum_le_sum
+        intro j _
+        have hj : 0 ≤ (j : ℝ) := Nat.cast_nonneg _
+        rw [inv_eq_one_div, inv_eq_one_div, mul_one_div]
+        exact (div_le_div_iff₀ (by positivity) (by positivity)).mpr (by linarith)
+      _ = 2 * (harmonic (m + 1) : ℝ) := by
+        rw [← Finset.mul_sum, harmonic]
+        push_cast
+        rfl
+      _ ≤ _ := by
+        simpa only [Nat.cast_add, Nat.cast_one] using
+          mul_le_mul_of_nonneg_left (harmonic_le_one_add_log (m + 1)) (by norm_num : (0 : ℝ) ≤ 2)
+  change (∑ n ∈ Finset.range (2 * (m + 1)), f n) ≤ _
+  rw [two_mul, Finset.sum_range_add, hleft, hright]
+  linarith [hsum]
+
+/-- Every half-integer cutoff with nonnegative integer part is positive
+and stays off the jump of every positive integer Dirichlet term. -/
+theorem halfInteger_ne_natCast (m n : ℕ) : (m : ℝ) + 1 / 2 ≠ (n : ℝ) := by
+  intro h
+  have hf : ⌊(m : ℝ) + 1 / 2⌋₊ = m := by
+    apply (Nat.floor_eq_iff (by positivity)).mpr
+    constructor <;> linarith
+  rw [h, Nat.floor_natCast] at hf
+  rw [hf] at h
+  linarith
+
+/-- The finite part of the majorant uses reciprocal distances. The other
+indices are controlled directly by the absolutely convergent Dirichlet series. -/
+theorem perronMajorant_halfInteger_term_le (m n : ℕ) (c : ℝ) (hc : 1 < c) (hc₂ : c ≤ 2) :
+    let x : ℝ := (m : ℝ) + 1 / 2
+    let f : ℕ → ℂ := fun k => (ArithmeticFunction.vonMangoldt k : ℂ)
+    perronSeriesErrorMajorant f x c n ≤
+      ‖LSeries.term f (c : ℂ) n‖ * (x ^ c * (8 + 4 / Real.log 2)) +
+      if n < 2 * (m + 1) then (32 * x * Real.log (2 * x)) * |x - n|⁻¹ else 0 := by
+  let x : ℝ := (m : ℝ) + 1 / 2
+  let f : ℕ → ℂ := fun k => (ArithmeticFunction.vonMangoldt k : ℂ)
+  change perronSeriesErrorMajorant f x c n ≤
+    ‖LSeries.term f (c : ℂ) n‖ * (x ^ c * (8 + 4 / Real.log 2)) +
+    if n < 2 * (m + 1) then (32 * x * Real.log (2 * x)) * |x - n|⁻¹ else 0
+  have hx : 0 < x := by dsimp [x]; positivity
+  have h2x : 1 ≤ 2 * x := by dsimp [x]; linarith [Nat.cast_nonneg (α := ℝ) m]
+  have hlog : 0 ≤ Real.log (2 * x) := Real.log_nonneg h2x
+  have hlog2 : 0 < Real.log 2 := Real.log_pos (by norm_num)
+  have hmain : 0 ≤ ‖LSeries.term f (c : ℂ) n‖ * (x ^ c * (8 + 4 / Real.log 2)) := by
+    positivity
+  have hnear : 0 ≤ (if n < 2 * (m + 1) then
+      (32 * x * Real.log (2 * x)) * |x - n|⁻¹ else 0) := by
+    split_ifs <;> positivity
+  by_cases hn : n = 0
+  · rw [perronSeriesErrorMajorant, if_pos hn]
+    exact add_nonneg hmain hnear
+  have hnpos : 0 < (n : ℝ) := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
+  have hne : x ≠ (n : ℝ) := halfInteger_ne_natCast m n
+  rw [perronSeriesErrorMajorant, if_neg hn]
+  by_cases hfar : 2 * x ≤ (n : ℝ)
+  · rw [if_pos hfar]
+    refine le_add_of_le_of_nonneg ?_ hnear
+    gcongr
+    linarith
+  rw [if_neg hfar, if_neg hne]
+  by_cases hleft : 2 * (n : ℝ) ≤ x
+  · have hnle : (n : ℝ) ≤ x := by linarith
+    have hgap : (1 / 2 : ℝ) ≤ |x - (n : ℝ)| / max x (n : ℝ) := by
+      rw [max_eq_left hnle, abs_of_nonneg (sub_nonneg.mpr hnle), le_div_iff₀ hx]
+      have hh : (n : ℝ) ≤ x / 2 :=
+        (le_div_iff₀ (by norm_num)).mpr (by simpa only [mul_comm] using hleft)
+      calc
+        (1 / 2 : ℝ) * x = x - x / 2 := by ring
+        _ ≤ x - (n : ℝ) := sub_le_sub_left hh _
+    have hrec : 4 / (|x - (n : ℝ)| / max x (n : ℝ)) ≤ 8 := by
+      have h := div_le_div_of_nonneg_left (show (0 : ℝ) ≤ 4 by norm_num)
+        (show (0 : ℝ) < 1 / 2 by norm_num) hgap
+      norm_num at h ⊢
+      exact h
+    refine le_add_of_le_of_nonneg ?_ hnear
+    calc
+      _ ≤ ‖f n‖ * ((x / (n : ℝ)) ^ c * 8) := by gcongr
+      _ = ‖LSeries.term f (↑c) n‖ * (x ^ c * 8) := by
+        rw [LSeries.norm_term_eq, if_neg hn, Complex.ofReal_re, Real.div_rpow hx.le hnpos.le]
+        ring
+      _ ≤ _ := by
+        gcongr
+        exact le_add_of_nonneg_right (div_nonneg (by norm_num) hlog2.le)
+  · have hnt : (n : ℝ) < 2 * x := lt_of_not_ge hfar
+    have hindex : n < 2 * (m + 1) := by
+      have h : (n : ℝ) < ((2 * (m + 1) : ℕ) : ℝ) := by
+        push_cast
+        dsimp [x] at hnt
+        linarith
+      exact_mod_cast h
+    rw [if_pos hindex]
+    refine le_add_of_nonneg_of_le hmain ?_
+    have hy : (x / (n : ℝ)) ^ c ≤ 4 := by
+      calc
+        _ ≤ (2 : ℝ) ^ c := Real.rpow_le_rpow (div_nonneg hx.le hnpos.le)
+          ((div_le_iff₀ hnpos).mpr (le_of_not_ge hleft)) (by linarith)
+        _ ≤ (2 : ℝ) ^ (2 : ℝ) := Real.rpow_le_rpow_of_exponent_le (by norm_num) hc₂
+        _ = 4 := by norm_num
+    have hΛ : ‖f n‖ ≤ Real.log (2 * x) := by
+      rw [show f n = (ArithmeticFunction.vonMangoldt n : ℂ) by rfl, Complex.norm_real,
+        Real.norm_of_nonneg ArithmeticFunction.vonMangoldt_nonneg]
+      exact ArithmeticFunction.vonMangoldt_le_log.trans (Real.log_le_log hnpos hnt.le)
+    have hmax : max x (n : ℝ) ≤ 2 * x := max_le (by linarith) hnt.le
+    calc
+      _ = ‖f n‖ * ((x / (n : ℝ)) ^ c * (4 * max x (n : ℝ) * |x - n|⁻¹)) := by
+        simp only [div_eq_mul_inv, mul_inv_rev, inv_inv, mul_assoc]
+      _ ≤ Real.log (2 * x) * (4 * (4 * (2 * x) * |x - n|⁻¹)) := by gcongr
+      _ = _ := by ring
+
+/-- For half-integer cutoffs the sum of the error coefficients is controlled
+by the absolute Dirichlet series and an elementary logarithmic term. -/
+theorem perronMajorant_halfInteger_tsum_le (m : ℕ) (c : ℝ) (hc : 1 < c) (hc₂ : c ≤ 2) :
+    let x : ℝ := (m : ℝ) + 1 / 2
+    let f : ℕ → ℂ := fun k => (ArithmeticFunction.vonMangoldt k : ℂ)
+    (∑' n : ℕ, perronSeriesErrorMajorant f x c n) ≤
+      (∑' n : ℕ, ‖LSeries.term f (c : ℂ) n‖) * (x ^ c * (8 + 4 / Real.log 2)) +
+        128 * x * Real.log (2 * x) * (1 + Real.log (2 * x)) := by
+  let x : ℝ := (m : ℝ) + 1 / 2
+  let f : ℕ → ℂ := fun k => (ArithmeticFunction.vonMangoldt k : ℂ)
+  change (∑' n : ℕ, perronSeriesErrorMajorant f x c n) ≤ _
+  let A (n : ℕ) := ‖LSeries.term f (c : ℂ) n‖ * (x ^ c * (8 + 4 / Real.log 2))
+  let B (n : ℕ) := if n < 2 * (m + 1) then (32 * x * Real.log (2 * x)) * |x - n|⁻¹ else 0
+  have hx : 0 < x := by dsimp [x]; positivity
+  have hf : LSeriesSummable f (c : ℂ) :=
+    ArithmeticFunction.LSeriesSummable_vonMangoldt (by simpa)
+  have hA : Summable A := (summable_norm_iff.mpr hf).mul_right _
+  have hB0 : ∀ n ∉ Finset.range (2 * (m + 1)), B n = 0 := by
+    intro n hn
+    simp only [B, ← Finset.mem_range, if_neg hn]
+  have hB := summable_of_ne_finset_zero hB0
+  have h := (summable_perronSeriesErrorMajorant f x c hx hf).tsum_le_tsum
+    (fun n => perronMajorant_halfInteger_term_le m n c hc hc₂) (hA.add hB)
+  rw [hA.tsum_add hB, tsum_eq_sum hB0] at h
+  have hsum : (∑ n ∈ Finset.range (2 * (m + 1)), B n) =
+      (32 * x * Real.log (2 * x)) *
+        (∑ n ∈ Finset.range (2 * (m + 1)), |x - n|⁻¹) := by
+    rw [Finset.mul_sum]
+    exact Finset.sum_congr rfl fun _ hn => if_pos (Finset.mem_range.mp hn)
+  have hlog : 0 ≤ Real.log (2 * x) := Real.log_nonneg (by dsimp [x]; linarith [Nat.cast_nonneg (α := ℝ) m])
+  have hlog' : Real.log ((m : ℝ) + 1) ≤ Real.log (2 * x) :=
+    Real.log_le_log (by positivity) (by dsimp [x]; linarith [Nat.cast_nonneg (α := ℝ) m])
+  have hAeq : (∑' n, A n) = (∑' n, ‖LSeries.term f (c : ℂ) n‖) *
+      (x ^ c * (8 + 4 / Real.log 2)) := tsum_mul_right
+  rw [hAeq, hsum] at h
+  apply h.trans
+  apply add_le_add_left
+  calc
+    _ ≤ (32 * x * Real.log (2 * x)) * (4 * (1 + Real.log ((m : ℝ) + 1))) :=
+      mul_le_mul_of_nonneg_left (halfInteger_reciprocal_distances_le m) (by positivity)
+    _ ≤ (32 * x * Real.log (2 * x)) * (4 * (1 + Real.log (2 * x))) := by gcongr
+    _ = _ := by ring
+
+/-- Half-integer cutoffs give the ordinary Chebyshev sum and a logarithmic
+bound on the near-cutoff contribution to the Perron truncation. -/
+theorem vonMangoldtPerronIntegral_halfInteger_bound (m : ℕ) (c T : ℝ)
+    (hc : 1 < c) (hc₂ : c ≤ 2) (hT : 0 < T) :
+    let x : ℝ := (m : ℝ) + 1 / 2
+    let f : ℕ → ℂ := fun k => (ArithmeticFunction.vonMangoldt k : ℂ)
+    ‖vonMangoldtPerronIntegral x c T - 2 * (Real.pi : ℂ) * (chebyshevPsi x : ℂ)‖ ≤
+      ((∑' n : ℕ, ‖LSeries.term f (c : ℂ) n‖) * (x ^ c * (8 + 4 / Real.log 2)) +
+        128 * x * Real.log (2 * x) * (1 + Real.log (2 * x))) / T := by
+  let x : ℝ := (m : ℝ) + 1 / 2
+  change ‖vonMangoldtPerronIntegral x c T - 2 * (Real.pi : ℂ) * (chebyshevPsi x : ℂ)‖ ≤ _
+  have hx : 0 < x := by dsimp [x]; positivity
+  have hhalf : halfWeightedChebyshevPsi x = chebyshevPsi x := by
+    rw [halfWeightedChebyshevPsi, if_neg (halfInteger_ne_natCast m ⌊x⌋₊), sub_zero]
+  have h := vonMangoldtPerronIntegral_sub_psi_bound x c T hx hc hT
+  rw [hhalf] at h
+  exact h.trans (div_le_div_of_nonneg_right (perronMajorant_halfInteger_tsum_le m c hc hc₂) hT.le)
+
+/-- The von Mangoldt Dirichlet series on the real axis is a sum of its
+nonnegative term norms. -/
+theorem vonMangoldt_tsum_norm_term (c : ℝ) :
+    let f : ℕ → ℂ := fun n => (ArithmeticFunction.vonMangoldt n : ℂ)
+    ((∑' n : ℕ, ‖LSeries.term f (c : ℂ) n‖ : ℝ) : ℂ) = LSeries f (c : ℂ) := by
+  dsimp only
+  rw [Complex.ofReal_tsum, LSeries]
+  apply tsum_congr
+  intro n
+  by_cases hn : n = 0
+  · simp [hn]
+  rw [LSeries.norm_term_eq, if_neg hn, Complex.ofReal_re, LSeries.term_of_ne_zero hn,
+    Complex.norm_real, Real.norm_of_nonneg ArithmeticFunction.vonMangoldt_nonneg,
+    Complex.ofReal_div, Complex.ofReal_cpow (Nat.cast_nonneg n), Complex.ofReal_natCast]
+
+/-- Removing the simple pole of the zeta logarithmic derivative gives a
+bounded function on the real segment from 1 to 2. -/
+theorem vonMangoldt_tsum_norm_term_le :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ c : ℝ, 1 < c → c ≤ 2 →
+      (∑' n : ℕ, ‖LSeries.term (fun k => (ArithmeticFunction.vonMangoldt k : ℂ))
+        (c : ℂ) n‖) ≤ 1 / (c - 1) + K := by
+  let U (t : ℝ) := deriv regularizedZeta (t : ℂ) / regularizedZeta (t : ℂ)
+  have hne (t : ℝ) (ht : 1 ≤ t) : regularizedZeta (t : ℂ) ≠ 0 := by
+    rcases eq_or_lt_of_le ht with h | h
+    · rw [← h, Complex.ofReal_one, regularizedZeta_one]
+      exact one_ne_zero
+    · have ht1 : (t : ℂ) ≠ 1 := by exact_mod_cast h.ne'
+      rw [(regularizedZeta_eventuallyEq (t : ℂ) ht1).eq_of_nhds]
+      exact mul_ne_zero (sub_ne_zero.mpr ht1)
+        (riemannZeta_ne_zero_of_one_le_re (by simpa using ht))
+  have hU : ContinuousOn (fun t => ‖U t‖) (Icc (1 : ℝ) 2) := by
+    have hd : Continuous (deriv regularizedZeta) :=
+      continuous_iff_continuousAt.mpr fun z => (regularizedZeta_analyticAt z).deriv.continuousAt
+    have hcont : Continuous regularizedZeta :=
+      continuous_iff_continuousAt.mpr fun z => (regularizedZeta_analyticAt z).continuousAt
+    exact ((hd.comp Complex.continuous_ofReal).continuousOn.div
+      (hcont.comp Complex.continuous_ofReal).continuousOn (fun t ht => hne t ht.1)).norm
+  obtain ⟨K, hK⟩ := isCompact_Icc.bddAbove_image hU
+  have hBound (t : ℝ) (ht : t ∈ Icc (1 : ℝ) 2) : ‖U t‖ ≤ K :=
+    hK (mem_image_of_mem _ ht)
+  refine ⟨K, (norm_nonneg _).trans (hBound 1 (by norm_num)), fun c hc hc₂ => ?_⟩
+  have hc0 : (c : ℂ) ≠ 0 := by exact_mod_cast (zero_lt_one.trans hc).ne'
+  have hc1 : (c : ℂ) ≠ 1 := by exact_mod_cast hc.ne'
+  have hζ := riemannZeta_ne_zero_of_one_le_re (show 1 ≤ (c : ℂ).re by simpa using hc.le)
+  have hreg := regularizedZeta_mellin_eq (c : ℂ) hc0 hc1 hζ
+  have hL : LSeries (fun k => (ArithmeticFunction.vonMangoldt k : ℂ)) (c : ℂ) =
+      1 / ((c : ℂ) - 1) - U c := by
+    rw [ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div (by simpa using hc)]
+    let w := -deriv riemannZeta (c : ℂ) / riemannZeta (c : ℂ)
+    change w = _
+    change -(1 + U c) / (c : ℂ) = -1 / ((c : ℂ) - 1) + w / (c : ℂ) at hreg
+    have hd : (c : ℂ) - 1 ≠ 0 := sub_ne_zero.mpr hc1
+    have hscaled : -(1 + U c) = -(c : ℂ) / ((c : ℂ) - 1) + w := by
+      have hh := congrArg (fun z : ℂ => z * (c : ℂ)) hreg
+      dsimp only at hh
+      rw [add_mul, div_mul_cancel₀ _ hc0, div_mul_cancel₀ _ hc0, div_mul_eq_mul_div,
+        neg_one_mul] at hh
+      exact hh
+    have hsplit : (c : ℂ) / ((c : ℂ) - 1) = 1 + 1 / ((c : ℂ) - 1) := by
+      field_simp [hd]
+    rw [neg_div, hsplit] at hscaled
+    linear_combination -hscaled
+  have hreal := congrArg Complex.re ((vonMangoldt_tsum_norm_term c).trans hL)
+  have hdiv : (1 : ℂ) / ((c : ℂ) - 1) = ((1 / (c - 1) : ℝ) : ℂ) := by push_cast; rfl
+  rw [hdiv, Complex.ofReal_re, Complex.sub_re, Complex.ofReal_re] at hreal
+  rw [hreal]
+  have hRe := Complex.abs_re_le_norm (U c)
+  have hKc := hBound c ⟨hc.le, hc₂⟩
+  linarith [neg_abs_le (U c).re]
+
+/-- On the moving line c = 1 + 1/log x the half-integer truncation error
+is bounded by a constant times x (1 + log (2x))² / T. -/
+theorem vonMangoldtPerronIntegral_halfInteger_moving_bound :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (m : ℕ) (T : ℝ), 0 < T →
+      let x : ℝ := (m : ℝ) + 1 / 2
+      1 ≤ Real.log x →
+      ‖vonMangoldtPerronIntegral x (1 + (Real.log x)⁻¹) T -
+          2 * (Real.pi : ℂ) * (chebyshevPsi x : ℂ)‖ ≤
+        C * x * (1 + Real.log (2 * x)) ^ 2 / T := by
+  obtain ⟨K, hK, hn⟩ := vonMangoldt_tsum_norm_term_le
+  let A := Real.exp 1 * (8 + 4 / Real.log 2)
+  have hlog2 := Real.log_pos (show (1 : ℝ) < 2 by norm_num)
+  have hA : 0 ≤ A := by dsimp [A]; positivity
+  refine ⟨A * (1 + K) + 128, add_nonneg (mul_nonneg hA (by linarith)) (by norm_num),
+    fun m T hT => ?_⟩
+  let x : ℝ := (m : ℝ) + 1 / 2
+  change 1 ≤ Real.log x → _
+  intro hxlog
+  have hx : 0 < x := by dsimp [x]; positivity
+  have hlog : 0 < Real.log x := zero_lt_one.trans_le hxlog
+  let c := 1 + (Real.log x)⁻¹
+  have hc : 1 < c := lt_add_of_pos_right 1 (inv_pos.mpr hlog)
+  have hc₂ : c ≤ 2 := by
+    have h := inv_le_one_of_one_le₀ hxlog
+    dsimp [c]
+    linarith
+  have hcsub : c - 1 = (Real.log x)⁻¹ := by dsimp [c]; ring
+  have hp : x ^ c = x * Real.exp 1 := by
+    dsimp [c]
+    rw [Real.rpow_add hx, Real.rpow_one, Real.rpow_def_of_pos hx,
+      mul_inv_cancel₀ hlog.ne']
+  let L := Real.log (2 * x)
+  have hxL : Real.log x ≤ L := Real.log_le_log hx (by linarith)
+  have hL : 0 ≤ L := hlog.le.trans hxL
+  have hlogSq : L + K ≤ (1 + K) * (1 + L) ^ 2 := by
+    have h₁ : L + K ≤ (1 + K) * (1 + L) := by nlinarith
+    refine h₁.trans (mul_le_mul_of_nonneg_left ?_ (by positivity))
+    nlinarith [sq_nonneg L]
+  have hseries := hn c hc hc₂
+  rw [hcsub, one_div, inv_inv] at hseries
+  refine (vonMangoldtPerronIntegral_halfInteger_bound m c T hc hc₂ hT).trans
+    (div_le_div_of_nonneg_right ?_ hT.le)
+  change (∑' n : ℕ, ‖LSeries.term (fun k => (ArithmeticFunction.vonMangoldt k : ℂ))
+      (c : ℂ) n‖) * (x ^ c * (8 + 4 / Real.log 2)) + 128 * x * L * (1 + L) ≤ _
+  rw [hp, mul_assoc, ← show A = Real.exp 1 * (8 + 4 / Real.log 2) from rfl]
+  have hmain := mul_le_mul_of_nonneg_right ((hseries.trans (add_le_add_right hxL K)).trans hlogSq)
+    (show 0 ≤ x * A by positivity)
+  have hnear := mul_le_mul_of_nonneg_left
+    (show L * (1 + L) ≤ (1 + L) ^ 2 by nlinarith) (show 0 ≤ 128 * x by positivity)
+  calc
+    _ ≤ ((1 + K) * (1 + L) ^ 2) * (x * A) + (128 * x) * (1 + L) ^ 2 := by
+      rw [mul_assoc (128 * x)]
+      exact add_le_add hmain hnear
+    _ = _ := by change _ = (A * (1 + K) + 128) * x * (1 + L) ^ 2; ring
+
+#print axioms halfInteger_reciprocal_distances_le
+#print axioms halfInteger_ne_natCast
+#print axioms perronMajorant_halfInteger_term_le
+#print axioms perronMajorant_halfInteger_tsum_le
+#print axioms vonMangoldtPerronIntegral_halfInteger_bound
+#print axioms vonMangoldt_tsum_norm_term
+#print axioms vonMangoldt_tsum_norm_term_le
+#print axioms vonMangoldtPerronIntegral_halfInteger_moving_bound
+end RiemannResearch

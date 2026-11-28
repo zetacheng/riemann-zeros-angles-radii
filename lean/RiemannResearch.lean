@@ -3615,3 +3615,348 @@ theorem chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
 #print axioms chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_bound
 #print axioms chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory Metric
+open scoped Interval Topology
+
+/-- The half-plane to disk map used in the Borel–Carathéodory estimate. -/
+private theorem norm_div_two_real_sub_lt_one (u : ℂ) (D : ℝ) (hD : 0 < D) (hu : u.re < D) :
+    (2 * (D : ℂ) - u ≠ 0) ∧ ‖u / (2 * (D : ℂ) - u)‖ < 1 := by
+  let v := 2 * (D : ℂ) - u
+  have hvr : v.re = 2 * D - u.re := by simp [v, Complex.mul_re]
+  have hvi : v.im = -u.im := by simp [v, Complex.mul_im]
+  have hnorm : ‖u‖ < ‖v‖ := by
+    by_contra! h
+    have hsq := mul_self_le_mul_self (norm_nonneg v) h
+    rw [Complex.norm_mul_self_eq_normSq, Complex.norm_mul_self_eq_normSq,
+      Complex.normSq_apply v, Complex.normSq_apply u, hvr, hvi] at hsq
+    nlinarith only [hsq, mul_pos hD (sub_pos.mpr hu)]
+  have hv : v ≠ 0 := norm_pos_iff.mp ((norm_nonneg u).trans_lt hnorm)
+  exact ⟨hv, by rw [norm_div, div_lt_one ((norm_nonneg u).trans_lt hnorm)]; exact hnorm⟩
+
+/-- A strict upper bound on the real part controls the derivative at the
+center and the deviation from the center throughout the disk. -/
+theorem borelCaratheodory_ball (f : ℂ → ℂ) (c : ℂ) (R A : ℝ) (hR : 0 < R)
+    (hf : DifferentiableOn ℂ f (ball c R))
+    (hA : ∀ z ∈ ball c R, (f z).re < A) :
+    ‖deriv f c‖ ≤ 2 * (A - (f c).re) / R ∧
+    ∀ z ∈ ball c R, ‖f z - f c‖ ≤
+      2 * (A - (f c).re) * dist z c / (R - dist z c) := by
+  let D := A - (f c).re
+  let u (z : ℂ) := f z - f c
+  let G (z : ℂ) := u z / (2 * (D : ℂ) - u z)
+  have hc := mem_ball_self (x := c) hR
+  have hD : 0 < D := sub_pos.mpr (hA c hc)
+  have hu (z : ℂ) (hz : z ∈ ball c R) : (u z).re < D := by
+    dsimp [u, D]
+    exact sub_lt_sub_right (hA z hz) _
+  have hden (z : ℂ) (hz : z ∈ ball c R) : 2 * (D : ℂ) - u z ≠ 0 :=
+    (norm_div_two_real_sub_lt_one (u z) D hD (hu z hz)).1
+  have hG : DifferentiableOn ℂ G (ball c R) :=
+    (hf.sub_const (f c)).div ((differentiableOn_const (2 * (D : ℂ))).sub (hf.sub_const (f c))) hden
+  have hGc : G c = 0 := by simp [G, u]
+  have hMaps : MapsTo G (ball c R) (ball (G c) 1) := by
+    intro z hz
+    simp only [mem_ball, hGc, dist_zero_right]
+    exact (norm_div_two_real_sub_lt_one (u z) D hD (hu z hz)).2
+  constructor
+  · have hSchwarz := Complex.norm_deriv_le_div_of_mapsTo_ball hG hMaps hR
+    have hdf := hf.differentiableAt (isOpen_ball.mem_nhds hc)
+    have hdc : 2 * (D : ℂ) ≠ 0 := mul_ne_zero (by norm_num) (Complex.ofReal_ne_zero.mpr hD.ne')
+    have hnum := hdf.hasDerivAt.sub_const (f c)
+    have hq := hnum.div ((hasDerivAt_const c (2 * (D : ℂ))).sub hnum) (hden c hc)
+    have he : deriv G c = deriv f c / (2 * (D : ℂ)) := by
+      rw [hq.deriv]
+      simp only [u, sub_self, zero_mul, sub_zero]
+      field_simp [hdc]
+      ring
+    rw [he, norm_div, norm_mul, Complex.norm_real, Real.norm_of_nonneg hD.le] at hSchwarz
+    norm_num at hSchwarz
+    exact ((div_le_iff₀ (by positivity : (0 : ℝ) < 2 * D)).mp hSchwarz).trans_eq (by ring)
+  · intro z hz
+    have hSchwarz := Complex.dist_le_div_mul_dist_of_mapsTo_ball hG hMaps hz
+    rw [hGc, dist_zero_right, one_div, inv_mul_eq_div] at hSchwarz
+    have hdc : dist z c < R := hz
+    have hnorm : ‖u z‖ ≤ (dist z c / R) * (2 * D + ‖u z‖) := by
+      have hi := (div_le_iff₀ (norm_pos_iff.mpr (hden z hz))).mp
+        (by simpa only [G, norm_div] using hSchwarz)
+      have htri := norm_sub_le (2 * (D : ℂ)) (u z)
+      rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg hD.le] at htri
+      norm_num at htri
+      exact hi.trans (mul_le_mul_of_nonneg_left htri (div_nonneg dist_nonneg hR.le))
+    apply (le_div_iff₀ (sub_pos.mpr hdc)).mpr
+    have hh : ‖u z‖ * R ≤ dist z c * (2 * D + ‖u z‖) := by
+      apply (le_div_iff₀ hR).mp
+      rwa [div_mul_eq_mul_div] at hnorm
+    change ‖u z‖ * (R - dist z c) ≤ 2 * D * dist z c
+    nlinarith only [hh]
+
+/-- The interior derivative estimate obtained by recentering the disk. -/
+theorem borelCaratheodory_deriv_le (f : ℂ → ℂ) (c z : ℂ) (R A : ℝ)
+    (hz : z ∈ ball c R) (hf : DifferentiableOn ℂ f (ball c R))
+    (hA : ∀ w ∈ ball c R, (f w).re < A) :
+    ‖deriv f z‖ ≤ 2 * (A - (f c).re) * (R + dist z c) / (R - dist z c) ^ 2 := by
+  have hd : dist z c < R := hz
+  have hR : 0 < R := dist_nonneg.trans_lt hd
+  have hr : 0 < R - dist z c := sub_pos.mpr hd
+  have hsub : ball z (R - dist z c) ⊆ ball c R := by
+    intro w hw
+    rw [mem_ball] at hw ⊢
+    exact (dist_triangle w z c).trans_lt (by linarith)
+  have h := (borelCaratheodory_ball f z (R - dist z c) A hr (hf.mono hsub)
+    (fun w hw => hA w (hsub hw))).1
+  have hdist := (borelCaratheodory_ball f c R A hR hf hA).2 z hz
+  have hre := Complex.abs_re_le_norm (f z - f c)
+  rw [Complex.sub_re] at hre
+  have hgap : A - (f z).re ≤
+      (A - (f c).re) + 2 * (A - (f c).re) * dist z c / (R - dist z c) := by
+    linarith [hre.trans hdist, neg_abs_le ((f z).re - (f c).re)]
+  refine h.trans ((div_le_div_of_nonneg_right (mul_le_mul_of_nonneg_left hgap (by norm_num))
+    hr.le).trans_eq ?_)
+  field_simp
+  ring
+
+/-- A holomorphic function on a disk has a primitive obtained by integrating
+along the straight segment from the center. -/
+theorem exists_primitive_ball (g : ℂ → ℂ) (c : ℂ) (R : ℝ)
+    (hg : ∀ w ∈ ball c R, AnalyticAt ℂ g w) :
+    ∃ F : ℂ → ℂ, F c = 0 ∧ ∀ z ∈ ball c R, HasDerivAt F (g z) z := by
+  let w (y : ℂ) (t : ℝ) : ℂ := c + (t : ℂ) * (y - c)
+  let I := Icc (0 : ℝ) 1
+  let φ (y : ℂ) (t : ℝ) : ℂ := (y - c) * g (w y t)
+  let φ' (y : ℂ) (t : ℝ) : ℂ := g (w y t) + (y - c) * (deriv g (w y t) * (t : ℂ))
+  refine ⟨fun y => ∫ t in (0 : ℝ)..1, φ y t, by simp [φ], ?_⟩
+  intro z hz
+  have hzR : dist z c < R := hz
+  let r := (dist z c + R) / 2
+  let ε := r - dist z c
+  have hrR : r < R := by dsimp [r]; linarith
+  have hε : 0 < ε := by dsimp [ε, r]; linarith
+  have hloc (y : ℂ) (hy : y ∈ ball z ε) : dist y c < r :=
+    (dist_triangle y z c).trans_lt (by have h : dist y z < ε := hy; dsimp [ε] at h; linarith)
+  have hzn : z ∈ ball z ε := mem_ball_self hε
+  have hb (y : ℂ) (hy : y ∈ ball z ε) (t : ℝ) (ht : t ∈ I) :
+      w y t ∈ closedBall c r := by
+    have h : ‖y - c‖ < r := by simpa only [dist_eq_norm] using hloc y hy
+    have h0 : 0 ≤ t := ht.1
+    have h1 : t ≤ 1 := ht.2
+    rw [mem_closedBall, dist_eq_norm]
+    simp only [w, add_sub_cancel_left, norm_mul, Complex.norm_real, Real.norm_of_nonneg h0]
+    exact (mul_le_of_le_one_left (norm_nonneg _) h1).trans h.le
+  have hs : closedBall c r ⊆ ball c R := fun y hy => mem_ball.mpr ((mem_closedBall.mp hy).trans_lt hrR)
+  have hgc : ContinuousOn g (closedBall c r) :=
+    fun y hy => (hg y (hs hy)).continuousAt.continuousWithinAt
+  have hdc : ContinuousOn (deriv g) (closedBall c r) :=
+    fun y hy => (hg y (hs hy)).deriv.continuousAt.continuousWithinAt
+  obtain ⟨B, hB⟩ := (isCompact_closedBall c r).bddAbove_image (hgc.norm.add hdc.norm)
+  have hBg (y : ℂ) (hy : y ∈ closedBall c r) : ‖g y‖ ≤ B :=
+    (le_add_of_nonneg_right (norm_nonneg _)).trans (hB (mem_image_of_mem _ hy))
+  have hBd (y : ℂ) (hy : y ∈ closedBall c r) : ‖deriv g y‖ ≤ B :=
+    (le_add_of_nonneg_left (norm_nonneg _)).trans (hB (mem_image_of_mem _ hy))
+  have hB0 : 0 ≤ B := (norm_nonneg _).trans (hBg _ (hb z hzn 0 (by norm_num [I])))
+  have hφ (y : ℂ) (hy : y ∈ ball z ε) : ContinuousOn (φ y) I :=
+    continuousOn_const.mul (hgc.comp (show Continuous (w y) by dsimp [w]; fun_prop).continuousOn
+      (fun t ht => hb y hy t ht))
+  have hφ' : ContinuousOn (φ' z) I := by
+    have hw : ContinuousOn (w z) I := (show Continuous (w z) by dsimp [w]; fun_prop).continuousOn
+    have hmap : MapsTo (w z) I (closedBall c r) := fun t ht => hb z hzn t ht
+    exact (hgc.comp hw hmap).add (continuousOn_const.mul
+      ((hdc.comp hw hmap).mul Complex.continuous_ofReal.continuousOn))
+  let μ : Measure ℝ := volume.restrict (Ioc 0 1)
+  have hμ : IsFiniteMeasure μ := isFiniteMeasure_restrict.mpr (by simp)
+  have hcontInt {H : ℝ → ℂ} (hH : ContinuousOn H I) : Integrable H μ := by
+    have hh : ContinuousOn H [[(0 : ℝ), 1]] := by
+      rw [uIcc_of_le zero_le_one]
+      exact hH
+    exact hh.intervalIntegrable.1
+  have htμ : ∀ᵐ t ∂μ, t ∈ I := (ae_restrict_mem measurableSet_Ioc).mono
+    (fun _ ht => ⟨ht.1.le, ht.2⟩)
+  have hmeas : ∀ᶠ y in 𝓝 z, AEStronglyMeasurable (φ y) μ :=
+    (show ∀ᶠ y in 𝓝 z, y ∈ ball z ε from ball_mem_nhds z hε).mono (fun y hy => (hcontInt (hφ y hy)).aestronglyMeasurable)
+  have hbound : ∀ᵐ t ∂μ, ∀ y ∈ ball z ε, ‖φ' y t‖ ≤ B + r * B := by
+    filter_upwards [htμ] with t ht y hy
+    have ht' : ‖(t : ℂ)‖ ≤ 1 := by rw [Complex.norm_real, Real.norm_of_nonneg ht.1]; exact ht.2
+    have hyr : ‖y - c‖ ≤ r := le_of_lt (by simpa only [dist_eq_norm] using hloc y hy)
+    calc
+      _ ≤ ‖g (w y t)‖ + ‖y - c‖ * (‖deriv g (w y t)‖ * ‖(t : ℂ)‖) := by
+        simpa only [φ', norm_mul] using norm_add_le (g (w y t)) ((y - c) * (deriv g (w y t) * (t : ℂ)))
+      _ ≤ B + r * B := by
+        apply add_le_add (hBg _ (hb y hy t ht))
+        exact mul_le_mul hyr ((mul_le_mul (hBd _ (hb y hy t ht)) ht' (norm_nonneg _) hB0).trans_eq
+          (mul_one _)) (mul_nonneg (norm_nonneg _) (norm_nonneg _)) ((norm_nonneg _).trans hyr)
+  have hdiff : ∀ᵐ t ∂μ, ∀ y ∈ ball z ε, HasDerivAt (fun v => φ v t) (φ' y t) y := by
+    filter_upwards [htμ] with t ht y hy
+    have hw : HasDerivAt (fun v => w v t) (t : ℂ) y := by
+      simpa [w] using (((hasDerivAt_id y).sub_const c).const_mul (t : ℂ)).const_add c
+    have h := ((hasDerivAt_id y).sub_const c).mul ((hg _ (hs (hb y hy t ht))).differentiableAt.hasDerivAt.comp y hw)
+    simpa [φ, φ'] using h
+  have hderiv := (hasDerivAt_integral_of_dominated_loc_of_deriv_le hε hmeas (hcontInt (hφ z hzn))
+    (hcontInt hφ').aestronglyMeasurable hbound (integrable_const _) hdiff).2
+  have hFTC : (∫ t in (0 : ℝ)..1, φ' z t) = g z := by
+    let H (t : ℝ) := (t : ℂ) * g (w z t)
+    have hd (t : ℝ) (ht : t ∈ [[(0 : ℝ), 1]]) : HasDerivAt H (φ' z t) t := by
+      rw [uIcc_of_le zero_le_one] at ht
+      have htCL : HasDerivAt (fun u : ℝ => (u : ℂ)) 1 t := by
+        simpa using (Complex.ofRealCLM.hasDerivAt (x := t))
+      have hw : HasDerivAt (w z) (z - c) t := by
+        simpa [w] using (htCL.mul_const (z - c)).const_add c
+      have hh := htCL.mul ((hg _ (hs (hb z hzn t ht))).differentiableAt.hasDerivAt.scomp t hw)
+      convert hh using 1
+      simp only [φ', one_mul, smul_eq_mul, Function.comp_apply]
+      ring
+    have hh : ContinuousOn (φ' z) [[(0 : ℝ), 1]] := by
+      rw [uIcc_of_le zero_le_one]
+      exact hφ'
+    rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hd hh.intervalIntegrable]
+    simp [H, w]
+  have he : (∫ t, φ' z t ∂μ) = g z := by
+    simpa only [intervalIntegral.integral_of_le (zero_le_one : (0 : ℝ) ≤ 1), μ] using hFTC
+  rw [he] at hderiv
+  exact hderiv.congr_of_eventuallyEq (Eventually.of_forall fun y =>
+    intervalIntegral.integral_of_le (zero_le_one : (0 : ℝ) ≤ 1))
+
+/-- A zero-free holomorphic function has a normalized logarithm on a disk.
+The real part is the logarithm of the ratio of its absolute values. -/
+theorem exists_normalized_log_ball (f : ℂ → ℂ) (c : ℂ) (R : ℝ) (hR : 0 < R)
+    (ha : ∀ z ∈ ball c R, AnalyticAt ℂ f z) (hn : ∀ z ∈ ball c R, f z ≠ 0) :
+    ∃ F : ℂ → ℂ, F c = 0 ∧ ∀ z ∈ ball c R,
+      HasDerivAt F (deriv f z / f z) z ∧
+        (F z).re = Real.log (‖f z‖ / ‖f c‖) := by
+  obtain ⟨F, hFc, hF⟩ := exists_primitive_ball (fun z => deriv f z / f z) c R
+    (fun z hz => (ha z hz).deriv.div (ha z hz) (hn z hz))
+  let Q (z : ℂ) := f z * Complex.exp (-F z)
+  have hQ (z : ℂ) (hz : z ∈ ball c R) : HasDerivAt Q 0 z := by
+    have h := (ha z hz).differentiableAt.hasDerivAt.mul ((hF z hz).neg.cexp)
+    convert h using 1
+    field_simp [hn z hz]
+    ring
+  have hQeq : EqOn Q (fun _ => f c) (ball c R) := by
+    apply isOpen_ball.eqOn_of_deriv_eq (convex_ball c R).isPreconnected
+      (fun z hz => (hQ z hz).differentiableAt.differentiableWithinAt) (differentiableOn_const (f c))
+      (fun z hz => by simp [(hQ z hz).deriv])
+      (mem_ball_self hR)
+    simp [Q, hFc]
+  refine ⟨F, hFc, fun z hz => ⟨hF z hz, ?_⟩⟩
+  have hQz : Q z = f c := hQeq hz
+  have hEq : Complex.exp (F z) * f c = f z := by
+    have he : Complex.exp (F z) * Complex.exp (-F z) = 1 := by
+      rw [← Complex.exp_add, add_neg_cancel, Complex.exp_zero]
+    calc
+      _ = f z * (Complex.exp (F z) * Complex.exp (-F z)) := by rw [← hQz]; dsimp [Q]; ring
+      _ = _ := by rw [he, mul_one]
+  have hnorm := congrArg norm hEq
+  rw [norm_mul, Complex.norm_exp] at hnorm
+  rw [← (eq_div_iff (norm_ne_zero_iff.mpr (hn c (mem_ball_self hR)))).mpr hnorm, Real.log_exp]
+
+/-- A zero-free disk and control of the ratio to its center bound the
+logarithmic derivative in the interior. -/
+theorem norm_logDeriv_le_of_ball (f : ℂ → ℂ) (c z : ℂ) (R M : ℝ)
+    (hz : z ∈ ball c R)
+    (ha : ∀ w ∈ ball c R, AnalyticAt ℂ f w) (hn : ∀ w ∈ ball c R, f w ≠ 0)
+    (hM : ∀ w ∈ ball c R, ‖f w‖ / ‖f c‖ ≤ M) :
+    ‖deriv f z / f z‖ ≤ 2 * (1 + Real.log M) * (R + dist z c) / (R - dist z c) ^ 2 := by
+  have hR : 0 < R := dist_nonneg.trans_lt (mem_ball.mp hz)
+  obtain ⟨F, hFc, hF⟩ := exists_normalized_log_ball f c R hR ha hn
+  have h := borelCaratheodory_deriv_le F c z R (1 + Real.log M) hz
+    (fun w hw => ((hF w hw).1.differentiableAt).differentiableWithinAt) (fun w hw => by
+      rw [(hF w hw).2]
+      exact (Real.log_le_log (div_pos (norm_pos_iff.mpr (hn w hw))
+        (norm_pos_iff.mpr (hn c (mem_ball_self hR)))) (hM w hw)).trans_lt (by linarith))
+  simpa only [(hF z hz).1.deriv, hFc, Complex.zero_re, sub_zero] using h
+
+/-- With RH, a disk strictly to the right of the critical line allows the
+holomorphic estimate for the logarithmic derivative of the regularized zeta. -/
+theorem norm_logDeriv_regularizedZeta_le_of_RH (hRH : RiemannHypothesis)
+    (c z : ℂ) (R M : ℝ) (hz : z ∈ ball c R) (hR : R ≤ c.re - 1 / 2)
+    (hM : ∀ w ∈ ball c R, ‖regularizedZeta w‖ / ‖regularizedZeta c‖ ≤ M) :
+    ‖deriv regularizedZeta z / regularizedZeta z‖ ≤
+      2 * (1 + Real.log M) * (R + dist z c) / (R - dist z c) ^ 2 := by
+  refine norm_logDeriv_le_of_ball regularizedZeta c z R M hz
+    (fun w _ => regularizedZeta_analyticAt w) (fun w hw => ?_) hM
+  by_cases h : w = 1
+  · simp [h]
+  have hdist : ‖w - c‖ < R := by simpa only [mem_ball, dist_eq_norm] using hw
+  have hre := Complex.abs_re_le_norm (w - c)
+  rw [Complex.sub_re] at hre
+  have hright : 1 / 2 < w.re := by linarith [neg_abs_le (w.re - c.re)]
+  rw [(regularizedZeta_eventuallyEq w h).eq_of_nhds]
+  exact mul_ne_zero (sub_ne_zero.mpr h) (riemannZeta_ne_zero_right_of_riemannHypothesis hRH w hright)
+
+/-- The regularization changes the logarithmic derivative by the reciprocal
+of the distance to the pole, with its complex sign retained. -/
+theorem riemannZeta_logDeriv_eq_regularized (z : ℂ) (hz : z ≠ 1) (hζ : riemannZeta z ≠ 0) :
+    deriv riemannZeta z / riemannZeta z =
+      deriv regularizedZeta z / regularizedZeta z - (z - 1)⁻¹ := by
+  have heq := regularizedZeta_eventuallyEq z hz
+  have hsub : HasDerivAt (fun w : ℂ => w - 1) 1 z := (hasDerivAt_id z).sub_const 1
+  have hd := (hsub.mul (differentiableAt_riemannZeta hz).hasDerivAt).deriv
+  rw [heq.deriv_eq, hd, heq.eq_of_nhds, one_mul]
+  field_simp [sub_ne_zero.mpr hz, hζ]
+  ring
+
+/-- The same zero-free disk estimate applies to the original logarithmic
+derivative, after adding the contribution from the pole. -/
+theorem norm_logDeriv_riemannZeta_le_of_RH (hRH : RiemannHypothesis)
+    (c z : ℂ) (R M : ℝ) (hz : z ∈ ball c R) (hR : R ≤ c.re - 1 / 2) (h1 : z ≠ 1)
+    (hM : ∀ w ∈ ball c R, ‖regularizedZeta w‖ / ‖regularizedZeta c‖ ≤ M) :
+    ‖deriv riemannZeta z / riemannZeta z‖ ≤
+      2 * (1 + Real.log M) * (R + dist z c) / (R - dist z c) ^ 2 + ‖z - 1‖⁻¹ := by
+  have hd : ‖z - c‖ < R := by simpa only [mem_ball, dist_eq_norm] using hz
+  have hre := Complex.abs_re_le_norm (z - c)
+  rw [Complex.sub_re] at hre
+  have hright : 1 / 2 < z.re := by linarith [neg_abs_le (z.re - c.re)]
+  rw [riemannZeta_logDeriv_eq_regularized z h1
+    (riemannZeta_ne_zero_right_of_riemannHypothesis hRH z hright)]
+  exact (norm_sub_le _ _).trans (by
+    rw [norm_inv]
+    exact add_le_add_right (norm_logDeriv_regularizedZeta_le_of_RH hRH c z R M hz hR hM) _)
+
+/-- The Möbius inverse gives a uniform positive lower bound on the center
+line used for zero-free disks, and everywhere to its right. -/
+theorem exists_pos_le_norm_riemannZeta_of_two_le_re :
+    ∃ δ : ℝ, 0 < δ ∧ ∀ z : ℂ, 2 ≤ z.re → δ ≤ ‖riemannZeta z‖ := by
+  let g (n : ℕ) := ‖LSeries.term (1 : ℕ → ℂ) (2 : ℂ) n‖
+  have hg : Summable g := summable_norm_iff.mpr
+    (LSeriesSummable_one_iff.mpr (by norm_num))
+  let B := 1 + ∑' n, g n
+  have hB : 0 < B := add_pos_of_pos_of_nonneg zero_lt_one
+    (tsum_nonneg (fun _ => norm_nonneg _))
+  refine ⟨1 / B, div_pos zero_lt_one hB, fun z hz => ?_⟩
+  let f (n : ℕ) := (ArithmeticFunction.moebius n : ℂ)
+  have hz1 : 1 < z.re := one_lt_two.trans_le hz
+  have hterm (n : ℕ) : ‖LSeries.term f z n‖ ≤ g n := by
+    by_cases hn : n = 0
+    · simp [hn, g]
+    have hn0 : 0 < (n : ℝ) := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
+    have hn1 : 1 ≤ (n : ℝ) := Nat.one_le_cast.mpr (Nat.pos_of_ne_zero hn)
+    have hf : ‖f n‖ ≤ 1 := by
+      change ‖(ArithmeticFunction.moebius n : ℂ)‖ ≤ 1
+      rw [Complex.norm_intCast]
+      exact_mod_cast (ArithmeticFunction.abs_moebius_le_one (n := n))
+    simp only [g, LSeries.norm_term_eq, if_neg hn, Complex.re_ofNat, Pi.one_apply, norm_one]
+    exact (div_le_div_of_nonneg_right hf (Real.rpow_nonneg hn0.le _)).trans
+      (div_le_div_of_nonneg_left zero_le_one (Real.rpow_pos_of_pos hn0 _)
+        (Real.rpow_le_rpow_of_exponent_le hn1 hz))
+  have hL : ‖LSeries f z‖ ≤ B :=
+    (tsum_of_norm_bounded hg.hasSum hterm).trans (le_add_of_nonneg_left zero_le_one)
+  have hinv := LSeries_one_mul_Lseries_moebius hz1
+  rw [LSeries_one_eq_riemannZeta hz1] at hinv
+  change riemannZeta z * LSeries f z = 1 at hinv
+  have hnorm := congrArg norm hinv
+  rw [norm_mul, norm_one] at hnorm
+  apply (div_le_iff₀ hB).mpr
+  rw [← hnorm]
+  exact mul_le_mul_of_nonneg_left hL (norm_nonneg _)
+
+#print axioms norm_div_two_real_sub_lt_one
+#print axioms borelCaratheodory_ball
+#print axioms borelCaratheodory_deriv_le
+#print axioms exists_primitive_ball
+#print axioms exists_normalized_log_ball
+#print axioms norm_logDeriv_le_of_ball
+#print axioms norm_logDeriv_regularizedZeta_le_of_RH
+#print axioms riemannZeta_logDeriv_eq_regularized
+#print axioms norm_logDeriv_riemannZeta_le_of_RH
+#print axioms exists_pos_le_norm_riemannZeta_of_two_le_re
+end RiemannResearch

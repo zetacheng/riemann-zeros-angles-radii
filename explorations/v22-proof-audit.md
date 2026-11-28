@@ -1,6 +1,6 @@
 # Version 22 proof audit and dependency graph
 
-The research baseline is version 22, dated 26 November 2026, introduced in commit `0191102` and present at the start of this round on `9f0e4e9`. [Version 22 source](../paper/Angles_and_Radii_of_the_Riemann_Zeros.tex) The section numbers below refer to this text. The target is Mathlib's `RiemannHypothesis` for the actual zeta function. The work in the repository supplies the $q=1$ endpoint and finite Perron identities. The paper's reports of external proofs and its numerical tables supply context for this audit.
+The research baseline is version 22, dated 26 November 2026, introduced in commit `0191102`. Round 41 audited the manuscript on `9f0e4e9`, and round 42 verified the §25 implication in Lean. The section numbers below refer to this text. The target is Mathlib's `RiemannHypothesis` for the actual zeta function. The work in the repository supplies the $q=1$ endpoint and finite Perron identities. The paper's reports of external proofs and its numerical tables supply context for this audit. [Version 22 source](../paper/Angles_and_Radii_of_the_Riemann_Zeros.tex)
 
 ## Dependency graph
 
@@ -13,6 +13,7 @@ flowchart TD
   X["Normalized Chebyshev fluctuation X"]
   W["Finite residue sum with boundary and truncation terms"]
   E["Unconditional cumulative energy bound for X · open"]
+  DE["Finite damped square energy at every positive rate"]
   M["Mellin continuation to Re s > 1/2"]
   B["One-sided prime-error bounds for every θ > 1/2"]
   H["Mathlib RH"]
@@ -26,7 +27,9 @@ flowchart TD
   X -->|"finite contour representation with remainder"| W
   W -.->|"uniform control including cross terms"| E
   X -.->|"arithmetic estimate of the actual aggregate"| E
-  E -->|"§25 Cauchy–Schwarz and exponential damping · paper proof"| M
+  E -->|"§25 exponential damping · Lean"| DE
+  DE -->|"absolute logarithmic integrability · Lean"| M
+  H -->|"Chebyshev error bound with arbitrary positive epsilon · Lean"| DE
   M <-->|"Lean"| H
   B <-->|"Lean"| H
   E -.->|"separate pointwise bridge if used directly"| B
@@ -37,7 +40,9 @@ flowchart TD
   D <-->|"§30 and classical criterion"| H
 ```
 
-Here $X(u)=e^{-u/2}(\psi(e^u)-e^u)$. The missing estimate is on **this** fluctuation or a proved equivalent arithmetic transform. A polynomial bound on `∫[log 2,L] |X(u)|² du` is sufficient for the §25 argument. Cauchy–Schwarz bounds the integral of `|X|` on the `j`th unit interval by a polynomial in `j`. Exponential damping makes the interval bounds summable, uniformly on compact subsets strictly to the right of the critical line. The finite prefix is entire, so the remaining step is to match the resulting holomorphic function to the Lean Mellin continuation criterion. A direct energy-to-pointwise implication needs additional information about the arithmetic fluctuation.
+Here $X(u)=e^{-u/2}(\psi(e^u)-e^u)$. The missing estimate is on **this** fluctuation or a proved equivalent arithmetic transform. Round 42 checks the change of variables $x=e^u$ and proves that a cumulative bound $\int_{\log 2}^{L}|X(u)|^2\,du=O(L^k)$ for any fixed nonnegative integer $k$ gives finite damped square energy at every rate $\delta>0$. The proof bounds each unit interval by the cumulative mass through its right endpoint and sums after exponential damping. The inequality $|X|\le 1+X^2$ gives absolute integrability of the logarithmic Mellin integrand. For each point in $\Re s>1/2$, one chooses a positive damping rate smaller than its distance to the critical line, then applies the existing Mellin analyticity theorem. A direct energy-to-pointwise implication needs additional information about the arithmetic fluctuation.
+
+The Lean theorem `riemannHypothesis_iff_chebyshevWave_damped_energy` also gives the reverse direction for damped energy. The existing Chebyshev bound under RH, with exponent $1/2+\delta/4$, makes the damped square bounded on the tail by a constant times $e^{-\delta u/2}$. This converse concerns integrability at each fixed rate. A polynomial cumulative bound would require additional control as the rate tends to zero. In particular, for $L\ge\log 2$, the damping factor $e^{-u/L}$ is at least $e^{-1}$ on $[\log 2,L]$. Thus $\int_{\log 2}^{L}|X(u)|^2\,du\le e\int_{\log 2}^{\infty}|X(u)|^2e^{-u/L}\,du$. A bound of order $\delta^{-k}$ for the damped integral as $\delta\downarrow0$ would supply the polynomial cumulative bound.
 
 The alternative spectral route needs an independent construction from the integers and archimedean data, a positive invariant norm, and a faithful correspondence with every nontrivial zero, including its multiplicity. The arithmetic route can bypass a spectral realization entirely. Neither route needs the precise von Koch logarithmic power for the $q=1$ target.
 
@@ -73,7 +78,7 @@ The alternative spectral route needs an independent construction from the intege
 | §22 | **Known/Model** Möbius phase and parity projections, even Fejér filter, phase Euler product and endpoint identities. **Known** square-free count and classical Mertens criterion. **Circular** the critical-exponent error for the positive endpoint combination is equivalent to Mertens cancellation. | The leading square-free term is nonnegative but subtracting it leaves the original difficulty. |
 | §23 proposition | **Known/Model** finite ratio, meromorphic ratio $\zeta(2s)/\zeta(s)^2$, Hilbert–Schmidt threshold, nonvanishing regularized factors and the odd-power series extending to $\Re s>1/3$. **Gap/Circular** independent control of the removed $P(s)$. | The quadratic determinant leaves out exactly the first-order term tied to zeta zero singularities. Finite `det(U*U)>0` is automatic for invertible $U$. |
 | §24 | **Known/Model** finite orthogonality and Besicovitch convergence of prime sums and fixed derivatives. **Gap** local limit or transform information. | Taking the long-time average at fixed cutoff does not commute with the uniform finite-window limit needed for the actual fluctuation. |
-| §25 proposition and preceding identities | **Model** damped oscillator identity for a prescribed mode and the cumulative-energy-to-Mellin argument. **Known** unitary translations with continuous spectrum and no (L^2) eigenfunctions. **Lean** strict nonconservation for a reflected off-line pair and exact finite Perron residue normalization. **Gap** the cumulative energy bound for actual $X$. | Use the §25 real integral bound followed by the Mellin continuation criterion. Neither abstract translation nor adding positive energies of prescribed modes provides that bound. |
+| §25 proposition and preceding identities | **Model** damped oscillator identity for a prescribed mode. **Known** unitary translations with continuous spectrum and no (L²) eigenfunctions. **Lean** strict nonconservation for a reflected off-line pair, exact finite Perron residue normalization, the cumulative energy implication to RH, and equivalence of damped square integrability at every positive rate with RH. **Gap** the unconditional cumulative bound for actual $X$. | Translation and positive energies of prescribed modes supply no bound on the full arithmetic fluctuation. A separate arithmetic estimate must establish the energy criterion. |
 | §26 proposition | **Known/Model** multinomial moment formula, $m!$ bound, fourth moment, and fixed-$m$ Besicovitch convergence. | Unique factorization selects exact resonances for any RH status. It gives no uniform finite-window estimate. |
 | §27 | **Known/Model** sinc kernel, (N^{-m}) separation bound and reference-density subtraction. **Gap** cutoff-uniform near-resonance and signed residual-energy control. | Reference subtraction does not preserve positivity as an order property. Independent estimates of the actual residual are needed. |
 | §28 proposition | **Known/Model** hyperbolic invariant and indefinite metric; the positive invariant metric exists exactly at zero offset. **Lean** direct strict growth of the positive sum under a nonzero offset. **Circular** imposing the positive metric on the actual zero modes without independent construction. | A positive metric for the diagonal model determines the offset by an elementary diagonal entry. |
@@ -113,4 +118,4 @@ $$
 $$
 This is `norm_normalizedPerronZeroResidue` in Lean. The positive multiplicity and a positive radial offset give divergence of this single modulus, as checked by `norm_normalizedPerronZeroResidue_tendsto_atTop`. At fixed height the sum is finite. An estimate for the squared modulus of that sum as the height grows requires its cross terms and the boundary/truncation terms. The nonnegativity of the auxiliary radial sum is a separate statement about prime-indexed weights.
 
-The next mathematical obligation for the prioritized arithmetic route is to formalize the §25 integrated-energy implication using the existing Mellin continuation theorem, then seek an **unconditional** estimate for the actual fluctuation. A useful acceptance test for a proposed arithmetic bound is that its derivation controls finite-window remainders and has a clear point of failure for a reflected off-line model. An independent functional or positive-real proof can replace this route if it establishes the necessary arithmetic identity without borrowing the zero locations.
+The next mathematical obligation for the arithmetic route is an **unconditional** energy estimate for the actual fluctuation. In a finite Perron approach, it must control the cross terms together with boundary and truncation errors uniformly in the required range. Any estimate of the damped energy at every positive rate needs an independent arithmetic derivation because that finiteness is itself equivalent to RH. An independent functional or positive-real proof can replace this route if it establishes the necessary arithmetic identity without borrowing the zero locations.

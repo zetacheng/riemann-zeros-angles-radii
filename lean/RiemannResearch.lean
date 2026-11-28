@@ -5116,3 +5116,304 @@ theorem norm_normalizedPerronZeroResidue_tendsto_atTop (ρ : ℂ)
 #print axioms norm_normalizedPerronZeroResidue
 #print axioms norm_normalizedPerronZeroResidue_tendsto_atTop
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory Asymptotics
+open scoped Topology
+
+/-- The actual normalized Chebyshev fluctuation of v22 §25. -/
+noncomputable def chebyshevWave (u : ℝ) : ℝ :=
+  Real.exp (-u / 2) * (chebyshevPsi (Real.exp u) - Real.exp u)
+
+theorem measurable_primeError : Measurable primeError := by
+  have hψ : Measurable chebyshevPsi :=
+    (measurable_of_countable (f := fun n : ℕ =>
+      ∑ k ∈ Finset.range (n + 1), ArithmeticFunction.vonMangoldt k)).comp measurable_id.nat_floor
+  exact measurable_id.sub hψ
+
+theorem measurable_chebyshevWave : Measurable chebyshevWave := by
+  have h := measurable_primeError.comp Real.continuous_exp.measurable
+  have he : chebyshevWave = fun u => Real.exp (-u / 2) * (-primeError (Real.exp u)) := by
+    funext u
+    simp [chebyshevWave, primeError]
+  rw [he]
+  exact (by fun_prop : Measurable (fun u : ℝ => Real.exp (-u / 2))).mul h.neg
+
+/-- Energy on compact nonnegative log intervals is an actual Bochner integral. -/
+theorem integrableOn_chebyshevWave_sq_Icc (a L : ℝ) (ha : 0 ≤ a) :
+    IntegrableOn (fun u => chebyshevWave u ^ 2) (Icc a L) := by
+  have hconst : IntegrableOn (fun _ : ℝ => (Real.exp L * (1 + |L|)) ^ 2) (Icc a L) := by
+    exact integrableOn_const.mpr (Or.inr measure_Icc_lt_top)
+  apply Integrable.mono' hconst ((measurable_chebyshevWave.pow_const 2).aestronglyMeasurable)
+  filter_upwards [ae_restrict_mem measurableSet_Icc] with u hu
+  have hu0 : 0 ≤ u := ha.trans hu.1
+  have he : 1 ≤ Real.exp u := Real.one_le_exp_iff.mpr hu0
+  obtain ⟨hψ0, hψ⟩ := chebyshevPsi_bounds (Real.exp u) he
+  rw [Real.log_exp] at hψ
+  have hsub : |chebyshevPsi (Real.exp u) - Real.exp u| ≤ Real.exp u * (1 + u) := by
+    refine (abs_sub _ _).trans ?_
+    rw [abs_of_nonneg hψ0, abs_of_pos (Real.exp_pos _)]
+    linarith
+  have hnorm : |chebyshevWave u| ≤ Real.exp L * (1 + |L|) := by
+    rw [chebyshevWave, abs_mul, abs_of_pos (Real.exp_pos _)]
+    calc
+      _ ≤ |chebyshevPsi (Real.exp u) - Real.exp u| :=
+        mul_le_of_le_one_left (abs_nonneg _) (Real.exp_le_one_iff.mpr (by linarith))
+      _ ≤ Real.exp u * (1 + u) := hsub
+      _ ≤ _ := mul_le_mul (Real.exp_le_exp.mpr hu.2) (add_le_add_left
+        (hu.2.trans (le_abs_self _)) _) (by linarith) (Real.exp_pos _).le
+  rw [Real.norm_of_nonneg (sq_nonneg _), ← sq_abs (chebyshevWave u)]
+  exact pow_le_pow_left₀ (abs_nonneg _) hnorm 2
+
+/-- Polynomial cumulative mass on a ray gives finite exponentially
+damped mass. Each unit interval is bounded by the cumulative mass at
+its right endpoint. -/
+theorem integrableOn_mul_exp_of_cumulative_isBigO (f : ℝ → ℝ) (a : ℝ)
+    (hn : ∀ u, 0 ≤ f u) (hf : Measurable f)
+    (hloc : ∀ L, IntegrableOn f (Icc a L))
+    (k : ℕ) (h : (fun L => ∫ u in Icc a L, f u) =O[atTop] fun L => L ^ k)
+    (δ : ℝ) (hδ : 0 < δ) :
+    IntegrableOn (fun u => f u * Real.exp (-δ * u)) (Ici a) := by
+  obtain ⟨C, hC, hO⟩ := h.exists_pos
+  obtain ⟨b₀, hb₀⟩ := eventually_atTop.mp hO.bound
+  let b := max (max a 0) b₀
+  have hab : a ≤ b := (le_max_left _ _).trans (le_max_left _ _)
+  have hb : 0 ≤ b := (le_max_right _ _).trans (le_max_left _ _)
+  have hb₁ : b₀ ≤ b := le_max_right _ _
+  let F (u : ℝ) := f u * Real.exp (-δ * u)
+  have hF : Measurable F := hf.mul (by fun_prop)
+  have hint (l L : ℝ) (hl : a ≤ l) : IntegrableOn F (Icc l L) := by
+    have hg := (hloc L).mono_set (Icc_subset_Icc_left hl)
+    apply Integrable.mono' (hg.mul_const (Real.exp (-δ * l))) hF.aestronglyMeasurable
+    filter_upwards [ae_restrict_mem measurableSet_Icc] with u hu
+    rw [show F u = f u * Real.exp (-δ * u) by rfl,
+      Real.norm_of_nonneg (mul_nonneg (hn u) (Real.exp_nonneg _))]
+    exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr (by
+      exact mul_le_mul_of_nonpos_left hu.1 (neg_nonpos.mpr hδ.le))) (hn u)
+  let J (n : ℕ) := Icc (b + (n : ℝ)) (b + (n : ℝ) + 1)
+  have hcover : (⋃ n, J n) = Ici b := by
+    ext u
+    simp only [mem_iUnion, mem_Ici]
+    constructor
+    · rintro ⟨n, hu⟩
+      exact (le_add_of_nonneg_right (Nat.cast_nonneg n)).trans hu.1
+    · intro hu
+      refine ⟨⌊u - b⌋₊, ?_⟩
+      exact ⟨by linarith [Nat.floor_le (sub_nonneg.mpr hu)],
+        by linarith [Nat.lt_floor_add_one (u - b)]⟩
+  have hJi (n : ℕ) : IntegrableOn F (J n) :=
+    hint _ _ (hab.trans (le_add_of_nonneg_right (Nat.cast_nonneg n)))
+  have hsum : Summable (fun n : ℕ => ∫ u in J n, ‖F u‖) := by
+    have hs := (Real.summable_pow_mul_exp_neg_nat_mul k hδ).mul_left (C * (b + 2) ^ k)
+    apply Summable.of_norm_bounded_eventually_nat _ hs
+    filter_upwards [eventually_ge_atTop (1 : ℕ)] with n hn'
+    have hn1 : (1 : ℝ) ≤ n := by exact_mod_cast hn'
+    have hJn : J n ⊆ Icc a (b + (n : ℝ) + 1) :=
+      Icc_subset_Icc_left (hab.trans (le_add_of_nonneg_right (Nat.cast_nonneg n)))
+    have hL : b₀ ≤ b + (n : ℝ) + 1 := by linarith
+    have hL0 : 0 ≤ b + (n : ℝ) + 1 := by linarith
+    have hmass := hb₀ _ hL
+    rw [Real.norm_of_nonneg (pow_nonneg hL0 _)] at hmass
+    have hmass' : ∫ u in Icc a (b + (n : ℝ) + 1), f u ≤ C * (b + (n : ℝ) + 1) ^ k :=
+      (Real.le_norm_self _).trans hmass
+    have hg := (hloc (b + (n : ℝ) + 1)).mono_set hJn
+    have hpow : (b + (n : ℝ) + 1) ^ k ≤ (b + 2) ^ k * (n : ℝ) ^ k := by
+      rw [← mul_pow]
+      exact pow_le_pow_left₀ hL0 (by nlinarith [mul_nonneg hb (sub_nonneg.mpr hn1)]) _
+    rw [Real.norm_of_nonneg (integral_nonneg (fun _ => norm_nonneg _))]
+    calc
+      _ ≤ ∫ u in J n, Real.exp (-δ * (n : ℝ)) * f u := by
+        apply integral_mono_ae (hJi n).norm (hg.const_mul _)
+        filter_upwards [ae_restrict_mem measurableSet_Icc] with u hu
+        rw [show F u = f u * Real.exp (-δ * u) by rfl,
+          Real.norm_of_nonneg (mul_nonneg (hn u) (Real.exp_nonneg _)), mul_comm (f u)]
+        apply mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr ?_) (hn u)
+        exact mul_le_mul_of_nonpos_left (by linarith [hu.1]) (neg_nonpos.mpr hδ.le)
+      _ = Real.exp (-δ * (n : ℝ)) * ∫ u in J n, f u := integral_const_mul _ _
+      _ ≤ Real.exp (-δ * (n : ℝ)) * (C * (b + (n : ℝ) + 1) ^ k) :=
+        mul_le_mul_of_nonneg_left ((setIntegral_mono_set (hloc _) (Eventually.of_forall hn)
+          hJn.eventuallyLE).trans hmass') (Real.exp_nonneg _)
+      _ ≤ _ := by
+        calc
+          _ ≤ Real.exp (-δ * (n : ℝ)) * (C * ((b + 2) ^ k * (n : ℝ) ^ k)) :=
+            mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left hpow hC.le) (Real.exp_nonneg _)
+          _ = _ := by ring
+  have ht := integrableOn_iUnion_of_summable_integral_norm hJi hsum
+  rw [hcover] at ht
+  rw [← Icc_union_Ici_eq_Ici hab]
+  exact (hint a b le_rfl).union ht
+
+/-- Exponential damping preserves local square integrability. -/
+theorem integrableOn_chebyshevWave_damped_sq_Icc (a L δ : ℝ) (ha : 0 ≤ a) (hδ : 0 ≤ δ) :
+    IntegrableOn (fun u => chebyshevWave u ^ 2 * Real.exp (-δ * u)) (Icc a L) := by
+  apply Integrable.mono' (integrableOn_chebyshevWave_sq_Icc a L ha)
+    ((measurable_chebyshevWave.pow_const 2).mul (by fun_prop)).aestronglyMeasurable
+  filter_upwards [ae_restrict_mem measurableSet_Icc] with u hu
+  have he : Real.exp (-δ * u) ≤ 1 := Real.exp_le_one_iff.mpr
+    (mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr hδ) (ha.trans hu.1))
+  rw [Real.norm_of_nonneg (mul_nonneg (sq_nonneg _) (Real.exp_nonneg _))]
+  exact mul_le_of_le_one_right (sq_nonneg _) he
+
+/-- The damped square and the damped constant dominate the absolute Mellin integrand. -/
+theorem integrableOn_primeError_mellin_of_damped_energy (a δ : ℝ) (ha : 0 ≤ a) (hδ : 0 < δ)
+    (h : IntegrableOn (fun u => chebyshevWave u ^ 2 * Real.exp (-δ * u)) (Ici a)) :
+    IntegrableOn (fun u => primeError (Real.exp u) * Real.exp (-(1 / 2 + δ) * u)) (Ici 0) := by
+  have hExp : IntegrableOn (fun t : ℝ => Real.exp (-δ * t)) (Ici 0) :=
+    integrableOn_Ici_iff_integrableOn_Ioi.mpr
+      (integrableOn_exp_mul_Ioi (neg_neg_of_pos hδ) 0)
+  have hsq : IntegrableOn (fun u => chebyshevWave u ^ 2 * Real.exp (-δ * u)) (Ici 0) := by
+    rw [← Icc_union_Ici_eq_Ici ha]
+    exact (integrableOn_chebyshevWave_damped_sq_Icc 0 a δ le_rfl hδ.le).union h
+  have hweight (u : ℝ) :
+      primeError (Real.exp u) * Real.exp (-(1 / 2 + δ) * u) =
+        -(chebyshevWave u * Real.exp (-δ * u)) := by
+    rw [show -(1 / 2 + δ) * u = -u / 2 + -δ * u by ring, Real.exp_add]
+    simp only [chebyshevWave, primeError]
+    ring
+  simp_rw [hweight]
+  apply Integrable.neg
+  apply Integrable.mono' (hsq.add hExp)
+    ((measurable_chebyshevWave.mul (by fun_prop)).aestronglyMeasurable)
+  apply Eventually.of_forall
+  intro u
+  rw [norm_mul, Real.norm_eq_abs, Real.norm_of_nonneg (Real.exp_nonneg _)]
+  have hnorm : |chebyshevWave u| ≤ chebyshevWave u ^ 2 + 1 := by
+    nlinarith [sq_nonneg (|chebyshevWave u| - 1), sq_abs (chebyshevWave u)]
+  exact (mul_le_mul_of_nonneg_right hnorm (Real.exp_nonneg _)).trans_eq (by
+    simp only [Pi.add_apply, add_mul, one_mul])
+
+/-- Finiteness of the damped energy for every positive damping exponent
+supplies the existing Mellin continuation criterion. -/
+theorem riemannHypothesis_of_chebyshevWave_damped_energy (a : ℝ) (ha : 0 ≤ a)
+    (h : ∀ δ : ℝ, 0 < δ →
+      IntegrableOn (fun u => chebyshevWave u ^ 2 * Real.exp (-δ * u)) (Ici a)) :
+    RiemannHypothesis := by
+  apply riemannHypothesis_iff_primeError_mellin_continuation.mpr
+  refine ⟨complexMellinOn primeError (Ici 0), ?_, fun _ _ => rfl⟩
+  intro z hz
+  change (1 / 2 : ℝ) < z.re at hz
+  let δ := (z.re - 1 / 2) / 2
+  have hδ : 0 < δ := by dsimp [δ]; linarith
+  have hM := integrableOn_primeError_mellin_of_damped_energy a δ ha hδ (h δ hδ)
+  exact complexMellinOn_tail_analyticOnNhd primeError 0 (1 / 2 + δ)
+    le_rfl measurable_primeError hM z (by dsimp [δ]; linarith)
+
+/-- The cumulative-energy criterion from v22 §25 in log coordinates,
+valid with any fixed polynomial bound. -/
+theorem riemannHypothesis_of_chebyshevWave_cumulative_energy (a : ℝ) (ha : 0 ≤ a) (k : ℕ)
+    (h : (fun L => ∫ u in Icc a L, chebyshevWave u ^ 2) =O[atTop] fun L => L ^ k) :
+    RiemannHypothesis := by
+  apply riemannHypothesis_of_chebyshevWave_damped_energy a ha
+  intro δ hδ
+  exact integrableOn_mul_exp_of_cumulative_isBigO _ a (fun _ => sq_nonneg _)
+    (measurable_chebyshevWave.pow_const 2) (fun L => integrableOn_chebyshevWave_sq_Icc a L ha)
+    k h δ hδ
+
+/-- Exact substitution from the energy written with the arithmetic cutoff. -/
+theorem chebyshevWave_energy_eq_arithmetic_energy (L : ℝ) :
+    (∫ u in Icc (Real.log 2) L, chebyshevWave u ^ 2) =
+      ∫ x in Icc (2 : ℝ) (Real.exp L), (chebyshevPsi x - x) ^ 2 / x ^ 2 := by
+  have hImage : Real.exp '' Icc (Real.log 2) L = Icc (2 : ℝ) (Real.exp L) := by
+    ext x
+    constructor
+    · rintro ⟨u, hu, rfl⟩
+      exact ⟨(Real.exp_log (by norm_num : (0 : ℝ) < 2)).symm.le.trans (Real.exp_le_exp.mpr hu.1),
+        Real.exp_le_exp.mpr hu.2⟩
+    · intro hx
+      have hx0 : 0 < x := (by norm_num : (0 : ℝ) < 2).trans_le hx.1
+      exact ⟨Real.log x, ⟨Real.log_le_log (by norm_num) hx.1,
+        (Real.log_le_log hx0 hx.2).trans_eq (Real.log_exp L)⟩, Real.exp_log hx0⟩
+  rw [← hImage, integral_image_eq_integral_abs_deriv_smul measurableSet_Icc
+    (fun t _ => (Real.hasDerivAt_exp t).hasDerivWithinAt) Real.exp_injective.injOn]
+  apply setIntegral_congr_fun measurableSet_Icc
+  intro u _
+  simp only [chebyshevWave, abs_of_pos (Real.exp_pos u), smul_eq_mul, mul_pow]
+  have he : Real.exp (-u / 2) ^ 2 = (Real.exp u)⁻¹ := by
+    rw [pow_two, ← Real.exp_add, show -u / 2 + -u / 2 = -u by ring, Real.exp_neg]
+  rw [he]
+  field_simp [(Real.exp_pos u).ne']
+  ring
+
+/-- The exact original-variable energy bound at any fixed logarithmic power implies RH. -/
+theorem riemannHypothesis_of_arithmetic_cumulative_energy (k : ℕ)
+    (h : (fun Y => ∫ x in Icc (2 : ℝ) Y, (chebyshevPsi x - x) ^ 2 / x ^ 2)
+      =O[atTop] fun Y => Real.log Y ^ k) : RiemannHypothesis := by
+  apply riemannHypothesis_of_chebyshevWave_cumulative_energy (Real.log 2)
+    (Real.log_nonneg (by norm_num)) k
+  simpa only [Function.comp_def, Real.log_exp, chebyshevWave_energy_eq_arithmetic_energy]
+    using h.comp_tendsto Real.tendsto_exp_atTop
+
+/-- The energy criterion as stated in v22 §25, with the absolute square. -/
+theorem riemannHypothesis_of_arithmetic_linear_log_energy
+    (h : (fun Y => ∫ x in Icc (2 : ℝ) Y, |chebyshevPsi x - x| ^ 2 * x⁻¹ ^ 2)
+      =O[atTop] Real.log) : RiemannHypothesis := by
+  apply riemannHypothesis_of_arithmetic_cumulative_energy 1
+  simpa only [pow_one, sq_abs, inv_pow, ← div_eq_mul_inv] using h
+
+/-- The already verified RH error bound also gives integrability after
+every positive exponential damping. -/
+theorem integrableOn_chebyshevWave_damped_energy_of_RH (hRH : RiemannHypothesis)
+    (a δ : ℝ) (ha : 0 ≤ a) (hδ : 0 < δ) :
+    IntegrableOn (fun u => chebyshevWave u ^ 2 * Real.exp (-δ * u)) (Ici a) := by
+  let θ : ℝ := 1 / 2 + δ / 4
+  have hθ : 1 / 2 < θ := by dsimp [θ]; linarith
+  obtain ⟨C, hC, hO⟩ := (primeError_isBigO_of_RH hRH θ hθ).exists_pos
+  obtain ⟨b₀, hb₀⟩ := eventually_atTop.mp hO.bound
+  let b := max a (Real.log (max b₀ 1))
+  have hab : a ≤ b := le_max_left _ _
+  have hpos : 0 < max b₀ 1 := zero_lt_one.trans_le (le_max_right _ _)
+  have htail : IntegrableOn (fun u => chebyshevWave u ^ 2 * Real.exp (-δ * u)) (Ici b) := by
+    have hExp : IntegrableOn (fun u : ℝ => Real.exp ((-δ / 2) * u)) (Ici b) :=
+      integrableOn_Ici_iff_integrableOn_Ioi.mpr
+        (integrableOn_exp_mul_Ioi (by linarith) b)
+    apply Integrable.mono' (hExp.const_mul (C ^ 2))
+      ((measurable_chebyshevWave.pow_const 2).mul (by fun_prop)).aestronglyMeasurable
+    filter_upwards [ae_restrict_mem measurableSet_Ici] with u hu
+    have he : b₀ ≤ Real.exp u := (le_max_left _ _).trans
+      ((Real.exp_log hpos).symm.le.trans (Real.exp_le_exp.mpr ((le_max_right _ _).trans hu)))
+    have hB := hb₀ _ he
+    rw [Real.norm_eq_abs, Real.norm_of_nonneg (Real.rpow_nonneg (Real.exp_pos u).le _)] at hB
+    have hW : |chebyshevWave u| ≤ C * Real.exp ((δ / 4) * u) := by
+      rw [chebyshevWave, abs_mul, abs_of_pos (Real.exp_pos _), abs_sub_comm,
+        ← show primeError (Real.exp u) = Real.exp u - chebyshevPsi (Real.exp u) by rfl]
+      calc
+        _ ≤ Real.exp (-u / 2) * (C * (Real.exp u) ^ θ) :=
+          mul_le_mul_of_nonneg_left hB (Real.exp_nonneg _)
+        _ = C * (Real.exp (-u / 2) * (Real.exp u) ^ θ) := by ring
+        _ = _ := by
+          rw [Real.rpow_def_of_pos (Real.exp_pos _), Real.log_exp, ← Real.exp_add]
+          congr 2
+          dsimp [θ]
+          ring
+    have hp := pow_le_pow_left₀ (abs_nonneg _) hW 2
+    rw [sq_abs, mul_pow, pow_two (Real.exp _), ← Real.exp_add] at hp
+    rw [Real.norm_of_nonneg (mul_nonneg (sq_nonneg _) (Real.exp_nonneg _))]
+    refine (mul_le_mul_of_nonneg_right hp (Real.exp_nonneg _)).trans_eq ?_
+    rw [mul_assoc, ← Real.exp_add]
+    congr 2
+    ring
+  rw [← Icc_union_Ici_eq_Ici hab]
+  exact (integrableOn_chebyshevWave_damped_sq_Icc a b δ ha hδ.le).union htail
+
+/-- Damped finiteness at every positive rate is itself equivalent to RH.
+The polynomial cumulative bound in §25 is a sufficient condition. -/
+theorem riemannHypothesis_iff_chebyshevWave_damped_energy (a : ℝ) (ha : 0 ≤ a) :
+    RiemannHypothesis ↔ ∀ δ : ℝ, 0 < δ →
+      IntegrableOn (fun u => chebyshevWave u ^ 2 * Real.exp (-δ * u)) (Ici a) := by
+  exact ⟨fun h δ hδ => integrableOn_chebyshevWave_damped_energy_of_RH h a δ ha hδ,
+    riemannHypothesis_of_chebyshevWave_damped_energy a ha⟩
+
+#print axioms measurable_primeError
+#print axioms measurable_chebyshevWave
+#print axioms integrableOn_chebyshevWave_sq_Icc
+#print axioms integrableOn_mul_exp_of_cumulative_isBigO
+#print axioms integrableOn_chebyshevWave_damped_sq_Icc
+#print axioms integrableOn_primeError_mellin_of_damped_energy
+#print axioms riemannHypothesis_of_chebyshevWave_damped_energy
+#print axioms riemannHypothesis_of_chebyshevWave_cumulative_energy
+#print axioms chebyshevWave_energy_eq_arithmetic_energy
+#print axioms riemannHypothesis_of_arithmetic_cumulative_energy
+#print axioms riemannHypothesis_of_arithmetic_linear_log_energy
+#print axioms integrableOn_chebyshevWave_damped_energy_of_RH
+#print axioms riemannHypothesis_iff_chebyshevWave_damped_energy
+end RiemannResearch

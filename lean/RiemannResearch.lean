@@ -4972,3 +4972,147 @@ theorem vonMangoldtPerronIntegral_shift_across_critical_zeros_of_RH
 #print axioms vonMangoldtPerronIntegral_shift_across_zeros
 #print axioms vonMangoldtPerronIntegral_shift_across_critical_zeros_of_RH
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set
+open scoped Topology
+
+/-- The summand of the v22 relative radial energy, extended by zero to composite indices. -/
+noncomputable def primeRadialEnergyTerm (a : ℝ) (n : ℕ) : ℝ :=
+  if n.Prime then 4 * (1 / (n : ℝ)) * (Real.sinh (a * Real.log n)) ^ 2 else 0
+
+/-- The inclusive cutoff from v22, using the existing finite energy. -/
+theorem primeRadialEnergy_sum_eq (N : ℕ) (a : ℝ) :
+    (∑ n ∈ Finset.range (N + 1), primeRadialEnergyTerm a n) =
+      radialEnergy (fun n => if n.Prime then 1 / (n : ℝ) else 0) (fun n => Real.log n) (N + 1) a := by
+  rw [radialEnergy, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro n _
+  by_cases hp : n.Prime <;> simp [primeRadialEnergyTerm, hp, mul_assoc]
+
+/-- Reflection of the radial parameter preserves the auxiliary energy. -/
+theorem primeRadialEnergyTerm_neg (a : ℝ) (n : ℕ) :
+    primeRadialEnergyTerm (-a) n = primeRadialEnergyTerm a n := by
+  simp [primeRadialEnergyTerm, Real.sinh_neg]
+
+/-- The v22 prime energy has finite total mass exactly at zero offset. -/
+theorem summable_primeRadialEnergyTerm_iff (a : ℝ) :
+    Summable (primeRadialEnergyTerm a) ↔ a = 0 := by
+  classical
+  refine ⟨?_, fun h => ?_⟩
+  swap
+  · subst a
+    have he : primeRadialEnergyTerm 0 = fun _ : ℕ => (0 : ℝ) := by
+      funext n
+      simp [primeRadialEnergyTerm]
+    rw [he]
+    exact summable_zero
+  intro hs
+  by_contra ha
+  let c := 4 * (Real.sinh (|a| * Real.log 2)) ^ 2
+  have hc : 0 < c := by
+    have ht : 0 < |a| * Real.log 2 := mul_pos (abs_pos.mpr ha) (Real.log_pos (by norm_num))
+    dsimp [c]
+    have hsinh := Real.sinh_pos_iff.mpr ht
+    positivity
+  have haAbs (n : ℕ) : primeRadialEnergyTerm |a| n = primeRadialEnergyTerm a n := by
+    rcases le_total 0 a with h | h
+    · rw [abs_of_nonneg h]
+    · rw [abs_of_nonpos h, primeRadialEnergyTerm_neg]
+  apply not_summable_one_div_on_primes
+  apply (hs.div_const c).of_nonneg_of_le
+  · intro n
+    by_cases hp : n.Prime <;> simp [Set.indicator, hp]
+  · intro n
+    rw [← haAbs]
+    by_cases hp : n.Prime
+    · have h2 : (2 : ℝ) ≤ n := by exact_mod_cast hp.two_le
+      have hlog := Real.log_le_log (by norm_num : (0 : ℝ) < 2) h2
+      have hh := Real.sinh_le_sinh.mpr (mul_le_mul_of_nonneg_left hlog (abs_nonneg a))
+      have hh0 : 0 ≤ Real.sinh (|a| * Real.log 2) :=
+        Real.sinh_nonneg_iff.mpr (mul_nonneg (abs_nonneg _) (Real.log_nonneg (by norm_num)))
+      simp only [Set.indicator_of_mem (show n ∈ {p : ℕ | p.Prime} from hp),
+        primeRadialEnergyTerm, if_pos hp]
+      apply (le_div_iff₀ hc).mpr
+      dsimp [c]
+      have hpow := pow_le_pow_left₀ hh0 hh 2
+      calc
+        _ = (4 * (1 / (n : ℝ))) * (Real.sinh (|a| * Real.log 2)) ^ 2 := by ring
+        _ ≤ _ := mul_le_mul_of_nonneg_left hpow (by positivity)
+    · simp [primeRadialEnergyTerm, Set.indicator, hp]
+
+/-- Away from the symmetry center the prime-cutoff energies tend to infinity. -/
+theorem primeRadialEnergy_sum_tendsto_atTop (a : ℝ) (ha : a ≠ 0) :
+    Tendsto (fun N : ℕ => ∑ n ∈ Finset.range (N + 1), primeRadialEnergyTerm a n) atTop atTop := by
+  have hn (n : ℕ) : 0 ≤ primeRadialEnergyTerm a n := by
+    unfold primeRadialEnergyTerm
+    split_ifs <;> positivity
+  have h := (not_summable_iff_tendsto_nat_atTop_of_nonneg hn).mp
+    (fun h => ha ((summable_primeRadialEnergyTerm_iff a).mp h))
+  exact h.comp (tendsto_atTop_mono (fun n : ℕ => Nat.le_succ n) tendsto_id)
+
+/-- Assigning finite v22 radial energy to every nontrivial zeta zero
+is equivalent to the target, so it cannot serve as an independent premise. -/
+theorem riemannHypothesis_iff_finite_primeRadialEnergy_at_zeros :
+    RiemannHypothesis ↔ ∀ ρ : ℂ, riemannZeta ρ = 0 →
+      (¬ ∃ n : ℕ, ρ = -2 * (n + 1)) → ρ ≠ 1 →
+      Summable (primeRadialEnergyTerm (ρ.re - 1 / 2)) := by
+  constructor
+  · intro h ρ hρ ht h1
+    exact (summable_primeRadialEnergyTerm_iff _).mpr (sub_eq_zero.mpr (h ρ hρ ht h1))
+  · intro h ρ hρ ht h1
+    exact sub_eq_zero.mp ((summable_primeRadialEnergyTerm_iff _).mp (h ρ hρ ht h1))
+
+/-- The reflection-symmetric pair has strictly larger total positive
+energy away from its initial time whenever the radial offset is nonzero. -/
+theorem reflected_pair_energy_gt_initial (a u : ℝ) (ha : a ≠ 0) (hu : u ≠ 0) :
+    2 < Real.exp (2 * a * u) + Real.exp (-(2 * a * u)) := by
+  have ht : 2 * a * u ≠ 0 := mul_ne_zero (mul_ne_zero (by norm_num) ha) hu
+  have h : Real.exp (2 * a * u) ≠ 1 := fun he => ht (Real.exp_injective (he.trans Real.exp_zero.symm))
+  have hp := Real.exp_pos (2 * a * u)
+  have hs := sq_pos_of_ne_zero (sub_ne_zero.mpr h)
+  rw [Real.exp_neg]
+  have hdiv : 0 < (Real.exp (2 * a * u) - 1) ^ 2 / Real.exp (2 * a * u) := div_pos hs hp
+  have he : (Real.exp (2 * a * u) - 1) ^ 2 / Real.exp (2 * a * u) =
+      Real.exp (2 * a * u) + (Real.exp (2 * a * u))⁻¹ - 2 := by
+    field_simp [hp.ne']
+    ring
+  rw [he] at hdiv
+  linarith
+
+
+/-- The round-40 contour residue, in the paper's normalized log coordinates. -/
+theorem norm_normalizedPerronZeroResidue (u : ℝ) (ρ : ℂ) :
+    ‖(Real.exp (-u / 2) : ℂ) * zetaPerronZeroResidue (Real.exp u) ρ‖ =
+      ((riemannZetaZeroOrder ρ : ℝ) / ‖ρ‖) * Real.exp ((ρ.re - 1 / 2) * u) := by
+  rw [zetaPerronZeroResidue, norm_mul, Complex.norm_real, Real.norm_of_nonneg (Real.exp_pos _).le,
+    norm_mul, norm_neg, Complex.norm_natCast, norm_div,
+    Complex.norm_cpow_eq_rpow_re_of_pos (Real.exp_pos _), Real.rpow_def_of_pos (Real.exp_pos _),
+    Real.log_exp]
+  rw [show (ρ.re - 1 / 2) * u = -u / 2 + u * ρ.re by ring, Real.exp_add]
+  ring
+
+
+/-- A hypothetical right-of-critical zeta zero forces growth of its
+individual normalized Perron residue, before summing with other modes. -/
+theorem norm_normalizedPerronZeroResidue_tendsto_atTop (ρ : ℂ)
+    (hzero : riemannZeta ρ = 0) (h1 : ρ ≠ 1) (hρ : 1 / 2 < ρ.re) :
+    Tendsto (fun u : ℝ =>
+      ‖(Real.exp (-u / 2) : ℂ) * zetaPerronZeroResidue (Real.exp u) ρ‖) atTop atTop := by
+  have hm := (neg_logDeriv_riemannZeta_at_zero ρ hzero h1).1
+  have hρ0 := Complex.ne_zero_of_re_pos ((by norm_num : (0 : ℝ) < 1 / 2).trans hρ)
+  have hc : 0 < ((riemannZetaZeroOrder ρ : ℝ) / ‖ρ‖) :=
+    div_pos (Nat.cast_pos.mpr hm) (norm_pos_iff.mpr hρ0)
+  simp_rw [norm_normalizedPerronZeroResidue]
+  exact (Real.tendsto_exp_atTop.comp
+    (tendsto_id.const_mul_atTop (sub_pos.mpr hρ))).const_mul_atTop hc
+
+#print axioms primeRadialEnergy_sum_eq
+#print axioms primeRadialEnergyTerm_neg
+#print axioms summable_primeRadialEnergyTerm_iff
+#print axioms primeRadialEnergy_sum_tendsto_atTop
+#print axioms riemannHypothesis_iff_finite_primeRadialEnergy_at_zeros
+#print axioms reflected_pair_energy_gt_initial
+#print axioms norm_normalizedPerronZeroResidue
+#print axioms norm_normalizedPerronZeroResidue_tendsto_atTop
+end RiemannResearch

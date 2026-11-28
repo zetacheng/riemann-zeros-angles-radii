@@ -3960,3 +3960,382 @@ theorem exists_pos_le_norm_riemannZeta_of_two_le_re :
 #print axioms norm_logDeriv_riemannZeta_le_of_RH
 #print axioms exists_pos_le_norm_riemannZeta_of_two_le_re
 end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory Asymptotics
+open scoped Topology
+
+/-- The bounded fractional part has an absolutely convergent Mellin integral
+throughout the positive half-plane. -/
+theorem fract_mellin_integrable (s : ℂ) (hs : 0 < s.re) :
+    IntegrableOn (fun t : ℝ => ((Int.fract (Real.exp t) : ℝ) : ℂ) * Complex.exp (-s * (t : ℂ)))
+      (Ici 0) := by
+  have hExp : IntegrableOn (fun t : ℝ => Real.exp (-s.re * t)) (Ici 0) :=
+    integrableOn_Ici_iff_integrableOn_Ioi.mpr (integrableOn_exp_mul_Ioi (neg_neg_of_pos hs) 0)
+  apply Integrable.mono hExp
+  · exact ((Complex.continuous_ofReal.measurable.comp
+      (measurable_fract.comp Real.continuous_exp.measurable)).mul (by fun_prop)).aestronglyMeasurable
+  · apply Eventually.of_forall
+    intro t
+    rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (Int.fract_nonneg _),
+      mellin_complex_kernel_norm, Real.norm_of_nonneg (Real.exp_pos _).le]
+    exact mul_le_of_le_one_left (Real.exp_pos _).le (Int.fract_lt_one _).le
+
+/-- The fractional-part Mellin integral has norm at most the integral
+of the positive exponential majorant. -/
+theorem norm_fract_mellin_le (s : ℂ) (hs : 0 < s.re) :
+    ‖complexMellinOn Int.fract (Ici 0) s‖ ≤ 1 / s.re := by
+  have hExp : IntegrableOn (fun t : ℝ => Real.exp (-s.re * t)) (Ici 0) :=
+    integrableOn_Ici_iff_integrableOn_Ioi.mpr (integrableOn_exp_mul_Ioi (neg_neg_of_pos hs) 0)
+  unfold complexMellinOn
+  calc
+    _ ≤ ∫ t in Ici (0 : ℝ), Real.exp (-s.re * t) := by
+      apply norm_integral_le_of_norm_le hExp
+      apply Eventually.of_forall
+      intro t
+      rw [norm_mul, Complex.norm_real, Real.norm_of_nonneg (Int.fract_nonneg _),
+        mellin_complex_kernel_norm]
+      exact mul_le_of_le_one_left (Real.exp_pos _).le (Int.fract_lt_one _).le
+    _ = _ := by
+      rw [integral_Ici_eq_integral_Ioi, integral_exp_mul_Ioi (neg_neg_of_pos hs)]
+      simp [one_div]
+
+/-- The unit coefficients give the floor function in the Abel integral. -/
+theorem riemannZeta_eq_mul_mellin_floor (s : ℂ) (hs : 1 < s.re) :
+    riemannZeta s = s * complexMellinOn (fun t : ℝ => (⌊t⌋₊ : ℝ)) (Ici 0) s := by
+  have hg : (fun n : ℕ => ∑ k ∈ Finset.Icc 1 n, (1 : ℝ))
+      =O[atTop] fun n => (n : ℝ) ^ (1 : ℝ) := by
+    simpa [Nat.card_Icc] using isBigO_refl (fun n : ℕ => (n : ℝ)) atTop
+  have h := LSeries_eq_mul_integral_of_nonneg (fun _ => (1 : ℝ)) zero_le_one hs hg
+    (fun _ => zero_le_one)
+  simp only [Complex.ofReal_one, ← Pi.one_def, LSeries_one_eq_riemannZeta hs,
+    Finset.sum_const, Nat.card_Icc, add_tsub_cancel_right, nsmul_eq_mul, mul_one] at h
+  have hm := mellin_integral_comp_exp (fun t : ℝ => (⌊t⌋₊ : ℝ)) s
+  simp only [Complex.ofReal_natCast] at hm
+  rw [h, hm]
+  rfl
+
+/-- Euler summation on the initial half-plane, with the pole removed. -/
+theorem regularizedZeta_eq_fract_mellin_of_one_lt_re (s : ℂ) (hs : 1 < s.re) :
+    regularizedZeta s = s - s * (s - 1) * complexMellinOn Int.fract (Ici 0) s := by
+  have hsp : 0 < s.re := zero_lt_one.trans hs
+  have hs1 : s ≠ 1 := fun he => by simp [he] at hs
+  have hs1p : 0 < (s - 1).re := by simpa using sub_pos.mpr hs
+  have hExp : IntegrableOn (fun t : ℝ => Complex.exp (-(s - 1) * (t : ℂ))) (Ici 0) :=
+    integrableOn_Ici_iff_integrableOn_Ioi.mpr
+      (integrableOn_exp_mul_complex_Ioi (a := -(s - 1)) (by simpa using hs1p) 0)
+  have hfract := fract_mellin_integrable s hsp
+  have hkernel (t : ℝ) :
+      ((⌊Real.exp t⌋₊ : ℝ) : ℂ) * Complex.exp (-s * (t : ℂ)) =
+        Complex.exp (-(s - 1) * (t : ℂ)) -
+          ((Int.fract (Real.exp t) : ℝ) : ℂ) * Complex.exp (-s * (t : ℂ)) := by
+    have hfloor : (⌊Real.exp t⌋₊ : ℝ) = Real.exp t - Int.fract (Real.exp t) := by
+      rw [Int.fract, sub_sub_cancel, ← Int.natCast_floor_eq_floor (Real.exp_pos t).le]
+      simp
+    rw [hfloor, Complex.ofReal_sub, sub_mul, Complex.ofReal_exp, ← Complex.exp_add]
+    congr 2
+    ring
+  have h := riemannZeta_eq_mul_mellin_floor s hs
+  unfold complexMellinOn at h ⊢
+  simp_rw [hkernel] at h
+  rw [integral_sub hExp hfract, mellin_complex_integral_Ici _ _ hs1p] at h
+  simp only [Complex.ofReal_zero, mul_zero, Complex.exp_zero] at h
+  rw [(regularizedZeta_eventuallyEq s hs1).eq_of_nhds, h]
+  field_simp [sub_ne_zero.mpr hs1]
+  ring
+
+/-- The Euler summation formula continues to the entire positive half-plane. -/
+theorem regularizedZeta_eq_fract_mellin (s : ℂ) (hs : 0 < s.re) :
+    regularizedZeta s = s - s * (s - 1) * complexMellinOn Int.fract (Ici 0) s := by
+  have ha : AnalyticOnNhd ℂ (complexMellinOn Int.fract (Ici 0)) {z : ℂ | 0 < z.re} := by
+    intro z hz
+    change 0 < z.re at hz
+    let v := z.re / 2
+    have hv : 0 < v := by dsimp [v]; linarith
+    have hi := (complexMellinOn_integrable_iff Int.fract (Ici 0) (v : ℂ) measurable_fract).mp
+      (fract_mellin_integrable (v : ℂ) (by simpa))
+    rw [Complex.ofReal_re] at hi
+    exact complexMellinOn_tail_analyticOnNhd Int.fract 0 v le_rfl measurable_fract hi z
+      (by dsimp [v]; linarith)
+  have hEq : EqOn regularizedZeta
+      (fun z => z - z * (z - 1) * complexMellinOn Int.fract (Ici 0) z) {z : ℂ | 0 < z.re} := by
+    apply AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq (𝕜 := ℂ) (z₀ := (2 : ℂ))
+    · exact fun z _ => regularizedZeta_analyticAt z
+    · intro z hz
+      exact analyticAt_id.sub ((analyticAt_id.mul (analyticAt_id.sub analyticAt_const)).mul (ha z hz))
+    · exact (convex_halfSpace_re_gt 0).isPreconnected
+    · norm_num
+    · have hopen : {z : ℂ | 1 < z.re} ∈ 𝓝 (2 : ℂ) :=
+        (isOpen_lt continuous_const Complex.continuous_re).mem_nhds (by norm_num)
+      filter_upwards [hopen] with z hz
+      exact regularizedZeta_eq_fract_mellin_of_one_lt_re z hz
+  exact hEq hs
+
+/-- An explicit growth bound without RH, valid even at the removed pole. -/
+theorem norm_regularizedZeta_le (s : ℂ) (hs : 0 < s.re) :
+    ‖regularizedZeta s‖ ≤ ‖s‖ + ‖s‖ * ‖s - 1‖ / s.re := by
+  rw [regularizedZeta_eq_fract_mellin s hs]
+  refine (norm_sub_le _ _).trans ?_
+  rw [norm_mul, norm_mul, div_eq_mul_one_div]
+  exact add_le_add_left (mul_le_mul_of_nonneg_left (norm_fract_mellin_le s hs) (by positivity)) _
+
+/-- The regularized zeta grows at most quadratically on Re s ≥ 1/2. -/
+theorem norm_regularizedZeta_le_quadratic (s : ℂ) (hs : 1 / 2 ≤ s.re) :
+    ‖regularizedZeta s‖ ≤ 3 * (1 + ‖s‖) ^ 2 := by
+  have hp : 0 < s.re := (by norm_num : (0 : ℝ) < 1 / 2).trans_le hs
+  refine (norm_regularizedZeta_le s hp).trans ?_
+  have hn := norm_sub_le s (1 : ℂ)
+  rw [norm_one] at hn
+  have hd : ‖s‖ * ‖s - 1‖ / s.re ≤ 2 * ‖s‖ * (‖s‖ + 1) := by
+    calc
+      _ ≤ ‖s‖ * ‖s - 1‖ / (1 / 2) :=
+        div_le_div_of_nonneg_left (by positivity) (by norm_num) hs
+      _ = 2 * ‖s‖ * ‖s - 1‖ := by ring
+      _ ≤ _ := mul_le_mul_of_nonneg_left hn (by positivity)
+  nlinarith [norm_nonneg s, sq_nonneg ‖s‖]
+
+/-- Under RH, the zeta logarithmic derivative grows at most logarithmically
+on the fixed right-hand strip away from its pole. -/
+theorem norm_logDeriv_riemannZeta_log_growth_of_RH (hRH : RiemannHypothesis)
+    (a : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
+      ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * (1 + Real.log (1 + |z.im|)) := by
+  obtain ⟨δ, hδ, hlower⟩ := exists_pos_le_norm_riemannZeta_of_two_le_re
+  let δ' := min δ 1
+  let A := 75 / δ'
+  let d := a - 1 / 2
+  have hd : 0 < d := sub_pos.mpr ha
+  have hδ' : 0 < δ' := lt_min hδ zero_lt_one
+  have hA : 1 ≤ A := (le_div_iff₀ hδ').mpr (by
+    simpa only [one_mul] using (min_le_right δ (1 : ℝ)).trans (by norm_num : (1 : ℝ) ≤ 75))
+  let K := 6 * (3 + Real.log A) / d ^ 2 + (1 - a)⁻¹ + 1
+  have hK0 : 0 ≤ Real.log A := Real.log_nonneg hA
+  have hgap : 0 < 1 - a := sub_pos.mpr ha1
+  refine ⟨K, by dsimp only [K]; positivity, fun z hz hpole => ?_⟩
+  let t := |z.im|
+  let c : ℂ := 2 + (z.im : ℂ) * Complex.I
+  let R : ℝ := 3 / 2
+  let M := A * (1 + t) ^ 2
+  let L := 1 + Real.log (1 + t)
+  have ht1 : 1 ≤ 1 + t := le_add_of_nonneg_right (abs_nonneg _)
+  have hlogt : 0 ≤ Real.log (1 + t) := Real.log_nonneg ht1
+  have hL : 1 ≤ L := le_add_of_nonneg_right hlogt
+  have hc : c.re = 2 := by simp [c, Complex.mul_re]
+  have hc1 : c ≠ 1 := by
+    intro he
+    rw [he, Complex.one_re] at hc
+    norm_num at hc
+  have hU : δ' ≤ ‖regularizedZeta c‖ := by
+    rw [(regularizedZeta_eventuallyEq c hc1).eq_of_nhds, norm_mul]
+    have hdist : 1 ≤ ‖c - 1‖ := by
+      have h := Complex.re_le_norm (c - 1)
+      rw [Complex.sub_re, Complex.one_re, hc] at h
+      norm_num at h ⊢
+      exact h
+    have hζ := hlower c hc.ge
+    exact (min_le_left δ 1).trans (hζ.trans (le_mul_of_one_le_left (norm_nonneg _) hdist))
+  have hdist : dist z c = 2 - z.re := by
+    have he : z - c = ((z.re - 2 : ℝ) : ℂ) := by
+      apply Complex.ext <;> simp [c, Complex.mul_re, Complex.mul_im]
+    rw [dist_eq_norm, he, Complex.norm_real, Real.norm_eq_abs, abs_of_nonpos (sub_nonpos.mpr hz.2)]
+    ring
+  have hzB : z ∈ Metric.ball c R := by
+    rw [Metric.mem_ball, hdist]
+    dsimp only [R]
+    linarith [hz.1]
+  have hRc : R ≤ c.re - 1 / 2 := by rw [hc]; norm_num [R]
+  have hM (w : ℂ) (hw : w ∈ Metric.ball c R) : ‖regularizedZeta w‖ / ‖regularizedZeta c‖ ≤ M := by
+    have hnormc : ‖c‖ ≤ 2 + t := by
+      simpa [c, t, norm_mul, Complex.norm_real, Real.norm_eq_abs] using
+        norm_add_le (2 : ℂ) ((z.im : ℂ) * Complex.I)
+    have hnormw := (norm_le_of_mem_closedBall (Metric.ball_subset_closedBall hw)).trans
+      (add_le_add_right hnormc R)
+    have hdw : ‖w - c‖ < R := by simpa only [Metric.mem_ball, dist_eq_norm] using hw
+    have hRe := neg_abs_le (w.re - c.re)
+    have hRe' := Complex.abs_re_le_norm (w - c)
+    rw [Complex.sub_re] at hRe'
+    have hwre : 1 / 2 ≤ w.re := by dsimp only [R] at hdw; linarith
+    have hpow : (1 + ‖w‖) ^ 2 ≤ (5 * (1 + t)) ^ 2 := by
+      have h : 1 + ‖w‖ ≤ 5 * (1 + t) := by
+        dsimp only [R] at hnormw
+        linarith [abs_nonneg z.im]
+      exact pow_le_pow_left₀ (by positivity) h 2
+    calc
+      _ ≤ 3 * (5 * (1 + t)) ^ 2 / δ' := by
+        refine (div_le_div_of_nonneg_right ((norm_regularizedZeta_le_quadratic w hwre).trans
+          (mul_le_mul_of_nonneg_left hpow (by norm_num))) ((hδ'.trans_le hU).le)).trans ?_
+        exact div_le_div_of_nonneg_left (by positivity) hδ' hU
+      _ = M := by dsimp only [M, A]; ring
+  have h1 : z ≠ 1 := by
+    intro he
+    rcases hpole with h | h
+    · rw [he, Complex.one_re] at h
+      linarith
+    · norm_num [he] at h
+  have h := norm_logDeriv_riemannZeta_le_of_RH hRH c z R M hzB hRc h1 hM
+  have hlog : 1 + Real.log M ≤ (3 + Real.log A) * L := by
+    have ht : 0 < 1 + t := by dsimp only [t]; positivity
+    dsimp only [M, L]
+    rw [Real.log_mul (zero_lt_one.trans_le hA).ne' (pow_ne_zero _ ht.ne'), Real.log_pow]
+    norm_num only [Nat.cast_ofNat]
+    nlinarith only [hK0, hlogt, mul_nonneg hK0 hlogt]
+  have hRdist : R - dist z c ≥ d := by
+    rw [hdist]
+    dsimp [R, d]
+    linarith [hz.1]
+  have hRn : R + dist z c ≤ 3 := by
+    have hh := Metric.mem_ball.mp hzB
+    dsimp only [R] at hh ⊢
+    linarith
+  have hFrac : 2 * (1 + Real.log M) * (R + dist z c) / (R - dist z c) ^ 2 ≤
+      (6 * (3 + Real.log A) / d ^ 2) * L := by
+    have hlogs : 0 ≤ 1 + Real.log M := by
+      have hm : 1 ≤ M := by
+        have ht : 1 ≤ 1 + t := le_add_of_nonneg_right (abs_nonneg _)
+        exact (le_mul_of_one_le_right (zero_le_one.trans hA) (one_le_pow₀ ht)).trans' hA
+      exact le_trans zero_le_one (le_add_of_nonneg_right (Real.log_nonneg hm))
+    have hnum : 2 * (1 + Real.log M) * (R + dist z c) ≤ 6 * (3 + Real.log A) * L := by
+      calc
+        _ ≤ (2 * ((3 + Real.log A) * L)) * 3 :=
+          mul_le_mul (mul_le_mul_of_nonneg_left hlog (by norm_num)) hRn
+            (by dsimp only [R]; positivity) (by positivity)
+        _ = _ := by ring
+    calc
+      _ ≤ (6 * (3 + Real.log A) * L) / (R - dist z c) ^ 2 :=
+        div_le_div_of_nonneg_right hnum (sq_nonneg _)
+      _ ≤ (6 * (3 + Real.log A) * L) / d ^ 2 :=
+        div_le_div_of_nonneg_left (by positivity) (by positivity)
+          (pow_le_pow_left₀ hd.le hRdist 2)
+      _ = _ := by ring
+  have hp : ‖z - 1‖⁻¹ ≤ (1 - a)⁻¹ + 1 := by
+    rcases hpole with hz' | ht
+    · have hn := Complex.abs_re_le_norm (z - 1)
+      rw [Complex.sub_re, Complex.one_re, hz', abs_of_neg (sub_neg.mpr ha1)] at hn
+      have hle : 1 - a ≤ ‖z - 1‖ := by linarith
+      exact (inv_anti₀ hgap hle).trans (le_add_of_nonneg_right zero_le_one)
+    · have hn := Complex.abs_im_le_norm (z - 1)
+      rw [Complex.sub_im, Complex.one_im, sub_zero] at hn
+      exact (inv_le_one_of_one_le₀ (ht.trans hn)).trans
+        (le_add_of_nonneg_left (inv_nonneg.mpr hgap.le))
+  have hp' := hp.trans (le_mul_of_one_le_right (by positivity : 0 ≤ (1 - a)⁻¹ + 1) hL)
+  exact h.trans ((add_le_add hFrac hp').trans_eq (by dsimp only [K]; ring))
+
+/-- RH alone gives the Chebyshev bound on half-integer cutoffs for every
+fixed exponent strictly between 1/2 and 1. -/
+theorem chebyshevPsi_halfInteger_log_sq_bound_of_RH (hRH : RiemannHypothesis)
+    (a : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ,
+      let x : ℝ := (m : ℝ) + 1 / 2
+      1 ≤ Real.log x →
+      |chebyshevPsi x - x| ≤ C * x ^ a * (1 + Real.log (2 * x)) ^ 2 := by
+  obtain ⟨K, hK, hlog⟩ := norm_logDeriv_riemannZeta_log_growth_of_RH hRH a ha ha1
+  exact chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound hRH a K ha ha1 hK hlog
+
+/-- Transfer the half-integer estimate to all large real cutoffs, using
+the fact that the Chebyshev sum depends only on the natural floor. -/
+theorem primeError_isBigO_power_log_sq_of_RH (hRH : RiemannHypothesis)
+    (a : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) :
+    primeError =O[atTop] fun x => x ^ a * Real.log x ^ 2 := by
+  obtain ⟨C, hC, h⟩ := chebyshevPsi_halfInteger_log_sq_bound_of_RH hRH a ha ha1
+  let B := 2 + Real.log 4
+  have hB : 0 ≤ B := add_nonneg (by norm_num) (Real.log_nonneg (by norm_num))
+  apply IsBigO.of_bound (C * (2 : ℝ) ^ a * B ^ 2 + 1)
+  filter_upwards [eventually_ge_atTop (2 * Real.exp 1)] with x hx
+  have hxe := Real.one_le_exp_iff.mpr (by norm_num : (0 : ℝ) ≤ 1)
+  have hx1 : 1 ≤ x := by linarith
+  have hx0 : 0 < x := zero_lt_one.trans_le hx1
+  have hxl : 1 ≤ Real.log x := by
+    simpa [Real.log_exp] using Real.log_le_log (Real.exp_pos 1) (show Real.exp 1 ≤ x by linarith)
+  let m := ⌊x⌋₊
+  let y : ℝ := (m : ℝ) + 1 / 2
+  have hm : (m : ℝ) ≤ x := Nat.floor_le hx0.le
+  have hm' : x < (m : ℝ) + 1 := Nat.lt_floor_add_one x
+  have hy0 : 0 < y := by dsimp only [y]; positivity
+  have hy2 : y ≤ 2 * x := by dsimp only [y]; linarith
+  have hye : Real.exp 1 ≤ y := by dsimp only [y]; linarith
+  have hylog : 1 ≤ Real.log y := by simpa [Real.log_exp] using Real.log_le_log (Real.exp_pos 1) hye
+  have hfloor : ⌊y⌋₊ = m := by
+    apply (Nat.floor_eq_iff hy0.le).mpr
+    dsimp only [y]
+    constructor <;> linarith
+  have hψ : chebyshevPsi y = chebyshevPsi x := by unfold chebyshevPsi; rw [hfloor]
+  have hdist : |y - x| ≤ 1 := abs_le.mpr (by dsimp only [y]; constructor <;> linarith)
+  have hya : y ^ a ≤ (2 : ℝ) ^ a * x ^ a := by
+    rw [← Real.mul_rpow (by norm_num) hx0.le]
+    exact Real.rpow_le_rpow hy0.le hy2 (by linarith)
+  have hly : 1 + Real.log (2 * y) ≤ B * Real.log x := by
+    have hh := Real.log_le_log (show 0 < 2 * y by positivity) (show 2 * y ≤ 4 * x by linarith)
+    rw [Real.log_mul (by norm_num) hx0.ne'] at hh
+    have h4 : 0 ≤ Real.log 4 := Real.log_nonneg (by norm_num)
+    dsimp only [B]
+    nlinarith only [hh, hxl, mul_nonneg h4 (sub_nonneg.mpr hxl)]
+  have hly0 : 0 ≤ 1 + Real.log (2 * y) := by
+    have hh := Real.log_nonneg (show 1 ≤ 2 * y by linarith)
+    linarith
+  have hype := h m hylog
+  change |chebyshevPsi y - y| ≤ C * y ^ a * (1 + Real.log (2 * y)) ^ 2 at hype
+  have hW : 1 ≤ x ^ a * Real.log x ^ 2 := by
+    have hxa := Real.one_le_rpow hx1 (by linarith : 0 ≤ a)
+    have hl := one_le_pow₀ hxl (n := 2)
+    simpa only [one_mul] using (mul_le_mul hxa hl (by norm_num) (by positivity))
+  have hh : |x - chebyshevPsi x| ≤ |chebyshevPsi y - y| + 1 := by
+    rw [← hψ, abs_sub_comm x]
+    have he : chebyshevPsi y - x = (chebyshevPsi y - y) + (y - x) := by ring
+    rw [he]
+    exact (abs_add_le _ _).trans (add_le_add_left hdist _)
+  change ‖x - chebyshevPsi x‖ ≤ _ * ‖x ^ a * Real.log x ^ 2‖
+  rw [Real.norm_eq_abs, Real.norm_of_nonneg (zero_le_one.trans hW)]
+  calc
+    _ ≤ C * y ^ a * (1 + Real.log (2 * y)) ^ 2 + 1 := hh.trans (add_le_add_right hype _)
+    _ ≤ (C * ((2 : ℝ) ^ a * x ^ a)) * (B * Real.log x) ^ 2 + x ^ a * Real.log x ^ 2 :=
+      add_le_add (mul_le_mul (mul_le_mul_of_nonneg_left hya hC)
+        (pow_le_pow_left₀ hly0 hly 2) (sq_nonneg _) (by positivity)) hW
+    _ = _ := by ring
+
+/-- RH gives the two-sided Chebyshev error exponent 1/2 + ε for every ε > 0. -/
+theorem primeError_isBigO_of_RH (hRH : RiemannHypothesis) (θ : ℝ) (hθ : 1 / 2 < θ) :
+    primeError =O[atTop] fun x => x ^ θ := by
+  let a := (1 / 2 + min θ 1) / 2
+  have hm : 1 / 2 < min θ 1 := lt_min hθ (by norm_num)
+  have ha : 1 / 2 < a := by dsimp only [a]; linarith
+  have haθ : a < θ := by dsimp only [a]; linarith [min_le_left θ 1]
+  have ha1 : a < 1 := by dsimp only [a]; linarith [min_le_right θ 1]
+  let ε := (θ - a) / 2
+  have hε : 0 < ε := by dsimp only [ε]; linarith
+  have hlog := (isLittleO_log_rpow_atTop hε).isBigO
+  have hlog₂ : (fun x : ℝ => Real.log x ^ 2) =O[atTop] fun x => (x ^ ε) * (x ^ ε) := by
+    simpa only [pow_two] using hlog.mul hlog
+  have hweight : (fun x : ℝ => x ^ a * Real.log x ^ 2) =O[atTop] fun x => x ^ θ := by
+    refine ((isBigO_refl (fun x : ℝ => x ^ a) atTop).mul hlog₂).congr' EventuallyEq.rfl ?_
+    filter_upwards [eventually_gt_atTop (0 : ℝ)] with x hx
+    rw [← Real.rpow_add hx, ← Real.rpow_add hx]
+    congr 1
+    dsimp only [ε]
+    ring
+  exact (primeError_isBigO_power_log_sq_of_RH hRH a ha ha1).trans hweight
+
+/-- The one-sided prime-error criterion for q = 1 is equivalent to RH. -/
+theorem riemannHypothesis_iff_oneSidedBounds :
+    RiemannHypothesis ↔ ∀ θ : ℝ, 1 / 2 < θ → OneSidedBound θ := by
+  refine ⟨fun hRH θ hθ => ?_, fun h => riemannHypothesis_of_oneSidedBounds (fun θ hθ _ => h θ hθ)⟩
+  obtain ⟨C, hC, hc⟩ := (primeError_isBigO_of_RH hRH θ hθ).exists_pos
+  obtain ⟨x₀, hx₀⟩ := eventually_atTop.mp hc.bound
+  refine ⟨C, max 1 x₀, hC.le, le_max_left _ _, fun x hx => ?_⟩
+  have hx1 := (le_max_left 1 x₀).trans hx
+  have hh := hx₀ x ((le_max_right 1 x₀).trans hx)
+  rw [Real.norm_of_nonneg (Real.rpow_nonneg (zero_le_one.trans hx1) _)] at hh
+  exact (Real.le_norm_self _).trans hh
+
+#print axioms fract_mellin_integrable
+#print axioms norm_fract_mellin_le
+#print axioms riemannZeta_eq_mul_mellin_floor
+#print axioms regularizedZeta_eq_fract_mellin_of_one_lt_re
+#print axioms regularizedZeta_eq_fract_mellin
+#print axioms norm_regularizedZeta_le
+#print axioms norm_regularizedZeta_le_quadratic
+#print axioms norm_logDeriv_riemannZeta_log_growth_of_RH
+#print axioms chebyshevPsi_halfInteger_log_sq_bound_of_RH
+#print axioms primeError_isBigO_power_log_sq_of_RH
+#print axioms primeError_isBigO_of_RH
+#print axioms riemannHypothesis_iff_oneSidedBounds
+end RiemannResearch

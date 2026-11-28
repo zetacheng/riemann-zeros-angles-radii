@@ -3047,30 +3047,38 @@ noncomputable def perronRectangle (f : ℂ → ℂ) (a b T : ℝ) : ℂ :=
   perronVertical f b T - perronVertical f a T +
     Complex.I * (perronHorizontal f a b T - perronHorizontal f a b (-T))
 
-/-- Cauchy–Goursat in vertical integral units. -/
-theorem perronRectangle_eq_zero (f : ℂ → ℂ) (a b T : ℝ)
-    (hf : ∀ z : ℂ, z.re ∈ [[a, b]] → DifferentiableAt ℂ f z) :
-    perronRectangle f a b T = 0 := by
-  let z : ℂ := (a : ℂ) - (T : ℂ) * Complex.I
-  let w : ℂ := (b : ℂ) + (T : ℂ) * Complex.I
+/-- The oriented rectangle boundary integral divided by i, with arbitrary heights. -/
+noncomputable def perronRectangleBetween (f : ℂ → ℂ) (a b u v : ℝ) : ℂ :=
+  (∫ t in u..v, f ((b : ℂ) + (t : ℂ) * Complex.I)) -
+    (∫ t in u..v, f ((a : ℂ) + (t : ℂ) * Complex.I)) +
+    Complex.I * (perronHorizontal f a b v - perronHorizontal f a b u)
+
+theorem perronRectangleBetween_eq_zero (f : ℂ → ℂ) (a b u v : ℝ)
+    (hf : DifferentiableOn ℂ f ([[a,b]] ×ℂ [[u,v]])) :
+    perronRectangleBetween f a b u v = 0 := by
+  let z : ℂ := (a : ℂ) + (u : ℂ) * Complex.I
+  let w : ℂ := (b : ℂ) + (v : ℂ) * Complex.I
   have hzre : z.re = a := by simp [z, Complex.mul_re]
   have hwre : w.re = b := by simp [w, Complex.mul_re]
-  have hzim : z.im = -T := by simp [z, Complex.mul_im]
-  have hwim : w.im = T := by simp [w, Complex.mul_im]
+  have hzim : z.im = u := by simp [z, Complex.mul_im]
+  have hwim : w.im = v := by simp [w, Complex.mul_im]
   have hd : DifferentiableOn ℂ f ([[z.re, w.re]] ×ℂ [[z.im, w.im]]) := by
-    intro v hv
-    apply (hf v ?_).differentiableWithinAt
-    simpa only [← hzre, ← hwre] using hv.1
+    simpa only [hzre, hwre, hzim, hwim] using hf
   have hrect := Complex.integral_boundary_rect_eq_zero_of_differentiableOn f z w hd
-  simp only [hzre, hwre, hzim, hwim, Complex.ofReal_neg, smul_eq_mul] at hrect
-  unfold perronRectangle perronVertical perronHorizontal
-  push_cast
+  simp only [hzre, hwre, hzim, hwim, smul_eq_mul] at hrect
   have halgebra (L R B U : ℂ) (h : B - U + Complex.I * R - Complex.I * L = 0) :
       R - L + Complex.I * (U - B) = 0 := by
     linear_combination (norm := skip) -Complex.I * h
     ring_nf
     simp [Complex.I_sq]
   exact halgebra _ _ _ _ hrect
+
+/-- Cauchy–Goursat in vertical integral units. -/
+theorem perronRectangle_eq_zero (f : ℂ → ℂ) (a b T : ℝ)
+    (hf : ∀ z : ℂ, z.re ∈ [[a, b]] → DifferentiableAt ℂ f z) :
+    perronRectangle f a b T = 0 :=
+  perronRectangleBetween_eq_zero f a b (-T) T
+    (fun z hz => (hf z hz.1).differentiableWithinAt)
 
 /-- A reciprocal has the arctangent vertical primitive on a positive line. -/
 theorem perronVertical_inv_pos (c T : ℝ) (hc : 0 < c) :
@@ -3352,6 +3360,7 @@ theorem chebyshevPsi_halfInteger_bound_of_RH (hRH : RiemannHypothesis) :
     rw [norm_neg]
     exact add_le_add (htrunc m T hT hxlog) hEdges)
 
+#print axioms perronRectangleBetween_eq_zero
 #print axioms perronRectangle_eq_zero
 #print axioms perronVertical_inv_pos
 #print axioms perronVertical_inv_neg
@@ -4645,4 +4654,321 @@ theorem norm_sum_zetaPerronZeroResidue_of_RH (hRH : RiemannHypothesis) (x : ℝ)
 #print axioms finite_regularizedZeta_zeros_of_isCompact
 #print axioms finite_riemannZeta_zeros_of_isCompact
 #print axioms norm_sum_zetaPerronZeroResidue_of_RH
+end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Interval Topology
+
+/-- Adjacent rectangles cancel on the shared horizontal edge. -/
+theorem perronRectangleBetween_add (f : ℂ → ℂ) (a b u v w : ℝ)
+    (ha : Continuous fun t : ℝ => f ((a : ℂ) + (t : ℂ) * Complex.I))
+    (hb : Continuous fun t : ℝ => f ((b : ℂ) + (t : ℂ) * Complex.I)) :
+    perronRectangleBetween f a b u v + perronRectangleBetween f a b v w =
+      perronRectangleBetween f a b u w := by
+  unfold perronRectangleBetween
+  rw [← intervalIntegral.integral_add_adjacent_intervals (ha.intervalIntegrable u v)
+    (ha.intervalIntegrable v w), ← intervalIntegral.integral_add_adjacent_intervals
+    (hb.intervalIntegrable u v) (hb.intervalIntegrable v w)]
+  ring
+
+/-- The reciprocal of the difference from any interior complex point
+has boundary integral 2π in vertical units. -/
+theorem perronRectangle_inv_sub (p : ℂ) (a b T : ℝ)
+    (ha : a < p.re) (hb : p.re < b) (hu : -T < p.im) (hv : p.im < T) :
+    perronRectangle (fun z => (z - p)⁻¹) a b T = 2 * (Real.pi : ℂ) := by
+  let f (z : ℂ) := (z - p)⁻¹
+  let d := min (T + p.im) (T - p.im)
+  have hd : 0 < d := lt_min (by linarith) (by linarith)
+  have hlu : -T ≤ p.im - d := by
+    have h := min_le_left (T + p.im) (T - p.im)
+    change d ≤ T + p.im at h
+    linarith
+  have huv : p.im + d ≤ T := by
+    have h := min_le_right (T + p.im) (T - p.im)
+    change d ≤ T - p.im at h
+    linarith
+  have hcont (c : ℝ) (hc : c ≠ p.re) :
+      Continuous (fun t : ℝ => f ((c : ℂ) + (t : ℂ) * Complex.I)) := by
+    apply Continuous.inv₀ (by fun_prop)
+    intro t h
+    have he := congrArg Complex.re (sub_eq_zero.mp h)
+    exact hc (by simpa [Complex.mul_re] using he)
+  have ha' := hcont a ha.ne
+  have hb' := hcont b hb.ne'
+  have hlo : perronRectangleBetween f a b (-T) (p.im - d) = 0 := by
+    apply perronRectangleBetween_eq_zero
+    intro z hz
+    have hn : z ≠ p := by
+      intro he
+      have h := hz.2
+      rw [uIcc_of_le hlu, he] at h
+      linarith [h.2]
+    exact ((differentiableAt_id.sub_const p).inv (sub_ne_zero.mpr hn)).differentiableWithinAt
+  have hhi : perronRectangleBetween f a b (p.im + d) T = 0 := by
+    apply perronRectangleBetween_eq_zero
+    intro z hz
+    have hn : z ≠ p := by
+      intro he
+      have h := hz.2
+      rw [uIcc_of_le huv, he] at h
+      linarith [h.1]
+    exact ((differentiableAt_id.sub_const p).inv (sub_ne_zero.mpr hn)).differentiableWithinAt
+  have htranslate (c t : ℝ) :
+      (c : ℂ) + (t : ℂ) * Complex.I - p =
+        (c : ℂ) + ((t - p.im : ℝ) : ℂ) * Complex.I - (p.re : ℂ) := by
+    apply Complex.ext <;> simp [Complex.mul_re, Complex.mul_im]
+  let g (z : ℂ) := (z - (p.re : ℂ))⁻¹
+  have hVert (c : ℝ) :
+      (∫ t in p.im - d..p.im + d, f ((c : ℂ) + (t : ℂ) * Complex.I)) =
+        perronVertical g c d := by
+    simp_rw [f, htranslate]
+    rw [intervalIntegral.integral_comp_sub_right (fun t : ℝ => g ((c : ℂ) + (t : ℂ) * Complex.I)) p.im, perronVertical]
+    rw [show p.im - d - p.im = -d by ring, show p.im + d - p.im = d by ring]
+  have hHoriz (k : ℝ) :
+      perronHorizontal f a b (p.im + k) = perronHorizontal g a b k := by
+    simp_rw [perronHorizontal, f, htranslate, add_sub_cancel_left]
+    rfl
+  have hMid : perronRectangleBetween f a b (p.im - d) (p.im + d) = 2 * (Real.pi : ℂ) := by
+    have hleft := hHoriz (-d)
+    rw [← sub_eq_add_neg] at hleft
+    rw [perronRectangleBetween, hVert, hVert, hHoriz, hleft]
+    exact perronRectangle_inv_sub_real p.re a b d ha hb hd
+  have h1 := perronRectangleBetween_add f a b (-T) (p.im - d) (p.im + d) ha' hb'
+  have h2 := perronRectangleBetween_add f a b (-T) (p.im + d) T ha' hb'
+  rw [hlo, hMid, zero_add] at h1
+  rw [← h1, hhi, add_zero] at h2
+  exact h2.symm
+
+/-- Subtracting all the principal parts gives one holomorphic remainder.
+At each pole the function is assigned its local regular value. -/
+theorem exists_analytic_sub_finset_principal_parts (f : ℂ → ℂ) (K : Set ℂ)
+    (S : Finset ℂ) (r : ℂ → ℂ)
+    (hf : ∀ z ∈ K, z ∉ S → AnalyticAt ℂ f z)
+    (hlocal : ∀ p ∈ S, ∃ H : ℂ → ℂ, AnalyticAt ℂ H p ∧
+      ∀ᶠ z in 𝓝[≠] p, f z = r p / (z - p) + H z) :
+    ∃ g : ℂ → ℂ, (∀ z ∈ K, AnalyticAt ℂ g z) ∧
+      ∀ z : ℂ, z ∉ S → f z = g z + ∑ p ∈ S, r p / (z - p) := by
+  classical
+  choose H hH hEq using hlocal
+  let P (A : Finset ℂ) (z : ℂ) := ∑ p ∈ A, r p / (z - p)
+  let g (z : ℂ) := if hz : z ∈ S then H z hz z - P (S.erase z) z else f z - P S z
+  have hP (A : Finset ℂ) (z : ℂ) (hz : z ∉ A) : AnalyticAt ℂ (P A) z := by
+    apply A.analyticAt_sum
+    intro p hp
+    exact analyticAt_const.div (analyticAt_id.sub analyticAt_const)
+      (sub_ne_zero.mpr (fun he => hz (he.symm ▸ hp)))
+  have hopen (A : Finset ℂ) (z : ℂ) (hz : z ∉ A) : ∀ᶠ w in 𝓝 z, w ∉ A :=
+    A.finite_toSet.isClosed.isOpen_compl.mem_nhds hz
+  refine ⟨g, fun z hz => ?_, fun z hz => ?_⟩
+  · by_cases hs : z ∈ S
+    · have hErase : z ∉ S.erase z := by simp
+      apply ((hH z hs).sub (hP (S.erase z) z hErase)).congr
+      filter_upwards [hopen (S.erase z) z hErase, eventually_nhdsWithin_iff.mp (hEq z hs)] with w hw h
+      by_cases he : w = z
+      · subst w
+        simp [g, hs]
+      have hw' : w ∉ S := fun hmem => hw (Finset.mem_erase.mpr ⟨he, hmem⟩)
+      have hsum : P (S.erase z) w + r z / (w - z) = P S w :=
+        Finset.sum_erase_add _ _ hs
+      change H z hs w - P (S.erase z) w = g w
+      dsimp only [g]
+      rw [dif_neg hw', h he, ← hsum]
+      ring
+    · apply ((hf z hz hs).sub (hP S z hs)).congr
+      filter_upwards [hopen S z hs] with w hw
+      simp [g, hw]
+  · simp only [g, dif_neg hz, sub_add_cancel, P]
+
+/-- Summing the principal parts of finitely many interior poles evaluates
+the full rectangular contour. -/
+theorem perronRectangle_of_finset_poles (f : ℂ → ℂ) (a b T : ℝ)
+    (hab : a ≤ b) (hT : 0 < T) (S : Finset ℂ) (r : ℂ → ℂ)
+    (hS : ∀ p ∈ S, p.re ∈ Ioo a b ∧ p.im ∈ Ioo (-T) T)
+    (hf : ∀ z ∈ Icc a b ×ℂ Icc (-T) T, z ∉ S → AnalyticAt ℂ f z)
+    (hlocal : ∀ p ∈ S, ∃ H : ℂ → ℂ, AnalyticAt ℂ H p ∧
+      ∀ᶠ z in 𝓝[≠] p, f z = r p / (z - p) + H z) :
+    perronRectangle f a b T = 2 * (Real.pi : ℂ) * ∑ p ∈ S, r p := by
+  obtain ⟨g, hg, hEq⟩ := exists_analytic_sub_finset_principal_parts f
+    (Icc a b ×ℂ Icc (-T) T) S r hf hlocal
+  have hTT : -T ≤ T := by linarith
+  let P (p z : ℂ) := (z - p)⁻¹
+  have hedge (l u : ℝ) (γ : ℝ → ℂ) (hγ : Continuous γ)
+      (hrect : ∀ t ∈ [[l,u]], γ t ∈ Icc a b ×ℂ Icc (-T) T)
+      (hne : ∀ t ∈ [[l,u]], γ t ∉ S) :
+      (∫ t in l..u, f (γ t)) =
+        (∫ t in l..u, g (γ t)) + ∑ p ∈ S, r p * ∫ t in l..u, P p (γ t) := by
+    have hCg : ContinuousOn (fun t => g (γ t)) [[l,u]] := by
+      intro t ht
+      exact (hg _ (hrect t ht)).continuousAt.comp_continuousWithinAt hγ.continuousWithinAt
+    have hCp (p : ℂ) (hp : p ∈ S) : ContinuousOn (fun t => P p (γ t)) [[l,u]] :=
+      (hγ.sub continuous_const).continuousOn.inv₀ (fun t ht =>
+        sub_ne_zero.mpr fun he => hne t ht (he.symm ▸ hp))
+    have hIp (p : ℂ) (hp : p ∈ S) : IntervalIntegrable
+        (fun t => r p * P p (γ t)) volume l u := (hCp p hp).intervalIntegrable.const_mul _
+    calc
+      _ = ∫ t in l..u, g (γ t) + ∑ p ∈ S, r p * P p (γ t) := by
+        apply intervalIntegral.integral_congr
+        intro t ht
+        simpa only [div_eq_mul_inv, P] using hEq _ (hne t ht)
+      _ = _ := by
+        have hsumI : IntervalIntegrable (fun t => ∑ p ∈ S, r p * P p (γ t)) volume l u := by
+          convert IntervalIntegrable.sum S hIp using 1
+          funext t
+          simp only [Finset.sum_apply]
+        rw [intervalIntegral.integral_add hCg.intervalIntegrable hsumI,
+          intervalIntegral.integral_finset_sum hIp]
+        simp only [intervalIntegral.integral_const_mul]
+  have hV (c : ℝ) (hc : c ∈ Icc a b) (hbdy : c = a ∨ c = b) :
+      perronVertical f c T = perronVertical g c T + ∑ p ∈ S, r p * perronVertical (P p) c T := by
+    apply hedge (-T) T _ (by fun_prop)
+    · intro t ht
+      rw [uIcc_of_le hTT] at ht
+      exact ⟨by simpa [Complex.mul_re] using hc, by simpa [Complex.mul_im] using ht⟩
+    · intro t _ ht
+      have h := (hS _ ht).1
+      simp [Complex.mul_re] at h
+      rcases hbdy with h' | h' <;> rw [h'] at h <;> exact (lt_irrefl _ (by first | exact h.1 | exact h.2))
+  have hH (c : ℝ) (hc : c ∈ Icc (-T) T) (hbdy : c = -T ∨ c = T) :
+      perronHorizontal f a b c = perronHorizontal g a b c + ∑ p ∈ S, r p * perronHorizontal (P p) a b c := by
+    apply hedge a b _ (by fun_prop)
+    · intro t ht
+      rw [uIcc_of_le hab] at ht
+      exact ⟨by simpa [Complex.mul_re] using ht, by simpa [Complex.mul_im] using hc⟩
+    · intro t _ ht
+      have h := (hS _ ht).2
+      simp [Complex.mul_im] at h
+      rcases hbdy with h' | h' <;> rw [h'] at h <;> exact (lt_irrefl _ (by first | exact h.1 | exact h.2))
+  have hg0 : perronRectangle g a b T = 0 := by
+    apply perronRectangleBetween_eq_zero
+    rw [uIcc_of_le hab, uIcc_of_le hTT]
+    exact fun z hz => (hg z hz).differentiableAt.differentiableWithinAt
+  have hsplit : perronRectangle f a b T =
+      perronRectangle g a b T + ∑ p ∈ S, r p * perronRectangle (P p) a b T := by
+    conv_lhs =>
+      unfold perronRectangle
+      rw [hV b ⟨hab, le_rfl⟩ (Or.inr rfl), hV a ⟨le_rfl, hab⟩ (Or.inl rfl),
+        hH T ⟨hTT, le_rfl⟩ (Or.inr rfl), hH (-T) ⟨le_rfl, hTT⟩ (Or.inl rfl)]
+    have hcomm (V U : ℂ → ℂ) :
+        (∑ p ∈ S, r p * (Complex.I * (V p - U p))) =
+          Complex.I * ((∑ p ∈ S, r p * V p) - ∑ p ∈ S, r p * U p) := by
+      rw [mul_sub, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
+      exact Finset.sum_congr rfl (fun p _ => by ring)
+    simp only [perronRectangle]
+    simp_rw [mul_add, mul_sub (r _), Finset.sum_add_distrib, Finset.sum_sub_distrib, hcomm]
+    ring
+  rw [hsplit, hg0, zero_add, Finset.mul_sum]
+  refine Finset.sum_congr rfl fun p hp => ?_
+  obtain ⟨hpR, hpI⟩ := hS p hp
+  rw [perronRectangle_inv_sub p a b T hpR.1 hpR.2 hpI.1 hpI.2, mul_comm]
+
+/-- A finite rectangular Perron shift across the pole and all the enclosed
+zeta zeros. The boundary must avoid the zeros. -/
+theorem vonMangoldtPerronIntegral_shift_across_zeros (x a b T : ℝ)
+    (hx : 0 < x) (ha0 : 0 < a) (ha1 : a < 1) (hb : 1 < b) (hT : 0 < T)
+    (hBoundary : ∀ z ∈ Icc a b ×ℂ Icc (-T) T, z ≠ 1 → riemannZeta z = 0 →
+      z.re ∈ Ioo a b ∧ z.im ∈ Ioo (-T) T) :
+    ∃ Z : Finset ℂ,
+      (∀ z : ℂ, z ∈ Z ↔ z ∈ Icc a b ×ℂ Icc (-T) T ∧ z ≠ 1 ∧ riemannZeta z = 0) ∧
+      vonMangoldtPerronIntegral x b T - vonMangoldtPerronIntegral x a T +
+        Complex.I * (perronHorizontal (zetaPerronIntegrand x) a b T -
+          perronHorizontal (zetaPerronIntegrand x) a b (-T)) =
+          2 * (Real.pi : ℂ) * ((x : ℂ) + ∑ z ∈ Z, zetaPerronZeroResidue x z) := by
+  classical
+  let K : Set ℂ := Icc a b ×ℂ Icc (-T) T
+  have hK : IsCompact K := isCompact_Icc.reProdIm isCompact_Icc
+  let hFinite := finite_riemannZeta_zeros_of_isCompact K hK
+  let Z := hFinite.toFinset
+  have hZ (z : ℂ) : z ∈ Z ↔ z ∈ K ∧ z ≠ 1 ∧ riemannZeta z = 0 := hFinite.mem_toFinset
+  have h1Z : (1 : ℂ) ∉ Z := fun hp => (hZ 1 |>.mp hp).2.1 rfl
+  let S : Finset ℂ := insert 1 Z
+  let r (p : ℂ) := if p = 1 then (x : ℂ) else zetaPerronZeroResidue x p
+  have h0 (z : ℂ) (hz : z ∈ K) : z ≠ 0 := Complex.ne_zero_of_re_pos (ha0.trans_le hz.1.1)
+  have hS (p : ℂ) (hp : p ∈ S) : p.re ∈ Ioo a b ∧ p.im ∈ Ioo (-T) T := by
+    rcases Finset.mem_insert.mp hp with hp | hp
+    · subst p
+      simpa only [Complex.one_re, Complex.one_im] using
+        (show (1 : ℝ) ∈ Ioo a b ∧ (0 : ℝ) ∈ Ioo (-T) T from
+          ⟨⟨ha1, hb⟩, ⟨by linarith, hT⟩⟩)
+    · obtain ⟨hk, h1, hz⟩ := (hZ p).mp hp
+      exact hBoundary p hk h1 hz
+  have hOutside (z : ℂ) (hz : z ∈ K) (hs : z ∉ S) :
+      AnalyticAt ℂ (zetaPerronIntegrand x) z := by
+    have h1 : z ≠ 1 := fun h => hs (Finset.mem_insert.mpr (Or.inl h))
+    have hζ : riemannZeta z ≠ 0 := fun h => hs (Finset.mem_insert.mpr
+      (Or.inr ((hZ z).mpr ⟨hz, h1, h⟩)))
+    have ha := riemannZeta_analyticAt_of_ne_one h1
+    have hE : AnalyticAt ℂ (fun s : ℂ => (x : ℂ) ^ s) z := by
+      simp_rw [Complex.cpow_def_of_ne_zero (Complex.ofReal_ne_zero.mpr hx.ne')]
+      exact (analyticAt_const.mul analyticAt_id).cexp
+    exact (hE.div analyticAt_id (h0 z hz)).mul (ha.deriv.neg.div ha hζ)
+  have hPole (p : ℂ) (hp : p ∈ S) :
+      ∃ H : ℂ → ℂ, AnalyticAt ℂ H p ∧
+        ∀ᶠ z in 𝓝[≠] p, zetaPerronIntegrand x z = r p / (z - p) + H z := by
+    by_cases he : p = 1
+    · subst p
+      refine ⟨zetaPerronRegularPart x, zetaPerronRegularPart_analyticAt x 1 one_ne_zero (by simp), ?_⟩
+      filter_upwards [self_mem_nhdsWithin, eventually_ne_nhdsWithin (by norm_num : (1 : ℂ) ≠ 0),
+        regularizedZeta_eventually_ne_zero (1 : ℂ)] with z hz hne hU
+      have hζ : riemannZeta z ≠ 0 := by
+        intro hzero
+        exact hU (by rw [(regularizedZeta_eventuallyEq z hz).eq_of_nhds, hzero, mul_zero])
+      rw [zetaPerronIntegrand_eq_regular_add x hx z hne hz hζ]
+      simp only [r, if_pos rfl, div_eq_mul_inv]
+      ring
+    · have hmem := (Finset.mem_insert.mp hp).resolve_left he
+      obtain ⟨hk, h1, hzero⟩ := (hZ p).mp hmem
+      simpa only [r, if_neg he] using zetaPerronIntegrand_at_zero x hx p hzero (h0 p hk) h1
+  have hresult := perronRectangle_of_finset_poles (zetaPerronIntegrand x) a b T
+    (ha1.trans hb).le hT S r hS hOutside hPole
+  have hsum : (∑ p ∈ S, r p) = (x : ℂ) + ∑ p ∈ Z, zetaPerronZeroResidue x p := by
+    rw [show S = insert 1 Z by rfl, Finset.sum_insert h1Z]
+    simp only [r, if_pos rfl]
+    congr 1
+    exact Finset.sum_congr rfl (fun p hp => if_neg (fun (he : p = 1) => h1Z (he ▸ hp)))
+  rw [hsum] at hresult
+  exact ⟨Z, hZ, hresult⟩
+
+/-- Under RH, a line in (0, 1/2) encloses all critical-line zeros
+of modulus of imaginary part less than the chosen height. -/
+theorem vonMangoldtPerronIntegral_shift_across_critical_zeros_of_RH
+    (hRH : RiemannHypothesis) (x a b T : ℝ) (hx : 0 < x)
+    (ha0 : 0 < a) (ha : a < 1 / 2) (hb : 1 < b) (hT : 0 < T)
+    (hHeight : ∀ z : ℂ, z.re = 1 / 2 → riemannZeta z = 0 → |z.im| ≠ T) :
+    ∃ Z : Finset ℂ,
+      (∀ z : ℂ, z ∈ Z ↔ z.re = 1 / 2 ∧ |z.im| < T ∧ riemannZeta z = 0) ∧
+      vonMangoldtPerronIntegral x b T - vonMangoldtPerronIntegral x a T +
+        Complex.I * (perronHorizontal (zetaPerronIntegrand x) a b T -
+          perronHorizontal (zetaPerronIntegrand x) a b (-T)) =
+          2 * (Real.pi : ℂ) * ((x : ℂ) + ∑ z ∈ Z, zetaPerronZeroResidue x z) := by
+  have hhalf1 : (1 / 2 : ℝ) < 1 := by norm_num
+  have hhalf (z : ℂ) (hz : a ≤ z.re) (h1 : z ≠ 1) (h0 : riemannZeta z = 0) :
+      z.re = 1 / 2 := by
+    have hn : ¬ ∃ n : ℕ, z = -2 * (n + 1) := by
+      rintro ⟨n, rfl⟩
+      have hz' := ha0.trans_le hz
+      norm_num [Complex.mul_re, Complex.add_re] at hz'
+      linarith [Nat.cast_nonneg (α := ℝ) n]
+    exact hRH z h0 hn h1
+  obtain ⟨Z, hZ, hformula⟩ := vonMangoldtPerronIntegral_shift_across_zeros x a b T hx ha0
+    (ha.trans hhalf1) hb hT (fun z hz h1 h0 => by
+      have hr := hhalf z hz.1.1 h1 h0
+      have him : |z.im| < T := (abs_le.mpr hz.2).lt_of_ne (hHeight z hr h0)
+      exact ⟨by rw [hr]; exact ⟨ha, hhalf1.trans hb⟩, abs_lt.mp him⟩)
+  refine ⟨Z, fun z => ?_, hformula⟩
+  rw [hZ]
+  constructor
+  · rintro ⟨hz, h1, h0⟩
+    have hr := hhalf z hz.1.1 h1 h0
+    exact ⟨hr, (abs_le.mpr hz.2).lt_of_ne (hHeight z hr h0), h0⟩
+  · rintro ⟨hr, hi, h0⟩
+    have hre : z.re ∈ Icc a b := by rw [hr]; exact ⟨ha.le, (hhalf1.trans hb).le⟩
+    exact ⟨⟨hre, abs_le.mp hi.le⟩, fun he => by rw [he, Complex.one_re] at hr; norm_num at hr, h0⟩
+
+#print axioms perronRectangleBetween_add
+#print axioms perronRectangle_inv_sub
+#print axioms exists_analytic_sub_finset_principal_parts
+#print axioms perronRectangle_of_finset_poles
+#print axioms vonMangoldtPerronIntegral_shift_across_zeros
+#print axioms vonMangoldtPerronIntegral_shift_across_critical_zeros_of_RH
 end RiemannResearch

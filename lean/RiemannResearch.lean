@@ -2616,12 +2616,13 @@ theorem vonMangoldt_perron_step (x : ℝ) (hx : 0 < x) :
     have hy : x / (n : ℝ) < 1 := (div_lt_one (hx.trans hxn)).mpr hxn
     simp [perronStep, hy]
 
+/-- The zeta Perron integrand, before normalizing the contour integral. -/
+noncomputable def zetaPerronIntegrand (x : ℝ) (z : ℂ) : ℂ :=
+  (x : ℂ) ^ z / z * (-deriv riemannZeta z / riemannZeta z)
+
 /-- The unnormalized vertical zeta integral used in Perron inversion. -/
 noncomputable def vonMangoldtPerronIntegral (x c T : ℝ) : ℂ :=
-  ∫ t in -T..T, (x : ℂ) ^ ((c : ℂ) + (t : ℂ) * Complex.I) /
-    ((c : ℂ) + (t : ℂ) * Complex.I) *
-    (-deriv riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I) /
-      riemannZeta ((c : ℂ) + (t : ℂ) * Complex.I))
+  ∫ t in -T..T, zetaPerronIntegrand x ((c : ℂ) + (t : ℂ) * Complex.I)
 
 /-- The Chebyshev sum with half of the last weight removed at integers. -/
 noncomputable def halfWeightedChebyshevPsi (x : ℝ) : ℝ :=
@@ -2642,7 +2643,7 @@ theorem vonMangoldtPerronIntegral_sub_psi_bound (x c T : ℝ)
         (ArithmeticFunction.vonMangoldt n : ℂ) * z := by
     by_cases hn : n = 0 <;> simp [hn]
   simp_rw [hzero, ← vonMangoldt_perron_truncated x c T hx hc, vonMangoldt_perron_step x hx] at h
-  unfold vonMangoldtPerronIntegral
+  unfold vonMangoldtPerronIntegral zetaPerronIntegrand
   convert h using 2
   unfold halfWeightedChebyshevPsi
   split_ifs <;> push_cast <;> ring
@@ -3004,4 +3005,340 @@ theorem vonMangoldtPerronIntegral_halfInteger_moving_bound :
 #print axioms vonMangoldt_tsum_norm_term
 #print axioms vonMangoldt_tsum_norm_term_le
 #print axioms vonMangoldtPerronIntegral_halfInteger_moving_bound
+end RiemannResearch
+
+namespace RiemannResearch
+open Filter Set MeasureTheory
+open scoped Interval Topology
+
+/-- A vertical segment parametrized by its imaginary coordinate. -/
+noncomputable def perronVertical (f : ℂ → ℂ) (r T : ℝ) : ℂ :=
+  ∫ t in -T..T, f ((r : ℂ) + (t : ℂ) * Complex.I)
+
+/-- A horizontal segment parametrized by its real coordinate. -/
+noncomputable def perronHorizontal (f : ℂ → ℂ) (a b h : ℝ) : ℂ :=
+  ∫ t in a..b, f ((t : ℂ) + (h : ℂ) * Complex.I)
+
+/-- The rectangle boundary integral divided by i, in counterclockwise orientation. -/
+noncomputable def perronRectangle (f : ℂ → ℂ) (a b T : ℝ) : ℂ :=
+  perronVertical f b T - perronVertical f a T +
+    Complex.I * (perronHorizontal f a b T - perronHorizontal f a b (-T))
+
+/-- Cauchy–Goursat in vertical integral units. -/
+theorem perronRectangle_eq_zero (f : ℂ → ℂ) (a b T : ℝ)
+    (hf : ∀ z : ℂ, z.re ∈ [[a, b]] → DifferentiableAt ℂ f z) :
+    perronRectangle f a b T = 0 := by
+  let z : ℂ := (a : ℂ) - (T : ℂ) * Complex.I
+  let w : ℂ := (b : ℂ) + (T : ℂ) * Complex.I
+  have hzre : z.re = a := by simp [z, Complex.mul_re]
+  have hwre : w.re = b := by simp [w, Complex.mul_re]
+  have hzim : z.im = -T := by simp [z, Complex.mul_im]
+  have hwim : w.im = T := by simp [w, Complex.mul_im]
+  have hd : DifferentiableOn ℂ f ([[z.re, w.re]] ×ℂ [[z.im, w.im]]) := by
+    intro v hv
+    apply (hf v ?_).differentiableWithinAt
+    simpa only [← hzre, ← hwre] using hv.1
+  have hrect := Complex.integral_boundary_rect_eq_zero_of_differentiableOn f z w hd
+  simp only [hzre, hwre, hzim, hwim, Complex.ofReal_neg, smul_eq_mul] at hrect
+  unfold perronRectangle perronVertical perronHorizontal
+  push_cast
+  have halgebra (L R B U : ℂ) (h : B - U + Complex.I * R - Complex.I * L = 0) :
+      R - L + Complex.I * (U - B) = 0 := by
+    linear_combination (norm := skip) -Complex.I * h
+    ring_nf
+    simp [Complex.I_sq]
+  exact halgebra _ _ _ _ hrect
+
+/-- A reciprocal has the arctangent vertical primitive on a positive line. -/
+theorem perronVertical_inv_pos (c T : ℝ) (hc : 0 < c) :
+    perronVertical (fun z => z⁻¹) c T = ((2 * Real.arctan (T / c) : ℝ) : ℂ) := by
+  simpa [perronVertical, perronOscillatoryKernel, one_div] using
+    perronOscillatoryKernel_integral_zero c T hc
+
+/-- Reflection changes the sign of the reciprocal's vertical integral. -/
+theorem perronVertical_inv_neg (c T : ℝ) (hc : c < 0) :
+    perronVertical (fun z => z⁻¹) c T = -((2 * Real.arctan (T / (-c)) : ℝ) : ℂ) := by
+  have he := perron_exp_vertical_reflect 0 (-c) T
+  simp only [neg_neg, neg_zero, Complex.ofReal_zero, zero_mul, Complex.exp_zero, one_div] at he
+  change perronVertical (fun z => z⁻¹) c T = -perronVertical (fun z => z⁻¹) (-c) T at he
+  rw [he, perronVertical_inv_pos _ _ (neg_pos.mpr hc)]
+
+/-- The difference of the two horizontal reciprocal integrals is an
+arctangent difference, in vertical units. -/
+theorem perronHorizontal_inv_diff (a b T : ℝ) (hT : 0 < T) :
+    Complex.I * (perronHorizontal (fun z => z⁻¹) a b T -
+      perronHorizontal (fun z => z⁻¹) a b (-T)) =
+      ((2 * (Real.arctan (b / T) - Real.arctan (a / T)) : ℝ) : ℂ) := by
+  have hcont (h : ℝ) (hh : h ≠ 0) :
+      Continuous (fun t : ℝ => ((t : ℂ) + (h : ℂ) * Complex.I)⁻¹) := by
+    apply Continuous.inv₀ (by fun_prop)
+    intro t hz
+    exact hh (by simpa [Complex.mul_im] using congrArg Complex.im hz)
+  unfold perronHorizontal
+  rw [← intervalIntegral.integral_sub ((hcont T hT.ne').intervalIntegrable a b)
+    ((hcont (-T) (neg_ne_zero.mpr hT.ne')).intervalIntegrable a b),
+    ← intervalIntegral.integral_const_mul]
+  have hpoint (t : ℝ) : Complex.I *
+      (((t : ℂ) + (T : ℂ) * Complex.I)⁻¹ - ((t : ℂ) + ((-T : ℝ) : ℂ) * Complex.I)⁻¹) =
+      ((2 * (T⁻¹ * (1 + (t / T) ^ 2)⁻¹) : ℝ) : ℂ) := by
+    have hd : (t : ℂ) + (T : ℂ) * Complex.I ≠ 0 := fun h => hT.ne' (by
+      simpa [Complex.mul_im] using congrArg Complex.im h)
+    have he : (t : ℂ) - (T : ℂ) * Complex.I ≠ 0 := fun h => hT.ne' (by
+      simpa [Complex.mul_im] using congrArg Complex.im h)
+    have hsum : 0 < T ^ 2 + t ^ 2 := by positivity
+    have hval : 2 * (T⁻¹ * (1 + (t / T) ^ 2)⁻¹) = 2 * T / (T ^ 2 + t ^ 2) := by
+      have hk : (1 : ℝ) + (t / T) ^ 2 = (T ^ 2 + t ^ 2) / T ^ 2 := by
+        field_simp
+      rw [hk, inv_div]
+      field_simp
+      ring
+    rw [hval]
+    push_cast
+    rw [neg_mul, ← sub_eq_add_neg]
+    have hk : (T : ℂ) ^ 2 + (t : ℂ) ^ 2 ≠ 0 := by exact_mod_cast hsum.ne'
+    field_simp [hd, he, hk]
+    ring_nf
+    simp [Complex.I_sq]
+    ring
+  simp_rw [hpoint]
+  have hreal :
+      (∫ t in a..b, T⁻¹ * (1 + (t / T) ^ 2)⁻¹) =
+      Real.arctan (b / T) - Real.arctan (a / T) := by
+    rw [intervalIntegral.integral_const_mul,
+      intervalIntegral.integral_comp_div (fun t : ℝ => (1 + t ^ 2)⁻¹) hT.ne']
+    simp [smul_eq_mul, hT.ne', integral_inv_one_add_sq]
+  have hc : Continuous (fun t : ℝ => T⁻¹ * (1 + (t / T) ^ 2)⁻¹) :=
+    continuous_const.mul ((continuous_const.add ((continuous_id.div_const T).pow 2)).inv₀
+      (fun t => by positivity))
+  have hlin := Complex.ofRealCLM.intervalIntegral_comp_comm
+    (((continuous_const : Continuous (fun _ : ℝ => (2 : ℝ))).mul hc).intervalIntegrable
+      (μ := volume) a b)
+  change (∫ t in a..b, ((2 * (T⁻¹ * (1 + (t / T) ^ 2)⁻¹) : ℝ) : ℂ)) =
+    (↑(∫ t in a..b, (2 : ℝ) * (T⁻¹ * (1 + (t / T) ^ 2)⁻¹)) : ℂ) at hlin
+  rw [hlin, intervalIntegral.integral_const_mul, hreal]
+
+/-- A centered rectangular contour encloses the unit residue of 1/z. -/
+theorem perronRectangle_inv (a b T : ℝ) (ha : a < 0) (hb : 0 < b) (hT : 0 < T) :
+    perronRectangle (fun z => z⁻¹) a b T = 2 * (Real.pi : ℂ) := by
+  rw [perronRectangle, perronVertical_inv_pos b T hb, perronVertical_inv_neg a T ha,
+    perronHorizontal_inv_diff a b T hT]
+  have hleft := Real.arctan_inv_of_pos (div_pos hT (neg_pos.mpr ha))
+  have hright := Real.arctan_inv_of_pos (div_pos hT hb)
+  rw [inv_div, neg_div, Real.arctan_neg] at hleft
+  rw [inv_div] at hright
+  exact_mod_cast (show
+    2 * Real.arctan (T / b) - -(2 * Real.arctan (T / (-a))) +
+      2 * (Real.arctan (b / T) - Real.arctan (a / T)) = 2 * Real.pi by linarith)
+
+/-- Translating the simple pole along the real axis translates the two
+horizontal endpoints and the real coordinates of the two vertical edges. -/
+theorem perronRectangle_inv_sub_real (p a b T : ℝ) (ha : a < p) (hb : p < b) (hT : 0 < T) :
+    perronRectangle (fun z => (z - (p : ℂ))⁻¹) a b T = 2 * (Real.pi : ℂ) := by
+  have hv (r : ℝ) :
+      perronVertical (fun z => (z - (p : ℂ))⁻¹) r T =
+      perronVertical (fun z => z⁻¹) (r - p) T := by
+    unfold perronVertical
+    simp only [Complex.ofReal_sub]
+    congr 1
+    ext t
+    congr 1
+    ring
+  have hh (h : ℝ) :
+      perronHorizontal (fun z => (z - (p : ℂ))⁻¹) a b h =
+      perronHorizontal (fun z => z⁻¹) (a - p) (b - p) h := by
+    let g (t : ℝ) := ((t : ℂ) + (h : ℂ) * Complex.I)⁻¹
+    rw [perronHorizontal, perronHorizontal, ← intervalIntegral.integral_comp_sub_right g p]
+    congr 1
+    ext t
+    dsimp [g]
+    rw [Complex.ofReal_sub]
+    congr 1
+    ring
+  simp_rw [perronRectangle, hv, hh]
+  exact perronRectangle_inv (a - p) (b - p) T (sub_neg.mpr ha) (sub_pos.mpr hb) hT
+
+/-- The regular part obtained by subtracting the simple pole of residue x. -/
+noncomputable def zetaPerronRegularPart (x : ℝ) (z : ℂ) : ℂ :=
+  dslope (fun w : ℂ => Complex.exp ((Real.log x : ℂ) * w)) 1 z -
+    Complex.exp ((Real.log x : ℂ) * z) *
+      ((1 + deriv regularizedZeta z / regularizedZeta z) / z)
+
+theorem zetaPerronRegularPart_analyticAt (x : ℝ) (z : ℂ)
+    (hz : z ≠ 0) (hU : regularizedZeta z ≠ 0) :
+    AnalyticAt ℂ (zetaPerronRegularPart x) z := by
+  let E : ℂ → ℂ := fun w => Complex.exp ((Real.log x : ℂ) * w)
+  have hE (w : ℂ) : AnalyticAt ℂ E w := (analyticAt_const.mul analyticAt_id).cexp
+  have hds : AnalyticAt ℂ (dslope E 1) z := by
+    by_cases h : z = 1
+    · subst z
+      apply Complex.analyticAt_of_differentiable_on_punctured_nhds_of_continuousAt
+      · filter_upwards [self_mem_nhdsWithin] with w hw
+        exact (differentiableAt_dslope_of_ne hw).mpr (hE w).differentiableAt
+      · exact continuousAt_dslope_same.mpr (hE 1).differentiableAt
+    · apply AnalyticAt.congr
+        ((((hE z).sub (analyticAt_const (v := E 1))).div (analyticAt_id.sub analyticAt_const))
+          (sub_ne_zero.mpr h))
+      filter_upwards [eventually_ne_nhds h] with w hw
+      rw [dslope_of_ne E hw, slope_def_field]
+      rfl
+  have hA := regularizedZeta_analyticAt z
+  exact hds.sub ((hE z).mul ((analyticAt_const.add (hA.deriv.div hA hU)).div analyticAt_id hz))
+
+/-- Away from the pole, the original integrand equals the regular part
+plus x/(z-1). -/
+theorem zetaPerronIntegrand_eq_regular_add (x : ℝ) (hx : 0 < x) (z : ℂ)
+    (hz0 : z ≠ 0) (hz1 : z ≠ 1) (hζ : riemannZeta z ≠ 0) :
+    zetaPerronIntegrand x z = zetaPerronRegularPart x z + (x : ℂ) * (z - 1)⁻¹ := by
+  have hE : (x : ℂ) ^ z = Complex.exp ((Real.log x : ℂ) * z) := by
+    rw [Complex.cpow_def_of_ne_zero (Complex.ofReal_ne_zero.mpr hx.ne'),
+      ← Complex.ofReal_log hx.le]
+  have hE1 : Complex.exp ((Real.log x : ℂ) * (1 : ℂ)) = (x : ℂ) := by
+    rw [mul_one, ← Complex.ofReal_exp, Real.exp_log hx]
+  have hm := regularizedZeta_mellin_eq z hz0 hz1 hζ
+  rw [zetaPerronIntegrand, zetaPerronRegularPart, dslope_of_ne _ hz1, slope_def_field, hE1, hE]
+  linear_combination (norm := ring_nf) -Complex.exp ((Real.log x : ℂ) * z) * hm
+
+/-- The finite rectangle picks up 2π times the coefficient of a real pole
+when the remaining integrand is holomorphic on the closed strip. -/
+theorem perronRectangle_of_real_pole (f g : ℂ → ℂ) (p a b T : ℝ) (r : ℂ)
+    (ha : a < p) (hb : p < b) (hT : 0 < T)
+    (hg : ∀ z : ℂ, z.re ∈ [[a, b]] → DifferentiableAt ℂ g z)
+    (hf : ∀ z : ℂ, z.re ∈ [[a, b]] → z ≠ (p : ℂ) →
+      f z = g z + r * (z - (p : ℂ))⁻¹) :
+    perronRectangle f a b T = r * (2 * (Real.pi : ℂ)) := by
+  let P (z : ℂ) := (z - (p : ℂ))⁻¹
+  have hind (l u : ℝ) (γ : ℝ → ℂ) (hγ : Continuous γ)
+      (hstrip : ∀ t ∈ [[l,u]], (γ t).re ∈ [[a,b]])
+      (hne : ∀ t ∈ [[l,u]], γ t ≠ (p : ℂ)) :
+      (∫ t in l..u, f (γ t)) = (∫ t in l..u, g (γ t)) + r * ∫ t in l..u, P (γ t) := by
+    have hg' : ContinuousOn (fun t => g (γ t)) [[l,u]] := by
+      intro t ht
+      exact (hg _ (hstrip t ht)).continuousAt.comp_continuousWithinAt hγ.continuousWithinAt
+    have hp : ContinuousOn (fun t => P (γ t)) [[l,u]] :=
+      (hγ.sub continuous_const).continuousOn.inv₀ (fun t ht => sub_ne_zero.mpr (hne t ht))
+    calc
+      _ = ∫ t in l..u, g (γ t) + r * P (γ t) :=
+        intervalIntegral.integral_congr (fun t ht => hf _ (hstrip t ht) (hne t ht))
+      _ = _ := by
+        rw [intervalIntegral.integral_add hg'.intervalIntegrable (hp.intervalIntegrable.const_mul r),
+          intervalIntegral.integral_const_mul]
+  have hV (c : ℝ) (hc : c ∈ [[a,b]]) (hcp : c ≠ p) :
+      perronVertical f c T = perronVertical g c T + r * perronVertical P c T := by
+    apply hind (-T) T _ (by fun_prop)
+    · intro t _
+      simpa [Complex.mul_re] using hc
+    · intro t _ ht
+      exact hcp (by simpa [Complex.mul_re] using congrArg Complex.re ht)
+  have hH (c : ℝ) (hc : c ≠ 0) :
+      perronHorizontal f a b c = perronHorizontal g a b c + r * perronHorizontal P a b c := by
+    apply hind a b _ (by fun_prop)
+    · intro t ht
+      simpa [Complex.mul_re] using ht
+    · intro t _ ht
+      exact hc (by simpa [Complex.mul_im] using congrArg Complex.im ht)
+  calc
+    _ = perronRectangle g a b T + r * perronRectangle P a b T := by
+      unfold perronRectangle
+      rw [hV b right_mem_uIcc hb.ne', hV a left_mem_uIcc ha.ne,
+        hH T hT.ne', hH (-T) (neg_ne_zero.mpr hT.ne')]
+      ring
+    _ = _ := by
+      rw [perronRectangle_eq_zero g a b T hg, zero_add, perronRectangle_inv_sub_real p a b T ha hb hT]
+
+/-- On a positive strip free of zeta zeros, crossing 1 contributes the
+Perron main term. The formula retains both horizontal edges. -/
+theorem vonMangoldtPerronIntegral_shift (x a b T : ℝ) (hx : 0 < x)
+    (ha0 : 0 < a) (ha1 : a < 1) (hb : 1 < b) (hT : 0 < T)
+    (hζ : ∀ z : ℂ, z.re ∈ [[a, b]] → z ≠ 1 → riemannZeta z ≠ 0) :
+    vonMangoldtPerronIntegral x b T - 2 * (Real.pi : ℂ) * (x : ℂ) =
+      vonMangoldtPerronIntegral x a T -
+        Complex.I * (perronHorizontal (zetaPerronIntegrand x) a b T -
+          perronHorizontal (zetaPerronIntegrand x) a b (-T)) := by
+  have hab : a ≤ b := (ha1.trans hb).le
+  have hz0 (z : ℂ) (hz : z.re ∈ [[a,b]]) : z ≠ 0 := by
+    rw [uIcc_of_le hab] at hz
+    exact Complex.ne_zero_of_re_pos (ha0.trans_le hz.1)
+  have hU (z : ℂ) (hz : z.re ∈ [[a,b]]) : regularizedZeta z ≠ 0 := by
+    by_cases h : z = 1
+    · simp [h]
+    rw [(regularizedZeta_eventuallyEq z h).eq_of_nhds]
+    exact mul_ne_zero (sub_ne_zero.mpr h) (hζ z hz h)
+  have h := perronRectangle_of_real_pole (zetaPerronIntegrand x) (zetaPerronRegularPart x)
+    1 a b T (x : ℂ) ha1 hb hT
+    (fun z hz => (zetaPerronRegularPart_analyticAt x z (hz0 z hz) (hU z hz)).differentiableAt)
+    (fun z hz h1 => by simpa only [Complex.ofReal_one] using
+      zetaPerronIntegrand_eq_regular_add x hx z (hz0 z hz) h1 (hζ z hz h1))
+  change vonMangoldtPerronIntegral x b T - vonMangoldtPerronIntegral x a T +
+    Complex.I * (perronHorizontal (zetaPerronIntegrand x) a b T -
+      perronHorizontal (zetaPerronIntegrand x) a b (-T)) = (x : ℂ) * (2 * (Real.pi : ℂ)) at h
+  linear_combination h
+
+/-- Under RH the finite Perron contour may be shifted across the pole at
+1 to any line strictly between the critical line and the pole. -/
+theorem vonMangoldtPerronIntegral_shift_of_RH (hRH : RiemannHypothesis)
+    (x a b T : ℝ) (hx : 0 < x) (ha : 1 / 2 < a) (ha1 : a < 1) (hb : 1 < b) (hT : 0 < T) :
+    vonMangoldtPerronIntegral x b T - 2 * (Real.pi : ℂ) * (x : ℂ) =
+      vonMangoldtPerronIntegral x a T -
+        Complex.I * (perronHorizontal (zetaPerronIntegrand x) a b T -
+          perronHorizontal (zetaPerronIntegrand x) a b (-T)) := by
+  apply vonMangoldtPerronIntegral_shift x a b T hx ((by norm_num : (0 : ℝ) < 1 / 2).trans ha)
+    ha1 hb hT
+  intro z hz _
+  rw [uIcc_of_le (ha1.trans hb).le] at hz
+  exact riemannZeta_ne_zero_right_of_riemannHypothesis hRH z (ha.trans_le hz.1)
+
+/-- Combining truncation with the RH contour shift bounds the Chebyshev
+error by the new vertical edge, the two horizontal edges, and truncation. -/
+theorem chebyshevPsi_halfInteger_bound_of_RH (hRH : RiemannHypothesis) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (m : ℕ) (a T : ℝ), 1 / 2 < a → a < 1 → 0 < T →
+      let x : ℝ := (m : ℝ) + 1 / 2
+      let b := 1 + (Real.log x)⁻¹
+      1 ≤ Real.log x →
+      ‖2 * (Real.pi : ℂ) * ((chebyshevPsi x : ℂ) - (x : ℂ))‖ ≤
+        C * x * (1 + Real.log (2 * x)) ^ 2 / T +
+          (‖vonMangoldtPerronIntegral x a T‖ +
+            ‖perronHorizontal (zetaPerronIntegrand x) a b T‖ +
+            ‖perronHorizontal (zetaPerronIntegrand x) a b (-T)‖) := by
+  obtain ⟨C, hC, htrunc⟩ := vonMangoldtPerronIntegral_halfInteger_moving_bound
+  refine ⟨C, hC, fun m a T ha ha1 hT => ?_⟩
+  let x : ℝ := (m : ℝ) + 1 / 2
+  let b : ℝ := 1 + (Real.log x)⁻¹
+  change 1 ≤ Real.log x → _
+  intro hxlog
+  have hx : 0 < x := by dsimp [x]; positivity
+  have hb : 1 < b := lt_add_of_pos_right 1 (inv_pos.mpr (zero_lt_one.trans_le hxlog))
+  have hshift := vonMangoldtPerronIntegral_shift_of_RH hRH x a b T hx ha ha1 hb hT
+  let V := vonMangoldtPerronIntegral x a T
+  let U := perronHorizontal (zetaPerronIntegrand x) a b T
+  let L := perronHorizontal (zetaPerronIntegrand x) a b (-T)
+  let E := vonMangoldtPerronIntegral x b T - 2 * (Real.pi : ℂ) * (chebyshevPsi x : ℂ)
+  change vonMangoldtPerronIntegral x b T - 2 * (Real.pi : ℂ) * (x : ℂ) =
+    V - Complex.I * (U - L) at hshift
+  have hE : 2 * (Real.pi : ℂ) * ((chebyshevPsi x : ℂ) - (x : ℂ)) =
+      -E + (V - Complex.I * (U - L)) := by
+    rw [← hshift]
+    dsimp only [E]
+    ring
+  have hEdges : ‖V - Complex.I * (U - L)‖ ≤ ‖V‖ + ‖U‖ + ‖L‖ := by
+    calc
+      _ ≤ ‖V‖ + ‖Complex.I * (U - L)‖ := norm_sub_le _ _
+      _ = ‖V‖ + ‖U - L‖ := by rw [norm_mul, Complex.norm_I, one_mul]
+      _ ≤ _ := by rw [add_assoc]; exact add_le_add_left (norm_sub_le _ _) _
+  rw [hE]
+  exact (norm_add_le _ _).trans (by
+    rw [norm_neg]
+    exact add_le_add (htrunc m T hT hxlog) hEdges)
+
+#print axioms perronRectangle_eq_zero
+#print axioms perronVertical_inv_pos
+#print axioms perronVertical_inv_neg
+#print axioms perronHorizontal_inv_diff
+#print axioms perronRectangle_inv
+#print axioms perronRectangle_inv_sub_real
+#print axioms zetaPerronRegularPart_analyticAt
+#print axioms zetaPerronIntegrand_eq_regular_add
+#print axioms perronRectangle_of_real_pole
+#print axioms vonMangoldtPerronIntegral_shift
+#print axioms vonMangoldtPerronIntegral_shift_of_RH
+#print axioms chebyshevPsi_halfInteger_bound_of_RH
 end RiemannResearch

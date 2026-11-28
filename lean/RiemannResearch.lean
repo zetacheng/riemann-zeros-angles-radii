@@ -3520,23 +3520,24 @@ theorem chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_bound (hRH : RiemannHyp
   convert add_le_add (add_le_add hV hU) hL using 1
   ring
 
-/-- A logarithmic pointwise estimate on a fixed right-of-critical strip
-gives the expected power and logarithms from the contour with height x. -/
-theorem chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
-    (hRH : RiemannHypothesis) (a K : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) (hK : 0 ≤ K)
-    (hD : ∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
-      ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * (1 + Real.log (1 + |z.im|))) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ,
-      let x : ℝ := (m : ℝ) + 1 / 2
-      1 ≤ Real.log x →
-      |chebyshevPsi x - x| ≤ C * x ^ a * (1 + Real.log (2 * x)) ^ 2 := by
+/-- The Perron estimate at height x has a constant affine in the
+logarithmic derivative constant, uniformly in the left edge. -/
+theorem chebyshevPsi_halfInteger_uniform_log_sq_of_RH (hRH : RiemannHypothesis) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ a K : ℝ, 1 / 2 < a → a < 1 → 0 ≤ K →
+      (∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
+        ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * (1 + Real.log (1 + |z.im|))) →
+      ∀ m : ℕ,
+        let x : ℝ := (m : ℝ) + 1 / 2
+        1 ≤ Real.log x →
+        |chebyshevPsi x - x| ≤
+          ((C + 8 * K + 4 * Real.exp 1 * K) / (2 * Real.pi)) *
+            x ^ a * (1 + Real.log (2 * x)) ^ 2 := by
   obtain ⟨C, hC, h⟩ := chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_bound hRH
+  refine ⟨C, hC, fun a K ha ha1 hK hD m => ?_⟩
   have hp : 0 < 2 * Real.pi := by positivity
   let E := Real.exp 1
   have hE : 0 < E := Real.exp_pos _
   let D := C + 8 * K + 4 * E * K
-  have hD0 : 0 ≤ D := by dsimp [D]; positivity
-  refine ⟨D / (2 * Real.pi), div_nonneg hD0 hp.le, fun m => ?_⟩
   let x : ℝ := (m : ℝ) + 1 / 2
   let L := 1 + Real.log (2 * x)
   let b := 1 + (Real.log x)⁻¹
@@ -3609,10 +3610,25 @@ theorem chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
   rw [mul_comm]
   exact hh'.trans_eq (by dsimp only [D]; ring)
 
+/-- A logarithmic pointwise estimate on a fixed right-of-critical strip
+gives the expected power and logarithms from the contour with height x. -/
+theorem chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
+    (hRH : RiemannHypothesis) (a K : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) (hK : 0 ≤ K)
+    (hD : ∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
+      ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * (1 + Real.log (1 + |z.im|))) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ,
+      let x : ℝ := (m : ℝ) + 1 / 2
+      1 ≤ Real.log x →
+      |chebyshevPsi x - x| ≤ C * x ^ a * (1 + Real.log (2 * x)) ^ 2 := by
+  obtain ⟨C, hC, h⟩ := chebyshevPsi_halfInteger_uniform_log_sq_of_RH hRH
+  exact ⟨(C + 8 * K + 4 * Real.exp 1 * K) / (2 * Real.pi), by positivity,
+    h a K ha ha1 hK hD⟩
+
 #print axioms integral_inv_add_abs
 #print axioms vonMangoldtPerronIntegral_le_of_logDeriv_bound
 #print axioms perronHorizontal_le_of_logDeriv_bound
 #print axioms chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_bound
+#print axioms chebyshevPsi_halfInteger_uniform_log_sq_of_RH
 #print axioms chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound
 end RiemannResearch
 
@@ -4094,24 +4110,24 @@ theorem norm_regularizedZeta_le_quadratic (s : ℂ) (hs : 1 / 2 ≤ s.re) :
       _ ≤ _ := mul_le_mul_of_nonneg_left hn (by positivity)
   nlinarith [norm_nonneg s, sq_nonneg ‖s‖]
 
-/-- Under RH, the zeta logarithmic derivative grows at most logarithmically
-on the fixed right-hand strip away from its pole. -/
-theorem norm_logDeriv_riemannZeta_log_growth_of_RH (hRH : RiemannHypothesis)
-    (a : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) :
-    ∃ K : ℝ, 0 ≤ K ∧ ∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
-      ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * (1 + Real.log (1 + |z.im|)) := by
+/-- A uniform logarithmic derivative estimate displaying the dependence
+on the distance of the left edge from the critical line and the pole. -/
+theorem norm_logDeriv_riemannZeta_uniform_of_RH (hRH : RiemannHypothesis) :
+    ∃ B : ℝ, 0 ≤ B ∧ ∀ a : ℝ, 1 / 2 < a → a < 1 →
+      ∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
+        ‖deriv riemannZeta z / riemannZeta z‖ ≤
+          (B / (a - 1 / 2) ^ 2 + (1 - a)⁻¹ + 1) * (1 + Real.log (1 + |z.im|)) := by
   obtain ⟨δ, hδ, hlower⟩ := exists_pos_le_norm_riemannZeta_of_two_le_re
   let δ' := min δ 1
   let A := 75 / δ'
-  let d := a - 1 / 2
-  have hd : 0 < d := sub_pos.mpr ha
   have hδ' : 0 < δ' := lt_min hδ zero_lt_one
   have hA : 1 ≤ A := (le_div_iff₀ hδ').mpr (by
     simpa only [one_mul] using (min_le_right δ (1 : ℝ)).trans (by norm_num : (1 : ℝ) ≤ 75))
-  let K := 6 * (3 + Real.log A) / d ^ 2 + (1 - a)⁻¹ + 1
   have hK0 : 0 ≤ Real.log A := Real.log_nonneg hA
+  refine ⟨6 * (3 + Real.log A), by positivity, fun a ha ha1 z hz hpole => ?_⟩
+  let d := a - 1 / 2
+  have hd : 0 < d := sub_pos.mpr ha
   have hgap : 0 < 1 - a := sub_pos.mpr ha1
-  refine ⟨K, by dsimp only [K]; positivity, fun z hz hpole => ?_⟩
   let t := |z.im|
   let c : ℂ := 2 + (z.im : ℂ) * Complex.I
   let R : ℝ := 3 / 2
@@ -4218,7 +4234,17 @@ theorem norm_logDeriv_riemannZeta_log_growth_of_RH (hRH : RiemannHypothesis)
       exact (inv_le_one_of_one_le₀ (ht.trans hn)).trans
         (le_add_of_nonneg_left (inv_nonneg.mpr hgap.le))
   have hp' := hp.trans (le_mul_of_one_le_right (by positivity : 0 ≤ (1 - a)⁻¹ + 1) hL)
-  exact h.trans ((add_le_add hFrac hp').trans_eq (by dsimp only [K]; ring))
+  exact h.trans ((add_le_add hFrac hp').trans_eq (by change _ = (6 * (3 + Real.log A) / d ^ 2 + (1 - a)⁻¹ + 1) * L; ring))
+
+/-- Under RH, the zeta logarithmic derivative grows at most logarithmically
+on the fixed right-hand strip away from its pole. -/
+theorem norm_logDeriv_riemannZeta_log_growth_of_RH (hRH : RiemannHypothesis)
+    (a : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) :
+    ∃ K : ℝ, 0 ≤ K ∧ ∀ z : ℂ, z.re ∈ Icc a 2 → (z.re = a ∨ 1 ≤ |z.im|) →
+      ‖deriv riemannZeta z / riemannZeta z‖ ≤ K * (1 + Real.log (1 + |z.im|)) := by
+  obtain ⟨B, hB, h⟩ := norm_logDeriv_riemannZeta_uniform_of_RH hRH
+  have hpole : 0 < 1 - a := sub_pos.mpr ha1
+  exact ⟨B / (a - 1 / 2) ^ 2 + (1 - a)⁻¹ + 1, by positivity, h a ha ha1⟩
 
 /-- RH alone gives the Chebyshev bound on half-integer cutoffs for every
 fixed exponent strictly between 1/2 and 1. -/
@@ -4231,15 +4257,18 @@ theorem chebyshevPsi_halfInteger_log_sq_bound_of_RH (hRH : RiemannHypothesis)
   obtain ⟨K, hK, hlog⟩ := norm_logDeriv_riemannZeta_log_growth_of_RH hRH a ha ha1
   exact chebyshevPsi_halfInteger_bound_of_RH_of_logDeriv_log_bound hRH a K ha ha1 hK hlog
 
-/-- Transfer the half-integer estimate to all large real cutoffs, using
-the fact that the Chebyshev sum depends only on the natural floor. -/
-theorem primeError_isBigO_power_log_sq_of_RH (hRH : RiemannHypothesis)
-    (a : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) :
-    primeError =O[atTop] fun x => x ^ a * Real.log x ^ 2 := by
-  obtain ⟨C, hC, h⟩ := chebyshevPsi_halfInteger_log_sq_bound_of_RH hRH a ha ha1
+/-- Transfer a power and logarithm bound from half-integers to all
+large real cutoffs, since the Chebyshev sum depends only on the floor. -/
+theorem primeError_isBigO_of_halfInteger (a : ℝ) (ha : 0 ≤ a) (k : ℕ)
+    (C : ℝ) (hC : 0 ≤ C)
+    (h : ∀ m : ℕ,
+      let x : ℝ := (m : ℝ) + 1 / 2
+      1 ≤ Real.log x →
+      |chebyshevPsi x - x| ≤ C * x ^ a * (1 + Real.log (2 * x)) ^ k) :
+    primeError =O[atTop] fun x => x ^ a * Real.log x ^ k := by
   let B := 2 + Real.log 4
   have hB : 0 ≤ B := add_nonneg (by norm_num) (Real.log_nonneg (by norm_num))
-  apply IsBigO.of_bound (C * (2 : ℝ) ^ a * B ^ 2 + 1)
+  apply IsBigO.of_bound (C * (2 : ℝ) ^ a * B ^ k + 1)
   filter_upwards [eventually_ge_atTop (2 * Real.exp 1)] with x hx
   have hxe := Real.one_le_exp_iff.mpr (by norm_num : (0 : ℝ) ≤ 1)
   have hx1 : 1 ≤ x := by linarith
@@ -4273,24 +4302,32 @@ theorem primeError_isBigO_power_log_sq_of_RH (hRH : RiemannHypothesis)
     have hh := Real.log_nonneg (show 1 ≤ 2 * y by linarith)
     linarith
   have hype := h m hylog
-  change |chebyshevPsi y - y| ≤ C * y ^ a * (1 + Real.log (2 * y)) ^ 2 at hype
-  have hW : 1 ≤ x ^ a * Real.log x ^ 2 := by
+  change |chebyshevPsi y - y| ≤ C * y ^ a * (1 + Real.log (2 * y)) ^ k at hype
+  have hW : 1 ≤ x ^ a * Real.log x ^ k := by
     have hxa := Real.one_le_rpow hx1 (by linarith : 0 ≤ a)
-    have hl := one_le_pow₀ hxl (n := 2)
+    have hl := one_le_pow₀ hxl (n := k)
     simpa only [one_mul] using (mul_le_mul hxa hl (by norm_num) (by positivity))
   have hh : |x - chebyshevPsi x| ≤ |chebyshevPsi y - y| + 1 := by
     rw [← hψ, abs_sub_comm x]
     have he : chebyshevPsi y - x = (chebyshevPsi y - y) + (y - x) := by ring
     rw [he]
     exact (abs_add_le _ _).trans (add_le_add_left hdist _)
-  change ‖x - chebyshevPsi x‖ ≤ _ * ‖x ^ a * Real.log x ^ 2‖
+  change ‖x - chebyshevPsi x‖ ≤ _ * ‖x ^ a * Real.log x ^ k‖
   rw [Real.norm_eq_abs, Real.norm_of_nonneg (zero_le_one.trans hW)]
   calc
-    _ ≤ C * y ^ a * (1 + Real.log (2 * y)) ^ 2 + 1 := hh.trans (add_le_add_right hype _)
-    _ ≤ (C * ((2 : ℝ) ^ a * x ^ a)) * (B * Real.log x) ^ 2 + x ^ a * Real.log x ^ 2 :=
+    _ ≤ C * y ^ a * (1 + Real.log (2 * y)) ^ k + 1 := hh.trans (add_le_add_right hype _)
+    _ ≤ (C * ((2 : ℝ) ^ a * x ^ a)) * (B * Real.log x) ^ k + x ^ a * Real.log x ^ k :=
       add_le_add (mul_le_mul (mul_le_mul_of_nonneg_left hya hC)
-        (pow_le_pow_left₀ hly0 hly 2) (sq_nonneg _) (by positivity)) hW
-    _ = _ := by ring
+        (pow_le_pow_left₀ hly0 hly k) (pow_nonneg hly0 _) (by positivity)) hW
+    _ = _ := by rw [mul_pow]; ring
+
+/-- Transfer the half-integer estimate to all large real cutoffs, using
+the fact that the Chebyshev sum depends only on the natural floor. -/
+theorem primeError_isBigO_power_log_sq_of_RH (hRH : RiemannHypothesis)
+    (a : ℝ) (ha : 1 / 2 < a) (ha1 : a < 1) :
+    primeError =O[atTop] fun x => x ^ a * Real.log x ^ 2 := by
+  obtain ⟨C, hC, h⟩ := chebyshevPsi_halfInteger_log_sq_bound_of_RH hRH a ha ha1
+  exact primeError_isBigO_of_halfInteger a (by linarith) 2 C hC h
 
 /-- RH gives the two-sided Chebyshev error exponent 1/2 + ε for every ε > 0. -/
 theorem primeError_isBigO_of_RH (hRH : RiemannHypothesis) (θ : ℝ) (hθ : 1 / 2 < θ) :
@@ -4326,6 +4363,94 @@ theorem riemannHypothesis_iff_oneSidedBounds :
   rw [Real.norm_of_nonneg (Real.rpow_nonneg (zero_le_one.trans hx1) _)] at hh
   exact (Real.le_norm_self _).trans hh
 
+/-- Moving the contour to 1/2 + 1/(4 log x) gives a square-root error at
+half-integers, with four logarithmic factors. -/
+theorem chebyshevPsi_halfInteger_sqrt_log_four_of_RH (hRH : RiemannHypothesis) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ m : ℕ,
+      let x : ℝ := (m : ℝ) + 1 / 2
+      1 ≤ Real.log x →
+      |chebyshevPsi x - x| ≤ C * x ^ (1 / 2 : ℝ) * (1 + Real.log (2 * x)) ^ 4 := by
+  obtain ⟨B, hB, hderiv⟩ := norm_logDeriv_riemannZeta_uniform_of_RH hRH
+  obtain ⟨C, hC, hmain⟩ := chebyshevPsi_halfInteger_uniform_log_sq_of_RH hRH
+  let F := 8 + 4 * Real.exp 1
+  let K₀ := 16 * B + 5
+  let E := Real.exp (1 / 4)
+  have hF : 0 ≤ F := by dsimp [F]; positivity
+  have hK₀ : 0 ≤ K₀ := by dsimp [K₀]; positivity
+  have hE : 0 < E := Real.exp_pos _
+  have hπ : 0 < 2 * Real.pi := by positivity
+  refine ⟨(C + F * K₀) / (2 * Real.pi) * E, by positivity, fun m => ?_⟩
+  let x : ℝ := (m : ℝ) + 1 / 2
+  let l := Real.log x
+  let L := 1 + Real.log (2 * x)
+  let a := 1 / 2 + (4 * l)⁻¹
+  change 1 ≤ l → |chebyshevPsi x - x| ≤
+    ((C + F * K₀) / (2 * Real.pi) * E) * x ^ (1 / 2 : ℝ) * L ^ 4
+  intro hx
+  have hl : 0 < l := zero_lt_one.trans_le hx
+  have hx0 : 0 < x := by dsimp [x]; positivity
+  have hx1 : 1 ≤ x := (Real.log_nonneg_iff hx0).mp hl.le
+  have hlogs : l ≤ Real.log (2 * x) := Real.log_le_log hx0 (by linarith)
+  have hlL : l ≤ L := hlogs.trans (le_add_of_nonneg_left zero_le_one)
+  have hL : 1 ≤ L := hx.trans hlL
+  have ha : 1 / 2 < a := lt_add_of_pos_right _ (inv_pos.mpr (by positivity))
+  have ha₃ : a ≤ 3 / 4 := by
+    have h : (4 * l)⁻¹ ≤ (1 / 4 : ℝ) := by
+      rw [one_div]
+      exact inv_anti₀ (by norm_num) (by linarith)
+    dsimp only [a]
+    linarith only [h]
+  have ha1 : a < 1 := ha₃.trans_lt (by norm_num)
+  have hpow : x ^ a = x ^ (1 / 2 : ℝ) * E := by
+    dsimp only [a, E]
+    rw [Real.rpow_add hx0, Real.rpow_def_of_pos hx0 ((4 * l)⁻¹)]
+    congr 2
+    change l * (4 * l)⁻¹ = 1 / 4
+    field_simp [hl.ne']
+    ring
+  let K := B / (a - 1 / 2) ^ 2 + (1 - a)⁻¹ + 1
+  have hK : 0 ≤ K := by
+    dsimp only [K]
+    have h : 0 < 1 - a := sub_pos.mpr ha1
+    positivity
+  have hKle : K ≤ K₀ * L ^ 2 := by
+    have hgap : a - 1 / 2 = (4 * l)⁻¹ := by dsimp [a]; ring
+    have he : B / (a - 1 / 2) ^ 2 = 16 * B * l ^ 2 := by
+      rw [hgap, inv_pow, div_inv_eq_mul]
+      ring
+    have hpole : (1 - a)⁻¹ ≤ 4 := by
+      have h := inv_anti₀ (by norm_num : (0 : ℝ) < 1 / 4)
+        (show 1 / 4 ≤ 1 - a by linarith)
+      norm_num at h
+      exact h
+    have hsq : l ^ 2 ≤ L ^ 2 := pow_le_pow_left₀ hl.le hlL 2
+    have hone : 1 ≤ L ^ 2 := one_le_pow₀ hL
+    dsimp only [K, K₀]
+    rw [he, add_mul, add_assoc]
+    apply add_le_add (mul_le_mul_of_nonneg_left hsq (by positivity))
+    apply le_trans (show (1 - a)⁻¹ + 1 ≤ 5 by linarith only [hpole])
+    exact le_mul_of_one_le_right (by norm_num) hone
+  have h := hmain a K ha ha1 hK (hderiv a ha ha1) m hx
+  change |chebyshevPsi x - x| ≤
+    ((C + 8 * K + 4 * Real.exp 1 * K) / (2 * Real.pi)) * x ^ a * L ^ 2 at h
+  have hconst : C + 8 * K + 4 * Real.exp 1 * K ≤ (C + F * K₀) * L ^ 2 := by
+    calc
+      _ = C + F * K := by dsimp [F]; ring
+      _ ≤ C * L ^ 2 + F * (K₀ * L ^ 2) :=
+        add_le_add (le_mul_of_one_le_right hC (one_le_pow₀ hL)) (mul_le_mul_of_nonneg_left hKle hF)
+      _ = _ := by ring
+  refine h.trans ((mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right
+    (div_le_div_of_nonneg_right hconst hπ.le) (Real.rpow_nonneg hx0.le _)) (sq_nonneg L)).trans_eq ?_)
+  rw [hpow]
+  ring
+
+/-- Under RH, the Chebyshev error at real cutoffs is O(√x log⁴ x). -/
+theorem primeError_isBigO_sqrt_log_four_of_RH (hRH : RiemannHypothesis) :
+    primeError =O[atTop] fun x => Real.sqrt x * Real.log x ^ 4 := by
+  obtain ⟨C, hC, h⟩ := chebyshevPsi_halfInteger_sqrt_log_four_of_RH hRH
+  simpa only [Real.sqrt_eq_rpow] using
+    primeError_isBigO_of_halfInteger (1 / 2) (by norm_num) 4 C hC h
+
 #print axioms fract_mellin_integrable
 #print axioms norm_fract_mellin_le
 #print axioms riemannZeta_eq_mul_mellin_floor
@@ -4333,9 +4458,13 @@ theorem riemannHypothesis_iff_oneSidedBounds :
 #print axioms regularizedZeta_eq_fract_mellin
 #print axioms norm_regularizedZeta_le
 #print axioms norm_regularizedZeta_le_quadratic
+#print axioms norm_logDeriv_riemannZeta_uniform_of_RH
 #print axioms norm_logDeriv_riemannZeta_log_growth_of_RH
 #print axioms chebyshevPsi_halfInteger_log_sq_bound_of_RH
+#print axioms primeError_isBigO_of_halfInteger
 #print axioms primeError_isBigO_power_log_sq_of_RH
 #print axioms primeError_isBigO_of_RH
 #print axioms riemannHypothesis_iff_oneSidedBounds
+#print axioms chebyshevPsi_halfInteger_sqrt_log_four_of_RH
+#print axioms primeError_isBigO_sqrt_log_four_of_RH
 end RiemannResearch
